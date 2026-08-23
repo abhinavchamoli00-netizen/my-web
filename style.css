@@ -74,7 +74,7 @@ header p {
 .card p { color: #999; font-size: 0.88rem; line-height: 1.4; }
 
 .card.locked { cursor: not-allowed; border-color: rgba(255,255,255,0.05); }
-.card.locked .card-content { filter: blur(2px); opacity: 0.55; }
+.card.locked .card-content { filter: blur(1px); opacity: 0.65; }
 
 .soon-badge {
   position: absolute;
@@ -100,3 +100,51 @@ section:not(.categories) h2 {
 }
 
 .card-container { display: flex; flex-wrap: wrap; gap: 15px; }
+
+.poster-card {
+  width: 160px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: transform 0.3s ease;
+}
+
+.poster-card:hover { transform: scale(1.05); }
+
+.poster-card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+.poster-card p {
+  padding: 8px;
+  font-size: 0.85rem;
+  text-align: center;
+  color: #ddd;
+}
+
+footer {
+  text-align: center;
+  padding: 50px 20px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  margin-top: 60px;
+}
+
+footer .watermark {
+  font-size: 0.95rem;
+  color: #ccc;
+  letter-spacing: 1px;
+}
+
+footer .watermark strong {
+  color: #a29bfe;
+}
+
+footer .contact {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #777;
+}
