@@ -149,11 +149,17 @@ footer .contact {
   color: #777;
 }
 .update-banner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   background: linear-gradient(90deg, #6c5ce7, #a29bfe);
   color: #fff;
   text-align: center;
-  padding: 10px;
+  padding: 12px 15px;
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 1px;
+  box-shadow: 0 2px 15px rgba(108,92,231,0.4);
 }
