@@ -8,6 +8,44 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
+<!-- Corner Icon -->
+<div class="secret-icon" onclick="toggleLockBox()">💌</div>
+
+<!-- Hidden Overlay -->
+<div id="lockOverlay" class="lock-overlay">
+  <div class="lock-box">
+    <span class="close-btn" onclick="toggleLockBox()">✕</span>
+
+    <div id="lockedView">
+      <div class="lock-icon">🔒</div>
+      <h2>A Box For You</h2>
+      <p>You know the code.</p>
+      <input type="text" id="codeInput" placeholder="Enter code">
+      <button onclick="checkCode()">Unlock</button>
+      <p id="errorMsg" class="error-msg"></p>
+    </div>
+
+    <div id="unlockedView" style="display:none;">
+      <h2>💌</h2>
+      <p class="letter-text">
+        Btw, I am still waiting...
+        <br><br>
+        <!-- apna poora letter yahan likh -->
+      </p>
+
+      <div class="question-box">
+        <p>Kya tumne meri jagah, hamare pal kisi aur ke saath share kiye?</p>
+        <p class="note">Sirf wahi button dabana jo tumhara sach jawab ho.</p>
+        <div class="btn-row">
+          <button class="yes-btn" onclick="answer('yes')">Yes</button>
+          <button class="no-btn" onclick="answer('no')">No</button>
+        </div>
+        <p id="answerMsg"></p>
+      </div>
+    </div>
+
+  </div>
+</div>
 <body>
 <div class="update-banner">
   <span>🔔 New updates every Sunday</span>

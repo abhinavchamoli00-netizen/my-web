@@ -16,3 +16,28 @@ activeCards.forEach(card => {
     card.style.transform = 'perspective(600px) rotateX(0) rotateY(0) translateY(0)';
   });
 });
+function toggleLockBox() {
+  const overlay = document.getElementById('lockOverlay');
+  overlay.classList.toggle('active');
+}
+
+const secretCode = "99700"; // iam still wating 
+
+function checkCode() {
+  const input = document.getElementById('codeInput').value.trim();
+  if (input.toLowerCase() === secretCode.toLowerCase()) {
+    document.getElementById('lockedView').style.display = 'none';
+    document.getElementById('unlockedView').style.display = 'block';
+  } else {
+    document.getElementById('errorMsg').textContent = "Galat code, dobara try karo.";
+  }
+}
+
+function answer(choice) {
+  const msg = document.getElementById('answerMsg');
+  if (choice === 'yes') {
+    msg.textContent = "..."; // I knew... but it still hurts to hear it.
+  } else {
+    msg.textContent = "..."; // Shukar hai... thank you for being honest.
+  }
+}
