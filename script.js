@@ -21,7 +21,7 @@ function toggleLockBox() {
   document.getElementById('lockOverlay').classList.toggle('active');
 }
 
-const secretCode = "99700"; // 👈 
+const secretCode = "2379520"; // 👈 
 
 const codeInputs = document.querySelectorAll('.code-digit');
 codeInputs.forEach((input, i) => {
