@@ -8,48 +8,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<!-- Corner Icon -->
-<div class="secret-icon" onclick="toggleLockBox()">💌</div>
-
-<!-- Hidden Overlay -->
-<div id="lockOverlay" class="lock-overlay">
-  <div class="lock-box">
-    <span class="close-btn" onclick="toggleLockBox()">✕</span>
-
-    <div id="lockedView">
-      <div class="lock-icon">🔒</div>
-      <h2>A Box For You</h2>
-      <p>You know the code.</p>
-      <input type="text" id="codeInput" placeholder="Enter code">
-      <button onclick="checkCode()">Unlock</button>
-      <p id="errorMsg" class="error-msg"></p>
-    </div>
-
-    <div id="unlockedView" style="display:none;">
-      <h2>💌</h2>
-      <p class="letter-text">
-        Btw, I am still waiting...
-        <br><br>
-        <!-- apna poora letter yahan likh -->
-      </p>
-
-      <div class="question-box">
-        <p>Kya tumne meri jagah, hamare pal kisi aur ke saath share kiye?</p>
-        <p class="note">Sirf wahi button dabana jo tumhara sach jawab ho.</p>
-        <div class="btn-row">
-          <button class="yes-btn" onclick="answer('yes')">Yes</button>
-          <button class="no-btn" onclick="answer('no')">No</button>
-        </div>
-        <p id="answerMsg"></p>
-      </div>
-    </div>
-
-  </div>
-</div>
 <body>
-<div class="update-banner">
-  <span>🔔 New updates every Sunday</span>
-</div>
+
+  <div class="update-banner">
+    <span>🔔 New updates every Sunday</span>
+  </div>
 
   <header>
     <h1>NEXUS</h1>
@@ -58,7 +21,7 @@
 
   <section class="categories">
 
-<a href="movies.html" class="card active">
+    <a href="movies.html" class="card active">
       <div class="icon">🎬</div>
       <h3>Movies</h3>
       <p>Handpicked movies across genres, worth your time.</p>
@@ -77,10 +40,10 @@
     </a>
 
     <a href="marvel.html" class="card active">
-  <div class="icon">🦸</div>
-  <h3>Marvel</h3>
-  <p>Every Marvel watch, ranked.</p>
-</a>
+      <div class="icon">🦸</div>
+      <h3>Marvel</h3>
+      <p>Every Marvel watch, ranked.</p>
+    </a>
 
     <div class="card locked">
       <span class="soon-badge">SOON</span>
@@ -162,16 +125,67 @@
         <p>Perspectives worth reading.</p>
       </div>
     </div>
-</section>
 
-    
+  </section>
 
-    <footer>
-      <p class="watermark">Made with care by <strong>Abhinav</strong></p>
-      <p class="contact">abhinavchamoli00@gmail.com</p>
-      <a href="https://github.com/abhinavchamoli00-netizen" target="_blank" class="github-link">GitHub</a>
-    </footer>
+  <div class="secret-icon" onclick="toggleLockBox()">💌</div>
 
-    <script src="script.js"></script>
-  </body>
+  <div id="lockOverlay" class="lock-overlay">
+    <div class="lock-box">
+      <span class="close-btn" onclick="toggleLockBox()">✕</span>
+
+      <div id="lockedView">
+        <div class="lock-icon">🔒</div>
+        <h2>A Box For You</h2>
+         <p class="intro-text">You know this box was made just for you, and its code is the last 5 digits of your phone number.</p>
+        <div class="code-boxes">
+          <input type="text" inputmode="numeric" maxlength="1" class="code-digit" data-index="0">
+          <input type="text" inputmode="numeric" maxlength="1" class="code-digit" data-index="1">
+          <input type="text" inputmode="numeric" maxlength="1" class="code-digit" data-index="2">
+          <input type="text" inputmode="numeric" maxlength="1" class="code-digit" data-index="3">
+          <input type="text" inputmode="numeric" maxlength="1" class="code-digit" data-index="4">
+        </div>
+      </div>
+
+      <div id="letterView" style="display:none;">
+        <div class="letter-wrapper">
+          <p class="letter-text blurred">
+           Btw, I am still waiting...
+<br><br>
+I don't know if you gave my place to someone else or not, but I didn't give yours away. My feelings have faded a lot by now, but if somewhere in your mind there are feelings for me again, then on the next page there are two options — Yes and No.
+<br><br>
+If you feel I should message you first, click Yes. If you feel I shouldn't — it's clearly over now, honestly it was over a long time ago — then click No.
+<br><br>
+My feelings were for you, and they'll stay that way. Though these feelings are fading now — you know the reasons — I think my place will probably be taken by someone else.
+<br><br>
+If you want me to message you first, I'll do it on my birthday — 26th November. But if you don't want that, click No on the next page.
+          </p>
+          <div class="countdown-overlay" id="countdownOverlay">
+            <p>🔒 This letter unlocks on</p>
+            <p class="unlock-date">25 November, 12:00 AM</p>
+            <div class="countdown-timer" id="countdownTimer">--d --h --m --s</div>
+          </div>
+        </div>
+        <button id="continueBtn" class="continue-btn" style="display:none;" onclick="goToQuestion()">Continue</button>
+      </div>
+
+      <div id="questionView" style="display:none;">
+        <h2 class="big-question">Well?</h2>
+        <div class="big-btn-row">
+          <button class="big-yes" onclick="answer('yes')">Yes</button>
+          <button class="big-no" onclick="answer('no')">No</button>
+        </div>
+        <p id="answerMsg"></p>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <p class="watermark">Made with care by <strong>Abhinav</strong></p>
+    <p class="contact">abhinavchamoli00@gmail.com</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
 </html>
