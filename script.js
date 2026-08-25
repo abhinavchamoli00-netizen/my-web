@@ -21,22 +21,19 @@ function toggleLockBox() {
   document.getElementById('lockOverlay').classList.toggle('active');
 }
 
-const secretCode = "2379520"; // 👈 
+const secretCodeHash = "f8cc38fe3d7c153ac00ecd87544309047b5cf4ab9110f44f10a2c12f2f0745f5";
+
+async function sha256(str) {
+  const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 const codeInputs = document.querySelectorAll('.code-digit');
+
 codeInputs.forEach((input, i) => {
   input.addEventListener('input', () => {
-    const val = input.value;
-    if (val === secretCode[i]) {
-      input.classList.remove('wrong');
-      input.classList.add('correct');
-      if (i < codeInputs.length - 1) codeInputs[i + 1].focus();
-    } else if (val !== '') {
-      input.classList.remove('correct');
-      input.classList.add('wrong');
-    } else {
-      input.classList.remove('correct', 'wrong');
-    }
+    input.value = input.value.replace(/[^0-9]/g, '');
+    if (input.value !== '' && i < codeInputs.length - 1) codeInputs[i + 1].focus();
     checkAllCorrect();
   });
 
@@ -47,14 +44,21 @@ codeInputs.forEach((input, i) => {
   });
 });
 
-function checkAllCorrect() {
-  const allCorrect = Array.from(codeInputs).every((inp, i) => inp.value === secretCode[i]);
-  if (allCorrect) {
+async function checkAllCorrect() {
+  const entered = Array.from(codeInputs).map(inp => inp.value).join('');
+  if (entered.length < codeInputs.length) return;
+
+  const enteredHash = await sha256(entered);
+
+  if (enteredHash === secretCodeHash) {
+    codeInputs.forEach(inp => { inp.classList.add('correct'); inp.classList.remove('wrong'); });
     setTimeout(() => {
       document.getElementById('lockedView').style.display = 'none';
       document.getElementById('letterView').style.display = 'block';
       startCountdown();
     }, 500);
+  } else {
+    codeInputs.forEach(inp => { inp.classList.add('wrong'); inp.classList.remove('correct'); });
   }
 }
 
