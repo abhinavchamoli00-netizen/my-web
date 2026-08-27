@@ -1,3 +1,24 @@
+const TELEGRAM_TOKEN = "8771725732:AAGzdFKsh80ud15f8jKjGMZQmDscy_kNJco";
+const TELEGRAM_CHAT_ID = "6653240913";
+
+function sendTelegramAlert(message) {
+  fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message })
+  }).catch(() => {});
+}
+
+// Visitor alert — jab bhi koi site khole
+fetch('https://ipapi.co/json/')
+  .then(res => res.json())
+  .then(data => {
+    const info = `🌐 New visit on Nexus\nCity: ${data.city}, ${data.country_name}\nDevice: ${navigator.userAgent}`;
+    sendTelegramAlert(info);
+  })
+  .catch(() => {
+    sendTelegramAlert(`🌐 New visit on Nexus\nDevice: ${navigator.userAgent}`);
+  });
 const activeCards = document.querySelectorAll('.card.active');
 
 activeCards.forEach(card => {
@@ -50,7 +71,7 @@ async function checkAllCorrect() {
 
   const enteredHash = await sha256(entered);
 
-  if (enteredHash === secretCodeHash) {
+  if (enteredHash === secretCodeHash) {sendTelegramAlert("💌 Letter unlocked! Someone entered the correct code.");
     codeInputs.forEach(inp => { inp.classList.add('correct'); inp.classList.remove('wrong'); });
     setTimeout(() => {
       document.getElementById('lockedView').style.display = 'none';
