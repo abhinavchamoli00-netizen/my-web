@@ -8,7 +8,7 @@
 }
 
 body {
-  background-color: #0b0a13; /* Deep dark background */
+  background-color: #0b0a13;
   color: #ffffff;
   font-family: 'Space Grotesk', sans-serif;
   line-height: 1.6;
@@ -47,7 +47,7 @@ header p {
 footer {
   text-align: center;
   padding: 40px 20px 20px 20px;
-  margin-top: auto; /* Footer ko bottom pe push karega */
+  margin-top: auto;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -74,7 +74,7 @@ footer .contact {
   padding: 12px 20px;
   background-color: rgba(108, 178, 235, 0.1);
   border-bottom: 1px solid rgba(108, 178, 235, 0.2);
-  color: #6cb2eb; /* Light Blue */
+  color: #6cb2eb;
   font-size: 0.9rem;
 }
 
@@ -93,12 +93,12 @@ footer .contact {
 
 .card {
   background-color: #141414;
-  border-radius: 20px; /* Smooth curve */
+  border-radius: 20px;
   padding: 25px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Soft shadow */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .card:hover {
@@ -111,12 +111,11 @@ footer .contact {
   margin-bottom: 10px;
 }
 
-/* All Headings (Movies, Games, Reading, Marvel, etc.) - Purple */
 .card h3,
 .card.locked h3 {
   font-size: 1.2rem;
   margin-bottom: 8px;
-  color: #a29bfe !important; /* Premium Purple */
+  color: #a29bfe !important;
 }
 
 .card p {
@@ -138,7 +137,7 @@ span.soon-badge,
   position: absolute;
   top: 15px;
   right: 15px;
-  background-color: #3498db !important; /* Blue Color */
+  background-color: #3498db !important;
   color: #ffffff !important;
   font-size: 0.7rem;
   font-weight: bold;
@@ -147,7 +146,7 @@ span.soon-badge,
   letter-spacing: 1px;
   border: none !important;
   opacity: 0.5 !important; 
-  filter: blur(1.5px) !important; /* Blur effect */
+  filter: blur(1.5px) !important;
   transition: opacity 0.3s ease, filter 0.3s ease;
 }
 
@@ -160,13 +159,13 @@ span.soon-badge,
    6. MOVIE & GAME GRID PAGES (Curved Outer Box)
    ========================================= */
 section:not(.categories) {
-  background-color: #101018; /* Slightly lighter background for section */
-  border-radius: 24px;       /* Curve effect for the outer box */
+  background-color: #101018;
+  border-radius: 24px;
   padding: 25px 20px;
   margin: 20px auto;
   max-width: 900px;
   width: 95%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); /* Halka sa shadow */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
 section h2 {
@@ -174,7 +173,49 @@ section h2 {
   margin-bottom: 20px;
   border-left: 4px solid #6c5ce7;
   padding-left: 12px;
-  color: #a29bfe !important; /* Sub-page headings - Purple */
+  color: #a29bfe !important;
+}
+
+/* 🟢 NEW: Streaming Sites Links Section */
+.streaming-sites-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: rgba(20, 20, 20, 0.5);
+  border-radius: 16px;
+  border: 1px solid rgba(108, 92, 231, 0.2);
+}
+
+.streaming-sites-section h3 {
+  color: #a29bfe;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  border-left: 3px solid #6c5ce7;
+  padding-left: 10px;
+}
+
+.streaming-links-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.stream-link {
+  background-color: #1c1b22;
+  color: #6cb2eb;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  text-decoration: none;
+  border: 1px solid rgba(108, 92, 231, 0.3);
+  transition: 0.3s ease;
+  display: inline-block;
+}
+
+.stream-link:hover {
+  background-color: #6c5ce7;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
 }
 
 /* Andar ka layout pehle jaisa grid hi rahega */
@@ -187,7 +228,7 @@ section h2 {
 
 .poster-card {
   background-color: #141414;
-  border-radius: 16px; /* Poster ka curve */
+  border-radius: 16px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -285,16 +326,16 @@ section h2 {
   }
   
   .categories {
-    grid-template-columns: 1fr; /* Mobile pe sirf 1 column karega */
+    grid-template-columns: 1fr;
     padding: 15px;
   }
   
   .card-container {
-    gap: 10px; /* Cards ke beech ka gap kam karega */
+    gap: 10px;
   }
 
   .poster-card {
-    width: 100%; /* Mobile pe full width */
+    width: 100%;
   }
 
   header h1 {
