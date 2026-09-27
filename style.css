@@ -8,16 +8,17 @@
 }
 
 body {
-  background-color: #0b0a13; /* Deep dark background */
+  background-color: #0b0a13;
   color: #ffffff;
   font-family: 'Space Grotesk', sans-serif;
   line-height: 1.6;
   padding-bottom: 40px;
 }
 
-a {
-  text-decoration: none;
-  color: inherit;
+/* Force all links to lose blue color and underline */
+a, a:visited, a:hover, a:active {
+  color: inherit !important;
+  text-decoration: none !important;
 }
 
 /* =========================================
@@ -94,21 +95,20 @@ footer .contact {
 .card h3 {
   font-size: 1.2rem;
   margin-bottom: 8px;
-  color: #ffffff; /* Force white */
+  color: #ffffff;
 }
 
 .card p {
   font-size: 0.9rem;
-  color: #aaaaaa; /* Force grey */
+  color: #aaaaaa;
 }
 
-/* Locked Cards (e.g., AI, Streaming) */
+/* Force correct colors for locked cards (Khatam karo blue color) */
 .card.locked {
   opacity: 0.9;
   cursor: not-allowed;
 }
 
-/* Force correct colors for locked cards (Fixes the blue color issue) */
 .card.locked h3 {
   color: #ffffff !important;
 }
@@ -121,14 +121,14 @@ footer .contact {
   position: absolute;
   top: 15px;
   right: 15px;
-  background-color: #6c5ce7 !important; /* Force Purple */
+  background-color: #6c5ce7 !important;
   color: #ffffff !important;
   font-size: 0.7rem;
   font-weight: bold;
   padding: 4px 10px;
   border-radius: 20px;
   letter-spacing: 1px;
-  box-shadow: none !important; /* Remove any blue glow */
+  box-shadow: none !important;
 }
 
 /* =========================================
@@ -170,7 +170,7 @@ section h2 {
 
 .poster-card img {
   width: 100%;
-  aspect-ratio: 2 / 3; /* Perfect vertical poster size */
+  aspect-ratio: 2 / 3;
   object-fit: cover;
   display: block;
 }
@@ -181,13 +181,6 @@ section h2 {
   font-size: 0.9rem;
   color: #e0e0e0;
   margin: 0;
-}
-
-/* Fix for blue color & underline inside links */
-.poster-link {
-  text-decoration: none;
-  color: inherit;
-  display: block;
 }
 
 /* =========================================
@@ -230,16 +223,16 @@ section h2 {
   display: inline-block;
   margin-top: 30px;
   padding: 10px 20px;
-  background-color: #6c5ce7;
-  color: #ffffff;
-  text-decoration: none;
+  background-color: #6c5ce7 !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
   border-radius: 8px;
   font-weight: 600;
   transition: 0.3s;
 }
 
 .back-btn:hover {
-  background-color: #4e3ec9;
+  background-color: #4e3ec9 !important;
 }
 
 /* =========================================
