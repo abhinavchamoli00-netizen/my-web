@@ -303,3 +303,17 @@ footer .watermark strong {
 footer .watermark strong {
   color: #a29bfe !important;
 }
+/* =========================================
+   FINAL FIX: PURPLE COLOR FOR ALL HEADINGS
+   ========================================= */
+
+/* All card headings (Games, Reading, Marvel, AI, Streaming, etc.) */
+.card h3,
+.card.locked h3 {
+  color: #a29bfe !important; /* Premium Purple Color */
+}
+
+/* Sub-page headings (like "Movies" on movies.html, "Marvel" on marvel.html) */
+section:not(.categories) h2 {
+  color: #a29bfe !important; /* Premium Purple Color */
+}
