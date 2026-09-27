@@ -157,16 +157,16 @@ span.soon-badge,
 }
 
 /* =========================================
-   6. MOVIE & GAME GRID PAGES (Centered)
+   6. MOVIE & GAME GRID PAGES (Curved Outer Box)
    ========================================= */
 section:not(.categories) {
   background-color: #101018; /* Slightly lighter background for section */
-  border-radius: 24px;       /* Curve effect */
-  padding: 30px 20px;
+  border-radius: 24px;       /* Curve effect for the outer box */
+  padding: 25px 20px;
   margin: 20px auto;
   max-width: 900px;
-  width: 90%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); /* Soft shadow */
+  width: 95%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); /* Halka sa shadow */
 }
 
 section h2 {
@@ -177,18 +177,17 @@ section h2 {
   color: #a29bfe !important; /* Sub-page headings - Purple */
 }
 
+/* Andar ka layout pehle jaisa grid hi rahega */
 .card-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center; /* Cards ko center karega */
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 15px;
   width: 100%;
 }
 
 .poster-card {
-  width: 160px; /* Fixed width for consistency */
   background-color: #141414;
-  border-radius: 16px; /* Smooth curve */
+  border-radius: 16px; /* Poster ka curve */
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -295,7 +294,7 @@ section h2 {
   }
 
   .poster-card {
-    width: 140px; /* Slightly smaller on mobile */
+    width: 100%; /* Mobile pe full width */
   }
 
   header h1 {
