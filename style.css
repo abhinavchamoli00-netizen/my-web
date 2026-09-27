@@ -124,16 +124,28 @@ footer .contact {
 }
 
 /* =========================================
-   5. SOON BADGE - BLUE COLOR FIX
+   5. SOON CARDS (Blur & Badge)
    ========================================= */
-.soon-badge,
-span.soon-badge,
+
+/* Locked card ke andar ka content halka blur ho */
+.card.locked .card-content {
+  opacity: 0.6 !important;       /* Halka (faded) */
+  filter: blur(0.7px) !important; /* Thoda sa dhundla */
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Hover karne pe thoda clear ho jaye */
+.card.locked:hover .card-content {
+  opacity: 0.9 !important;
+  filter: blur(0px) !important;
+}
+
+/* SOON badge bilkul clear aur Purple rahe */
 .card.locked .soon-badge {
   position: absolute;
   top: 15px;
   right: 15px;
-  background-color: #3498db !important; /* 👈 BLUE COLOR */
-  background: #3498db !important;
+  background-color: #6c5ce7 !important; /* Purple Background */
   color: #ffffff !important;
   font-size: 0.7rem;
   font-weight: bold;
@@ -142,6 +154,8 @@ span.soon-badge,
   letter-spacing: 1px;
   border: none !important;
   box-shadow: none !important;
+  opacity: 1 !important;         /* Clear */
+  filter: none !important;       /* Clear */
 }
 
 /* =========================================
@@ -183,7 +197,7 @@ section h2 {
 
 .poster-card img {
   width: 100%;
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 2 / 3; /* Perfect vertical poster size */
   object-fit: cover;
   display: block;
 }
@@ -196,6 +210,7 @@ section h2 {
   margin: 0;
 }
 
+/* Fix for blue color & underline inside links */
 .poster-link {
   text-decoration: none;
   color: inherit;
@@ -276,53 +291,4 @@ section h2 {
   .movie-detail h1 {
     font-size: 2rem;
   }
-}
-/* ====== FORCE BLUE COLOR FOR SOON BADGE ====== */
-.soon-badge,
-span.soon-badge,
-.card.locked .soon-badge {
-  background-color: #3498db !important; /* Perfect Blue */
-  background: #3498db !important;
-  color: #ffffff !important;
-  box-shadow: none !important;
-}
-/* ====== FINAL FIX: BLURRED SOON BADGE ====== */
-.soon-badge,
-span.soon-badge,
-.card.locked .soon-badge {
-  background-color: #6c5ce7 !important; /* Purple background */
-  color: #ffffff !important;
-  opacity: 0.5 !important;              /* Halka (faded) look */
-  filter: blur(1.5px) !important;       /* Dhundla (blurry) look */
-  box-shadow: none !important;
-  transition: opacity 0.3s ease, filter 0.3s ease;
-}
-
-/* Hover karne pe thoda clear ho jaye (Optional) */
-.card.locked:hover .soon-badge {
-  opacity: 0.9 !important;
-  filter: blur(0px) !important;
-}
-/* ====== BLUR/FADE THE LOCKED SECTIONS (SOON CARDS) ====== */
-
-/* Locked card ke andar ka content (icon, heading, description) blur ho */
-.card.locked .card-content {
-  opacity: 0.4 !important;
-  filter: blur(1.5px) !important;
-  transition: opacity 0.3s ease, filter 0.3s ease;
-}
-
-/* SOON badge bilkul clear rahe (koi blur nahi) */
-.card.locked .soon-badge {
-  opacity: 1 !important;
-  filter: none !important;
-  background-color: #6c5ce7 !important;
-  color: #ffffff !important;
-  box-shadow: none !important;
-}
-
-/* Optional: Hover karne pe card thoda clear ho jaye */
-.card.locked:hover .card-content {
-  opacity: 0.7 !important;
-  filter: blur(0.5px) !important;
 }
