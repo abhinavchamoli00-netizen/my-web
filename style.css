@@ -21,20 +21,7 @@ a {
 }
 
 /* =========================================
-   2. UPDATE BANNER (Top Notification)
-   ========================================= */
-.update-banner {
-  background-color: #6c5ce7; /* Purple background */
-  color: #ffffff;
-  text-align: center;
-  padding: 12px 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-
-/* =========================================
-   3. HEADER & FOOTER
+   2. HEADER & FOOTER
    ========================================= */
 header {
   text-align: center;
@@ -73,7 +60,7 @@ footer .contact {
 }
 
 /* =========================================
-   4. INDEX PAGE (Categories)
+   3. INDEX PAGE (Categories)
    ========================================= */
 .categories {
   display: grid;
@@ -91,6 +78,7 @@ footer .contact {
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
+  display: block;
 }
 
 .card:hover {
@@ -106,49 +94,45 @@ footer .contact {
 .card h3 {
   font-size: 1.2rem;
   margin-bottom: 8px;
-  color: #fff;
+  color: #ffffff; /* Force white */
 }
 
 .card p {
   font-size: 0.9rem;
-  color: #aaa;
+  color: #aaaaaa; /* Force grey */
 }
 
-/* =========================================
-   5. LOCKED CARDS (SOON Wale Sections - Blue)
-   ========================================= */
+/* Locked Cards (e.g., AI, Streaming) */
 .card.locked {
-  background-color: #0f172a; /* Dark Blue background */
-  border: 1px solid #1e3a8a; /* Blue border */
   opacity: 0.9;
   cursor: not-allowed;
 }
 
+/* Force correct colors for locked cards (Fixes the blue color issue) */
 .card.locked h3 {
-  color: #00aaff; /* Bright Blue Title */
+  color: #ffffff !important;
 }
 
 .card.locked p {
-  color: #93c5fd; /* Light Blue Paragraph */
+  color: #aaaaaa !important;
 }
 
-/* SOON Badge (Isko same rakha hai jaisa tune bola tha) */
 .soon-badge {
   position: absolute;
   top: 15px;
   right: 15px;
-  background-color: #00aaff; /* Electric Blue */
-  color: #ffffff;
+  background-color: #6c5ce7 !important; /* Force Purple */
+  color: #ffffff !important;
   font-size: 0.7rem;
   font-weight: bold;
   padding: 4px 10px;
   border-radius: 20px;
   letter-spacing: 1px;
-  box-shadow: 0 0 10px rgba(0, 170, 255, 0.6); /* Blue Glow */
+  box-shadow: none !important; /* Remove any blue glow */
 }
 
 /* =========================================
-   6. MOVIE & MARVEL GRID PAGES
+   4. MOVIE & MARVEL GRID PAGES
    ========================================= */
 section:not(.categories) {
   padding: 20px;
@@ -161,6 +145,7 @@ section h2 {
   margin-bottom: 20px;
   border-left: 4px solid #6c5ce7;
   padding-left: 12px;
+  color: #ffffff;
 }
 
 .card-container {
@@ -206,7 +191,7 @@ section h2 {
 }
 
 /* =========================================
-   7. MOVIE DETAIL PAGES
+   5. MOVIE DETAIL PAGES
    ========================================= */
 .movie-detail {
   max-width: 800px;
@@ -233,7 +218,7 @@ section h2 {
 .movie-info p {
   font-size: 1.1rem;
   line-height: 1.6;
-  color: #ccc;
+  color: #cccccc;
   margin-bottom: 10px;
 }
 
@@ -246,7 +231,7 @@ section h2 {
   margin-top: 30px;
   padding: 10px 20px;
   background-color: #6c5ce7;
-  color: #fff;
+  color: #ffffff;
   text-decoration: none;
   border-radius: 8px;
   font-weight: 600;
@@ -258,7 +243,7 @@ section h2 {
 }
 
 /* =========================================
-   8. RESPONSIVE / MOBILE
+   6. RESPONSIVE / MOBILE
    ========================================= */
 @media (max-width: 600px) {
   .movie-poster-large {
