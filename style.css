@@ -14,7 +14,7 @@ body {
   line-height: 1.6;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100vh; /* Page ko full height dega */
   padding-bottom: 20px;
 }
 
@@ -88,6 +88,7 @@ footer .contact {
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
+  width: 100%;
 }
 
 .card {
@@ -109,12 +110,12 @@ footer .contact {
   margin-bottom: 10px;
 }
 
-/* All Headings (Movies, Games, Reading, Marvel, etc.) - Purple */
+/* All Headings (Movies, Games, Marvel, etc.) - Purple */
 .card h3,
 .card.locked h3 {
   font-size: 1.2rem;
   margin-bottom: 8px;
-  color: #a29bfe !important; /* Premium Purple */
+  color: #a29bfe !important;
 }
 
 .card p {
@@ -127,9 +128,7 @@ footer .contact {
   cursor: not-allowed;
 }
 
-/* =========================================
-   5. SOON BADGE (BLUE WITH BLUR)
-   ========================================= */
+/* SOON BADGE (BLUE WITH BLUR) */
 .soon-badge,
 span.soon-badge,
 .card.locked .soon-badge {
@@ -155,7 +154,7 @@ span.soon-badge,
 }
 
 /* =========================================
-   6. MOVIE & GAME GRID PAGES (Centered)
+   5. MOVIE & GAME GRID PAGES (Centered)
    ========================================= */
 section:not(.categories) {
   padding: 20px;
@@ -169,7 +168,7 @@ section h2 {
   margin-bottom: 20px;
   border-left: 4px solid #6c5ce7;
   padding-left: 12px;
-  color: #a29bfe !important; /* Sub-page headings - Purple */
+  color: #a29bfe !important;
 }
 
 .card-container {
@@ -217,7 +216,7 @@ section h2 {
 }
 
 /* =========================================
-   7. MOVIE/GAME DETAIL PAGES
+   6. MOVIE/GAME DETAIL PAGES
    ========================================= */
 .movie-detail {
   max-width: 800px;
@@ -269,17 +268,20 @@ section h2 {
 }
 
 /* =========================================
-   8. RESPONSIVE / MOBILE
+   7. RESPONSIVE / MOBILE (Mobile Overflow Fix)
    ========================================= */
 @media (max-width: 600px) {
-  .movie-poster-large {
-    float: none;
-    display: block;
-    margin: 0 auto 20px auto;
+  .categories {
+    grid-template-columns: 1fr; /* 👈 Mobile pe sirf 1 column karega */
+    padding: 15px;
+  }
+
+  .card-container {
+    gap: 10px;
   }
   
   .poster-card {
-    width: 140px; /* Slightly smaller on mobile */
+    width: 140px; /* Mobile pe thoda chhota */
   }
 
   header h1 {
@@ -288,5 +290,11 @@ section h2 {
   
   .movie-detail h1 {
     font-size: 2rem;
+  }
+
+  .movie-poster-large {
+    float: none;
+    display: block;
+    margin: 0 auto 20px auto;
   }
 }
