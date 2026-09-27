@@ -346,3 +346,34 @@ section h2 {
     font-size: 2rem;
   }
 }
+/* =========================================
+   NOTICE BOX (For Streaming Sites Warning)
+   ========================================= */
+.notice-box {
+  background-color: rgba(255, 159, 67, 0.08); /* Subtle orange background */
+  border: 1px solid rgba(255, 159, 67, 0.2);
+  border-left: 4px solid #ff9f43; /* Orange accent line */
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 25px;
+}
+
+.notice-box h4 {
+  color: #ff9f43; /* Orange heading */
+  font-size: 1rem;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notice-box p {
+  color: #ccc;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.notice-box strong {
+  color: #ffffff;
+}
