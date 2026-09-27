@@ -286,3 +286,20 @@ span.soon-badge,
   color: #ffffff !important;
   box-shadow: none !important;
 }
+/* ====== FINAL FIX: BLURRED SOON BADGE ====== */
+.soon-badge,
+span.soon-badge,
+.card.locked .soon-badge {
+  background-color: #6c5ce7 !important; /* Purple background */
+  color: #ffffff !important;
+  opacity: 0.5 !important;              /* Halka (faded) look */
+  filter: blur(1.5px) !important;       /* Dhundla (blurry) look */
+  box-shadow: none !important;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Hover karne pe thoda clear ho jaye (Optional) */
+.card.locked:hover .soon-badge {
+  opacity: 0.9 !important;
+  filter: blur(0px) !important;
+}
