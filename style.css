@@ -303,3 +303,26 @@ span.soon-badge,
   opacity: 0.9 !important;
   filter: blur(0px) !important;
 }
+/* ====== BLUR/FADE THE LOCKED SECTIONS (SOON CARDS) ====== */
+
+/* Locked card ke andar ka content (icon, heading, description) blur ho */
+.card.locked .card-content {
+  opacity: 0.4 !important;
+  filter: blur(1.5px) !important;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* SOON badge bilkul clear rahe (koi blur nahi) */
+.card.locked .soon-badge {
+  opacity: 1 !important;
+  filter: none !important;
+  background-color: #6c5ce7 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+/* Optional: Hover karne pe card thoda clear ho jaye */
+.card.locked:hover .card-content {
+  opacity: 0.7 !important;
+  filter: blur(0.5px) !important;
+}
