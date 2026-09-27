@@ -114,26 +114,37 @@ footer .contact {
   color: #aaa;
 }
 
+/* =========================================
+   5. LOCKED CARDS (SOON Wale Sections - Blue)
+   ========================================= */
 .card.locked {
-  opacity: 0.7;
+  background-color: #0f172a; /* Dark Blue background */
+  border: 1px solid #1e3a8a; /* Blue border */
+  opacity: 0.9;
   cursor: not-allowed;
 }
 
-/* =========================================
-   5. SOON BADGE (Ekdum bright Blue + Glow)
-   ========================================= */
+.card.locked h3 {
+  color: #00aaff; /* Bright Blue Title */
+}
+
+.card.locked p {
+  color: #93c5fd; /* Light Blue Paragraph */
+}
+
+/* SOON Badge (Isko same rakha hai jaisa tune bola tha) */
 .soon-badge {
   position: absolute;
   top: 15px;
   right: 15px;
-  background-color: #00aaff; /* <--- Electric Blue */
+  background-color: #00aaff; /* Electric Blue */
   color: #ffffff;
   font-size: 0.7rem;
   font-weight: bold;
   padding: 4px 10px;
   border-radius: 20px;
   letter-spacing: 1px;
-  box-shadow: 0 0 10px rgba(0, 170, 255, 0.6); /* <--- Blue Glow */
+  box-shadow: 0 0 10px rgba(0, 170, 255, 0.6); /* Blue Glow */
 }
 
 /* =========================================
