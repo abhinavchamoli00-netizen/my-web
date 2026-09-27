@@ -258,3 +258,39 @@ section h2 {
     font-size: 2rem;
   }
 }
+/* =========================================
+   CUSTOM COLOR FIXES
+   ========================================= */
+
+/* 1. NEXUS Text - Dark Purple */
+header h1 {
+  color: #7b4fbf !important; 
+}
+
+/* 2. Subtitle (Movies, Games...) - Light Blue */
+header p {
+  color: #6cb2eb !important;
+}
+
+/* 3. Top Banner (New updates every Sunday) - Light Blue */
+.update-banner {
+  color: #6cb2eb !important;
+  background-color: rgba(108, 178, 235, 0.1) !important;
+  border-bottom: 1px solid rgba(108, 178, 235, 0.2) !important;
+}
+
+/* 4. Section Headings (Movies, Games, Political, etc.) - Dark Blue */
+section h2, section h1 {
+  color: #4a69bd !important;
+}
+
+/* 5. SOON Badges - Blue (Jaisa pehle tha) */
+.soon-badge {
+  background-color: #3498db !important;
+  color: #ffffff !important;
+}
+
+/* 6. Footer "Abhinav" - Light Purple/Blue */
+footer .watermark strong {
+  color: #a29bfe !important;
+}
