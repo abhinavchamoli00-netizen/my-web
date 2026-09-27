@@ -57,8 +57,9 @@ footer .watermark {
   margin-bottom: 5px;
 }
 
+/* Ye line "Abhinav" aur "Alpha" dono ko purple karegi */
 footer .watermark strong {
-  color: #a29bfe; /* "Abhinav" - Light Purple */
+  color: #a29bfe; /* Light Purple */
 }
 
 footer .contact {
@@ -131,10 +132,10 @@ footer .contact {
   cursor: not-allowed;
 }
 
-/* Card ke content (icon, title, text) ko blur karo (Blur kam kar diya) */
+/* Card ke content (icon, title, text) ko blur karo (Blur kam hai) */
 .card.locked .card-content {
-  filter: blur(1px) !important; /* 👈 Blur kam kiya (2px -> 1px) */
-  opacity: 0.7 !important;      /* 👈 Thoda clear kiya (0.5 -> 0.7) */
+  filter: blur(1px) !important; /* Halka sa blur */
+  opacity: 0.7 !important;      /* Thoda clear */
   transition: all 0.3s ease;
 }
 
@@ -155,7 +156,7 @@ span.soon-badge,
   border: none !important;
   filter: none !important;  /* No blur on badge */
   opacity: 1 !important;     /* Fully visible */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); /* Slight shadow for pop */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); /* Slight shadow */
   z-index: 10;               /* Ensures badge stays on top */
 }
 
