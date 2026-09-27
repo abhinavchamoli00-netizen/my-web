@@ -8,17 +8,16 @@
 }
 
 body {
-  background-color: #0b0a13;
+  background-color: #0b0a13; /* Deep dark background */
   color: #ffffff;
   font-family: 'Space Grotesk', sans-serif;
   line-height: 1.6;
   padding-bottom: 40px;
 }
 
-/* Force all links to lose blue color and underline */
-a, a:visited, a:hover, a:active {
-  color: inherit !important;
-  text-decoration: none !important;
+a {
+  text-decoration: none;
+  color: inherit;
 }
 
 /* =========================================
@@ -33,12 +32,12 @@ header h1 {
   font-size: 2.2rem;
   font-weight: 700;
   letter-spacing: 2px;
-  color: #ffffff;
+  color: #7b4fbf; /* NEXUS - Dark Purple */
   margin-bottom: 5px;
 }
 
 header p {
-  color: #a0a0a0;
+  color: #6cb2eb; /* Subtitle - Light Blue */
   font-size: 1rem;
 }
 
@@ -55,13 +54,29 @@ footer .watermark {
   margin-bottom: 5px;
 }
 
+footer .watermark strong {
+  color: #a29bfe; /* "Abhinav" - Light Purple */
+}
+
 footer .contact {
   color: #666;
   font-size: 0.85rem;
 }
 
 /* =========================================
-   3. INDEX PAGE (Categories)
+   3. UPDATE BANNER
+   ========================================= */
+.update-banner {
+  text-align: center;
+  padding: 12px 20px;
+  background-color: rgba(108, 178, 235, 0.1);
+  border-bottom: 1px solid rgba(108, 178, 235, 0.2);
+  color: #6cb2eb; /* Light Blue */
+  font-size: 0.9rem;
+}
+
+/* =========================================
+   4. INDEX PAGE (Categories)
    ========================================= */
 .categories {
   display: grid;
@@ -79,7 +94,6 @@ footer .contact {
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
-  display: block;
 }
 
 .card:hover {
@@ -92,36 +106,30 @@ footer .contact {
   margin-bottom: 10px;
 }
 
-.card h3 {
+/* All Headings (Movies, Games, Reading, Marvel, etc.) - Purple */
+.card h3,
+.card.locked h3 {
   font-size: 1.2rem;
   margin-bottom: 8px;
-  color: #ffffff;
+  color: #a29bfe !important; /* Premium Purple */
 }
 
 .card p {
   font-size: 0.9rem;
-  color: #aaaaaa;
+  color: #aaa;
 }
 
-/* Force correct colors for locked cards (Khatam karo blue color) */
 .card.locked {
   opacity: 0.9;
   cursor: not-allowed;
 }
 
-.card.locked h3 {
-  color: #ffffff !important;
-}
-
-.card.locked p {
-  color: #aaaaaa !important;
-}
-
+/* SOON Badge - Final Purple Fix */
 .soon-badge {
   position: absolute;
   top: 15px;
   right: 15px;
-  background-color: #6c5ce7 !important;
+  background-color: #6c5ce7 !important; /* Purple Background */
   color: #ffffff !important;
   font-size: 0.7rem;
   font-weight: bold;
@@ -132,7 +140,7 @@ footer .contact {
 }
 
 /* =========================================
-   4. MOVIE & MARVEL GRID PAGES
+   5. MOVIE & MARVEL GRID PAGES
    ========================================= */
 section:not(.categories) {
   padding: 20px;
@@ -145,7 +153,7 @@ section h2 {
   margin-bottom: 20px;
   border-left: 4px solid #6c5ce7;
   padding-left: 12px;
-  color: #ffffff;
+  color: #a29bfe !important; /* Sub-page headings - Purple */
 }
 
 .card-container {
@@ -170,7 +178,7 @@ section h2 {
 
 .poster-card img {
   width: 100%;
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 2 / 3; /* Perfect vertical poster size */
   object-fit: cover;
   display: block;
 }
@@ -183,8 +191,15 @@ section h2 {
   margin: 0;
 }
 
+/* Fix for blue color & underline inside links */
+.poster-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
 /* =========================================
-   5. MOVIE DETAIL PAGES
+   6. MOVIE DETAIL PAGES
    ========================================= */
 .movie-detail {
   max-width: 800px;
@@ -211,7 +226,7 @@ section h2 {
 .movie-info p {
   font-size: 1.1rem;
   line-height: 1.6;
-  color: #cccccc;
+  color: #ccc;
   margin-bottom: 10px;
 }
 
@@ -223,20 +238,20 @@ section h2 {
   display: inline-block;
   margin-top: 30px;
   padding: 10px 20px;
-  background-color: #6c5ce7 !important;
-  color: #ffffff !important;
-  text-decoration: none !important;
+  background-color: #6c5ce7;
+  color: #fff;
+  text-decoration: none;
   border-radius: 8px;
   font-weight: 600;
   transition: 0.3s;
 }
 
 .back-btn:hover {
-  background-color: #4e3ec9 !important;
+  background-color: #4e3ec9;
 }
 
 /* =========================================
-   6. RESPONSIVE / MOBILE
+   7. RESPONSIVE / MOBILE
    ========================================= */
 @media (max-width: 600px) {
   .movie-poster-large {
@@ -257,69 +272,4 @@ section h2 {
   .movie-detail h1 {
     font-size: 2rem;
   }
-}
-/* =========================================
-   CUSTOM COLOR FIXES
-   ========================================= */
-
-/* 1. NEXUS Text - Dark Purple */
-header h1 {
-  color: #7b4fbf !important; 
-}
-
-/* 2. Subtitle (Movies, Games...) - Light Blue */
-header p {
-  color: #6cb2eb !important;
-}
-
-/* 3. Top Banner (New updates every Sunday) - Light Blue */
-.update-banner {
-  color: #6cb2eb !important;
-  background-color: rgba(108, 178, 235, 0.1) !important;
-  border-bottom: 1px solid rgba(108, 178, 235, 0.2) !important;
-}
-
-/* 4. Section Headings (Movies, Games, Political, etc.) - Dark Blue */
-section h2, section h1 {
-  color: #4a69bd !important;
-}
-
-/* 5. SOON Badges - Blue (Jaisa pehle tha) */
-.soon-badge {
-  background-color: #3498db !important;
-  color: #ffffff !important;
-}
-
-/* 6. Footer "Abhinav" - Light Purple/Blue */
-footer .watermark strong {
-  color: #a29bfe !important;
-}
-/* 1. Category Card Headings (Movies, Games, Reading, Political, etc.) - Dark Blue */
-.card h3 {
-  color: #4a69bd !important;
-}
-
-/* 2. Footer "Abhinav" Name - Light Purple */
-footer .watermark strong {
-  color: #a29bfe !important;
-}
-/* =========================================
-   FINAL FIX: PURPLE COLOR FOR ALL HEADINGS
-   ========================================= */
-
-/* All card headings (Games, Reading, Marvel, AI, Streaming, etc.) */
-.card h3,
-.card.locked h3 {
-  color: #a29bfe !important; /* Premium Purple Color */
-}
-
-/* Sub-page headings (like "Movies" on movies.html, "Marvel" on marvel.html) */
-section:not(.categories) h2 {
-  color: #a29bfe !important; /* Premium Purple Color */
-}
-/* Fix for SOON badge color to Purple */
-.soon-badge {
-  background-color: #6c5ce7 !important; /* Premium Purple color */
-  color: #ffffff !important;
-  box-shadow: none !important; /* Extra glow hatane ke liye */
 }
