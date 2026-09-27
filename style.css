@@ -14,7 +14,7 @@ body {
   line-height: 1.6;
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Page ko full height dega */
+  min-height: 100vh;
   padding-bottom: 20px;
 }
 
@@ -93,16 +93,17 @@ footer .contact {
 
 .card {
   background-color: #141414;
-  border-radius: 12px;
+  border-radius: 20px; /* Smooth curve */
   padding: 25px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Soft shadow */
 }
 
 .card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(108, 92, 231, 0.2);
+  box-shadow: 0 12px 30px rgba(108, 92, 231, 0.2);
 }
 
 .card .icon {
@@ -110,12 +111,12 @@ footer .contact {
   margin-bottom: 10px;
 }
 
-/* All Headings (Movies, Games, Marvel, etc.) - Purple */
+/* All Headings (Movies, Games, Reading, Marvel, etc.) - Purple */
 .card h3,
 .card.locked h3 {
   font-size: 1.2rem;
   margin-bottom: 8px;
-  color: #a29bfe !important;
+  color: #a29bfe !important; /* Premium Purple */
 }
 
 .card p {
@@ -128,7 +129,9 @@ footer .contact {
   cursor: not-allowed;
 }
 
-/* SOON BADGE (BLUE WITH BLUR) */
+/* =========================================
+   5. SOON BADGE (BLUE WITH BLUR)
+   ========================================= */
 .soon-badge,
 span.soon-badge,
 .card.locked .soon-badge {
@@ -154,13 +157,16 @@ span.soon-badge,
 }
 
 /* =========================================
-   5. MOVIE & GAME GRID PAGES (Centered)
+   6. MOVIE & GAME GRID PAGES (Centered)
    ========================================= */
 section:not(.categories) {
-  padding: 20px;
-  max-width: 1000px;
-  margin: 0 auto;
-  width: 100%;
+  background-color: #101018; /* Slightly lighter background for section */
+  border-radius: 24px;       /* Curve effect */
+  padding: 30px 20px;
+  margin: 20px auto;
+  max-width: 900px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); /* Soft shadow */
 }
 
 section h2 {
@@ -168,13 +174,13 @@ section h2 {
   margin-bottom: 20px;
   border-left: 4px solid #6c5ce7;
   padding-left: 12px;
-  color: #a29bfe !important;
+  color: #a29bfe !important; /* Sub-page headings - Purple */
 }
 
 .card-container {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center; /* 👈 Cards ko center karega */
+  justify-content: center; /* Cards ko center karega */
   gap: 20px;
   width: 100%;
 }
@@ -182,16 +188,18 @@ section h2 {
 .poster-card {
   width: 160px; /* Fixed width for consistency */
   background-color: #141414;
-  border-radius: 10px;
+  border-radius: 16px; /* Smooth curve */
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
 }
 
 .poster-card:hover {
-  transform: scale(1.05);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(108, 92, 231, 0.3);
 }
 
 .poster-card img {
@@ -216,7 +224,7 @@ section h2 {
 }
 
 /* =========================================
-   6. MOVIE/GAME DETAIL PAGES
+   7. MOVIE/GAME DETAIL PAGES
    ========================================= */
 .movie-detail {
   max-width: 800px;
@@ -268,20 +276,26 @@ section h2 {
 }
 
 /* =========================================
-   7. RESPONSIVE / MOBILE (Mobile Overflow Fix)
+   8. RESPONSIVE / MOBILE
    ========================================= */
 @media (max-width: 600px) {
-  .categories {
-    grid-template-columns: 1fr; /* 👈 Mobile pe sirf 1 column karega */
-    padding: 15px;
-  }
-
-  .card-container {
-    gap: 10px;
+  .movie-poster-large {
+    float: none;
+    display: block;
+    margin: 0 auto 20px auto;
   }
   
+  .categories {
+    grid-template-columns: 1fr; /* Mobile pe sirf 1 column karega */
+    padding: 15px;
+  }
+  
+  .card-container {
+    gap: 10px; /* Cards ke beech ka gap kam karega */
+  }
+
   .poster-card {
-    width: 140px; /* Mobile pe thoda chhota */
+    width: 140px; /* Slightly smaller on mobile */
   }
 
   header h1 {
@@ -290,11 +304,5 @@ section h2 {
   
   .movie-detail h1 {
     font-size: 2rem;
-  }
-
-  .movie-poster-large {
-    float: none;
-    display: block;
-    margin: 0 auto 20px auto;
   }
 }
