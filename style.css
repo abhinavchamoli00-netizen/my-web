@@ -277,3 +277,12 @@ section h2 {
     font-size: 2rem;
   }
 }
+/* ====== FORCE BLUE COLOR FOR SOON BADGE ====== */
+.soon-badge,
+span.soon-badge,
+.card.locked .soon-badge {
+  background-color: #3498db !important; /* Perfect Blue */
+  background: #3498db !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
