@@ -1,10 +1,16 @@
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
+  // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
   const { name, message } = req.body || {};
 
@@ -16,7 +22,7 @@ module.exports = async (req, res) => {
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
   if (!botToken || !chatId) {
-    return res.status(500).json({ error: 'Server config missing' });
+    return res.status(500).json({ error: 'Server configuration missing' });
   }
 
   const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
@@ -26,12 +32,21 @@ module.exports = async (req, res) => {
     const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: 'Markdown' })
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: text,
+        parse_mode: 'Markdown'
+      })
     });
+
     const data = await response.json();
-    if (!data.ok) return res.status(500).json({ error: 'Telegram failed' });
+
+    if (!data.ok) {
+      return res.status(500).json({ error: 'Telegram failed to send message' });
+    }
+
     return res.status(200).json({ success: true });
   } catch (error) {
-    return res.status(500).json({ error: 'Server error' });
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
-};
+}
