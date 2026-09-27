@@ -131,10 +131,10 @@ footer .contact {
   cursor: not-allowed;
 }
 
-/* Card ke content (icon, title, text) ko blur karo */
+/* Card ke content (icon, title, text) ko blur karo (Blur kam kar diya) */
 .card.locked .card-content {
-  filter: blur(2px) !important;
-  opacity: 0.5 !important;
+  filter: blur(1px) !important; /* 👈 Blur kam kiya (2px -> 1px) */
+  opacity: 0.7 !important;      /* 👈 Thoda clear kiya (0.5 -> 0.7) */
   transition: all 0.3s ease;
 }
 
