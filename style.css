@@ -21,7 +21,20 @@ a {
 }
 
 /* =========================================
-   2. HEADER & FOOTER
+   2. UPDATE BANNER (Top Notification)
+   ========================================= */
+.update-banner {
+  background-color: #6c5ce7; /* Purple background */
+  color: #ffffff;
+  text-align: center; /* Text ko center karega */
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* =========================================
+   3. HEADER & FOOTER
    ========================================= */
 header {
   text-align: center;
@@ -60,7 +73,7 @@ footer .contact {
 }
 
 /* =========================================
-   3. INDEX PAGE (Categories)
+   4. INDEX PAGE (Categories)
    ========================================= */
 .categories {
   display: grid;
@@ -120,7 +133,7 @@ footer .contact {
 }
 
 /* =========================================
-   4. MOVIE & MARVEL GRID PAGES
+   5. MOVIE & MARVEL GRID PAGES
    ========================================= */
 section:not(.categories) {
   padding: 20px;
@@ -178,7 +191,7 @@ section h2 {
 }
 
 /* =========================================
-   5. MOVIE DETAIL PAGES
+   6. MOVIE DETAIL PAGES
    ========================================= */
 .movie-detail {
   max-width: 800px;
@@ -230,7 +243,7 @@ section h2 {
 }
 
 /* =========================================
-   6. RESPONSIVE / MOBILE
+   7. RESPONSIVE / MOBILE
    ========================================= */
 @media (max-width: 600px) {
   .movie-poster-large {
