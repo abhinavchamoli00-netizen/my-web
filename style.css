@@ -119,12 +119,13 @@ footer .contact {
   cursor: not-allowed;
 }
 
+/* Yahan Blue Color Change kiya hai */
 .soon-badge {
   position: absolute;
   top: 15px;
   right: 15px;
-  background-color: #6c5ce7;
-  color: #fff;
+  background-color: #0055ff; /* <--- Ye ekdum bright aur pure Blue hai */
+  color: #ffffff;
   font-size: 0.7rem;
   font-weight: bold;
   padding: 4px 10px;
