@@ -295,3 +295,12 @@ footer .contact { margin-top: 8px; font-size: 0.85rem; color: #777; }
     font-size: 0.78rem;
   }
 }
+/* Movie Detail Page CSS */
+.movie-detail { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+.movie-detail h1 { font-size: 2.5rem; color: #ffffff; margin-bottom: 10px; }
+.movie-poster-large { width: 100%; max-width: 300px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); float: left; margin-right: 30px; margin-bottom: 20px; }
+.movie-info p { font-size: 1.1rem; line-height: 1.6; color: #ccc; margin-bottom: 10px; }
+.movie-info strong { color: #ffffff; }
+.back-btn { display: inline-block; margin-top: 30px; padding: 10px 20px; background-color: #6c5ce7; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600; transition: 0.3s; }
+.back-btn:hover { background-color: #4e3ec9; }
+@media (max-width: 600px) { .movie-poster-large { float: none; display: block; margin: 0 auto 20px auto; } }
