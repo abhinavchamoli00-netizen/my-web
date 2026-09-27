@@ -14,7 +14,8 @@ body {
   line-height: 1.6;
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Footer ko niche push karne ke liye */
+  min-height: 100vh;
+  padding-bottom: 20px;
 }
 
 a {
@@ -44,11 +45,10 @@ header p {
 }
 
 footer {
-  margin-top: auto; /* Ye footer ko sabse neeche push karega */
   text-align: center;
   padding: 40px 20px 20px 20px;
+  margin-top: auto; /* Footer ko bottom pe push karega */
   border-top: 1px solid rgba(255, 255, 255, 0.05);
-  width: 100%;
 }
 
 footer .watermark {
@@ -109,11 +109,12 @@ footer .contact {
   margin-bottom: 10px;
 }
 
+/* All Headings (Movies, Games, Reading, Marvel, etc.) - Purple */
 .card h3,
 .card.locked h3 {
   font-size: 1.2rem;
   margin-bottom: 8px;
-  color: #a29bfe !important; /* Premium Purple for all headings */
+  color: #a29bfe !important; /* Premium Purple */
 }
 
 .card p {
@@ -127,7 +128,7 @@ footer .contact {
 }
 
 /* =========================================
-   5. SOON BADGE
+   5. SOON BADGE (BLUE WITH BLUR)
    ========================================= */
 .soon-badge,
 span.soon-badge,
@@ -136,7 +137,6 @@ span.soon-badge,
   top: 15px;
   right: 15px;
   background-color: #3498db !important; /* Blue Color */
-  background: #3498db !important;
   color: #ffffff !important;
   font-size: 0.7rem;
   font-weight: bold;
@@ -144,16 +144,24 @@ span.soon-badge,
   border-radius: 20px;
   letter-spacing: 1px;
   border: none !important;
-  box-shadow: none !important;
+  opacity: 0.5 !important; 
+  filter: blur(1.5px) !important; /* Blur effect */
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+.card.locked:hover .soon-badge {
+  opacity: 0.9 !important;
+  filter: blur(0px) !important;
 }
 
 /* =========================================
-   6. MOVIE & MARVEL GRID PAGES
+   6. MOVIE & GAME GRID PAGES (Centered)
    ========================================= */
 section:not(.categories) {
   padding: 20px;
   max-width: 1000px;
   margin: 0 auto;
+  width: 100%;
 }
 
 section h2 {
@@ -165,12 +173,15 @@ section h2 {
 }
 
 .card-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* 👈 Cards ko center karega */
+  gap: 20px;
+  width: 100%;
 }
 
 .poster-card {
+  width: 160px; /* Fixed width for consistency */
   background-color: #141414;
   border-radius: 10px;
   overflow: hidden;
@@ -206,7 +217,7 @@ section h2 {
 }
 
 /* =========================================
-   7. MOVIE DETAIL PAGES
+   7. MOVIE/GAME DETAIL PAGES
    ========================================= */
 .movie-detail {
   max-width: 800px;
@@ -267,9 +278,8 @@ section h2 {
     margin: 0 auto 20px auto;
   }
   
-  .card-container {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 10px;
+  .poster-card {
+    width: 140px; /* Slightly smaller on mobile */
   }
 
   header h1 {
