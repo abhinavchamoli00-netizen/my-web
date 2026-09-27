@@ -26,7 +26,7 @@ a {
 .update-banner {
   background-color: #6c5ce7; /* Purple background */
   color: #ffffff;
-  text-align: center; /* Text ko center karega */
+  text-align: center;
   padding: 12px 20px;
   font-size: 0.9rem;
   font-weight: 600;
@@ -119,22 +119,25 @@ footer .contact {
   cursor: not-allowed;
 }
 
-/* Yahan Blue Color Change kiya hai */
+/* =========================================
+   5. SOON BADGE (Ekdum bright Blue + Glow)
+   ========================================= */
 .soon-badge {
   position: absolute;
   top: 15px;
   right: 15px;
-  background-color: #0055ff; /* <--- Ye ekdum bright aur pure Blue hai */
+  background-color: #00aaff; /* <--- Electric Blue */
   color: #ffffff;
   font-size: 0.7rem;
   font-weight: bold;
   padding: 4px 10px;
   border-radius: 20px;
   letter-spacing: 1px;
+  box-shadow: 0 0 10px rgba(0, 170, 255, 0.6); /* <--- Blue Glow */
 }
 
 /* =========================================
-   5. MOVIE & MARVEL GRID PAGES
+   6. MOVIE & MARVEL GRID PAGES
    ========================================= */
 section:not(.categories) {
   padding: 20px;
@@ -192,7 +195,7 @@ section h2 {
 }
 
 /* =========================================
-   6. MOVIE DETAIL PAGES
+   7. MOVIE DETAIL PAGES
    ========================================= */
 .movie-detail {
   max-width: 800px;
@@ -244,7 +247,7 @@ section h2 {
 }
 
 /* =========================================
-   7. RESPONSIVE / MOBILE
+   8. RESPONSIVE / MOBILE
    ========================================= */
 @media (max-width: 600px) {
   .movie-poster-large {
