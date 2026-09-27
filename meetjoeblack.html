@@ -54,7 +54,59 @@
     <a href="movies.html" class="back-btn">← Back to Movies</a>
   </section>
 
-  <footer>
+  <!-- 🟢 FEEDBACK FORM -->
+<div class="feedback-section">
+  <h3>📩 Send Feedback</h3>
+  <p>Found a broken link? Have a suggestion? Send us a message!</p>
+  <form id="feedbackForm">
+    <input type="text" id="feedbackName" placeholder="Your name (optional)" />
+    <textarea id="feedbackMessage" placeholder="Type your message here..." required></textarea>
+    <button type="submit" id="feedbackSubmit">Send Message</button>
+  </form>
+  <p id="feedbackStatus"></p>
+</div>
+
+<script>
+  document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('feedbackName').value.trim();
+    const message = document.getElementById('feedbackMessage').value.trim();
+    const statusEl = document.getElementById('feedbackStatus');
+    const submitBtn = document.getElementById('feedbackSubmit');
+
+    if (!message) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+    statusEl.textContent = '';
+
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, message })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        statusEl.textContent = '✅ Thanks! Your feedback has been sent.';
+        statusEl.style.color = '#2ecc71';
+        document.getElementById('feedbackForm').reset();
+      } else {
+        statusEl.textContent = '❌ Something went wrong. Please try again.';
+        statusEl.style.color = '#e74c3c';
+      }
+    } catch (err) {
+      statusEl.textContent = '❌ Network error. Please try again.';
+      statusEl.style.color = '#e74c3c';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send Message';
+    }
+  });
+</script>
+
+<footer>
     <p class="watermark">Handled by <strong>Abhinav</strong> with Team <strong>Alpha</strong></p>
     <p class="contact">abhinavchamoli00@gmail.com</p>
   </footer>

@@ -387,3 +387,86 @@ section h2 {
     font-size: 2rem;
   }
 }
+/* =========================================
+   FEEDBACK FORM
+   ========================================= */
+.feedback-section {
+  text-align: center;
+  margin: 30px auto;
+  padding: 25px 20px;
+  background-color: #141414;
+  border-radius: 20px;
+  max-width: 500px;
+  width: 90%;
+  border: 1px solid rgba(108, 92, 231, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.feedback-section h3 {
+  color: #a29bfe;
+  margin-bottom: 8px;
+  font-size: 1.2rem;
+}
+
+.feedback-section > p {
+  color: #aaa;
+  margin-bottom: 18px;
+  font-size: 0.9rem;
+}
+
+.feedback-section input,
+.feedback-section textarea {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 12px;
+  background-color: #1c1b22;
+  border: 1px solid rgba(108, 92, 231, 0.3);
+  border-radius: 10px;
+  color: #ffffff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  transition: 0.3s ease;
+}
+
+.feedback-section input:focus,
+.feedback-section textarea:focus {
+  border-color: #6c5ce7;
+  box-shadow: 0 0 10px rgba(108, 92, 231, 0.3);
+}
+
+.feedback-section textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.feedback-section button {
+  width: 100%;
+  padding: 12px 24px;
+  background-color: #6c5ce7;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s ease;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.feedback-section button:hover:not(:disabled) {
+  background-color: #4e3ec9;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4);
+}
+
+.feedback-section button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#feedbackStatus {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  min-height: 20px;
+}
