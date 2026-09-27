@@ -106,12 +106,11 @@ footer .contact {
   margin-bottom: 10px;
 }
 
-/* All Headings (Movies, Games, Reading, Marvel, etc.) - Purple */
 .card h3,
 .card.locked h3 {
   font-size: 1.2rem;
   margin-bottom: 8px;
-  color: #a29bfe !important; /* Premium Purple */
+  color: #a29bfe !important; /* Premium Purple for all headings */
 }
 
 .card p {
@@ -124,23 +123,29 @@ footer .contact {
   cursor: not-allowed;
 }
 
-/* SOON Badge - Final Purple Fix */
-.soon-badge {
+/* =========================================
+   5. SOON BADGE - BLUE COLOR FIX
+   ========================================= */
+.soon-badge,
+span.soon-badge,
+.card.locked .soon-badge {
   position: absolute;
   top: 15px;
   right: 15px;
-  background-color: #6c5ce7 !important; /* Purple Background */
+  background-color: #3498db !important; /* 👈 BLUE COLOR */
+  background: #3498db !important;
   color: #ffffff !important;
   font-size: 0.7rem;
   font-weight: bold;
   padding: 4px 10px;
   border-radius: 20px;
   letter-spacing: 1px;
+  border: none !important;
   box-shadow: none !important;
 }
 
 /* =========================================
-   5. MOVIE & MARVEL GRID PAGES
+   6. MOVIE & MARVEL GRID PAGES
    ========================================= */
 section:not(.categories) {
   padding: 20px;
@@ -178,7 +183,7 @@ section h2 {
 
 .poster-card img {
   width: 100%;
-  aspect-ratio: 2 / 3; /* Perfect vertical poster size */
+  aspect-ratio: 2 / 3;
   object-fit: cover;
   display: block;
 }
@@ -191,7 +196,6 @@ section h2 {
   margin: 0;
 }
 
-/* Fix for blue color & underline inside links */
 .poster-link {
   text-decoration: none;
   color: inherit;
@@ -199,7 +203,7 @@ section h2 {
 }
 
 /* =========================================
-   6. MOVIE DETAIL PAGES
+   7. MOVIE DETAIL PAGES
    ========================================= */
 .movie-detail {
   max-width: 800px;
@@ -251,7 +255,7 @@ section h2 {
 }
 
 /* =========================================
-   7. RESPONSIVE / MOBILE
+   8. RESPONSIVE / MOBILE
    ========================================= */
 @media (max-width: 600px) {
   .movie-poster-large {
