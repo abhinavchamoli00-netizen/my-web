@@ -317,3 +317,9 @@ footer .watermark strong {
 section:not(.categories) h2 {
   color: #a29bfe !important; /* Premium Purple Color */
 }
+/* Fix for SOON badge color to Purple */
+.soon-badge {
+  background-color: #6c5ce7 !important; /* Premium Purple color */
+  color: #ffffff !important;
+  box-shadow: none !important; /* Extra glow hatane ke liye */
+}
