@@ -8,7 +8,7 @@
 }
 
 body {
-  background-color: #0b0a13;
+  background-color: #0b0a13; /* Deep dark background */
   color: #ffffff;
   font-family: 'Space Grotesk', sans-serif;
   line-height: 1.6;
@@ -47,7 +47,7 @@ header p {
 footer {
   text-align: center;
   padding: 40px 20px 20px 20px;
-  margin-top: auto;
+  margin-top: auto; /* Footer ko bottom pe push karega */
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -74,7 +74,7 @@ footer .contact {
   padding: 12px 20px;
   background-color: rgba(108, 178, 235, 0.1);
   border-bottom: 1px solid rgba(108, 178, 235, 0.2);
-  color: #6cb2eb;
+  color: #6cb2eb; /* Light Blue */
   font-size: 0.9rem;
 }
 
@@ -93,12 +93,12 @@ footer .contact {
 
 .card {
   background-color: #141414;
-  border-radius: 20px;
+  border-radius: 20px; /* Smooth curve */
   padding: 25px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Soft shadow */
 }
 
 .card:hover {
@@ -111,11 +111,12 @@ footer .contact {
   margin-bottom: 10px;
 }
 
+/* All Card Headings (Movies, Games, Reading, Marvel, etc.) - Purple */
 .card h3,
 .card.locked h3 {
   font-size: 1.2rem;
   margin-bottom: 8px;
-  color: #a29bfe !important;
+  color: #a29bfe !important; /* Premium Purple */
 }
 
 .card p {
@@ -123,21 +124,28 @@ footer .contact {
   color: #aaa;
 }
 
+/* =========================================
+   5. LOCKED CARDS & SOON BADGE (BLUR & SHARP FIX)
+   ========================================= */
 .card.locked {
-  opacity: 0.9;
   cursor: not-allowed;
 }
 
-/* =========================================
-   5. SOON BADGE (BLUE WITH BLUR)
-   ========================================= */
+/* Card ke content (icon, title, text) ko blur karo */
+.card.locked .card-content {
+  filter: blur(2px) !important;
+  opacity: 0.5 !important;
+  transition: all 0.3s ease;
+}
+
+/* SOON Badge ko sharp, clear aur Blue rakho */
 .soon-badge,
 span.soon-badge,
 .card.locked .soon-badge {
   position: absolute;
   top: 15px;
   right: 15px;
-  background-color: #3498db !important;
+  background-color: #3498db !important; /* Blue Background */
   color: #ffffff !important;
   font-size: 0.7rem;
   font-weight: bold;
@@ -145,27 +153,23 @@ span.soon-badge,
   border-radius: 20px;
   letter-spacing: 1px;
   border: none !important;
-  opacity: 0.5 !important; 
-  filter: blur(1.5px) !important;
-  transition: opacity 0.3s ease, filter 0.3s ease;
-}
-
-.card.locked:hover .soon-badge {
-  opacity: 0.9 !important;
-  filter: blur(0px) !important;
+  filter: none !important;  /* No blur on badge */
+  opacity: 1 !important;     /* Fully visible */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); /* Slight shadow for pop */
+  z-index: 10;               /* Ensures badge stays on top */
 }
 
 /* =========================================
    6. MOVIE & GAME GRID PAGES (Curved Outer Box)
    ========================================= */
 section:not(.categories) {
-  background-color: #101018;
-  border-radius: 24px;
+  background-color: #101018; /* Slightly lighter background for section */
+  border-radius: 24px;       /* Curve effect for the outer box */
   padding: 25px 20px;
   margin: 20px auto;
   max-width: 900px;
   width: 95%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); /* Halka sa shadow */
 }
 
 section h2 {
@@ -173,10 +177,44 @@ section h2 {
   margin-bottom: 20px;
   border-left: 4px solid #6c5ce7;
   padding-left: 12px;
-  color: #a29bfe !important;
+  color: #a29bfe !important; /* Sub-page headings - Purple */
 }
 
-/* 🟢 NEW: Streaming Sites Links Section */
+/* =========================================
+   7. NOTICE BOX (For Streaming Sites Warning)
+   ========================================= */
+.notice-box {
+  background-color: rgba(255, 159, 67, 0.08); /* Subtle orange background */
+  border: 1px solid rgba(255, 159, 67, 0.2);
+  border-left: 4px solid #ff9f43; /* Orange accent line */
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 25px;
+}
+
+.notice-box h4 {
+  color: #ff9f43; /* Orange heading */
+  font-size: 1rem;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notice-box p {
+  color: #ccc;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.notice-box strong {
+  color: #ffffff;
+}
+
+/* =========================================
+   8. STREAMING SITES LINKS SECTION
+   ========================================= */
 .streaming-sites-section {
   margin-bottom: 30px;
   padding: 20px;
@@ -218,7 +256,9 @@ section h2 {
   box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
 }
 
-/* Andar ka layout pehle jaisa grid hi rahega */
+/* =========================================
+   9. MOVIE & GAME POSTERS GRID
+   ========================================= */
 .card-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -228,7 +268,7 @@ section h2 {
 
 .poster-card {
   background-color: #141414;
-  border-radius: 16px;
+  border-radius: 16px; /* Smooth curve */
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -264,7 +304,7 @@ section h2 {
 }
 
 /* =========================================
-   7. MOVIE/GAME DETAIL PAGES
+   10. MOVIE/GAME DETAIL PAGES
    ========================================= */
 .movie-detail {
   max-width: 800px;
@@ -316,7 +356,7 @@ section h2 {
 }
 
 /* =========================================
-   8. RESPONSIVE / MOBILE
+   11. RESPONSIVE / MOBILE
    ========================================= */
 @media (max-width: 600px) {
   .movie-poster-large {
@@ -326,16 +366,16 @@ section h2 {
   }
   
   .categories {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* Mobile pe sirf 1 column karega */
     padding: 15px;
   }
   
   .card-container {
-    gap: 10px;
+    gap: 10px; /* Cards ke beech ka gap kam karega */
   }
 
   .poster-card {
-    width: 100%;
+    width: 100%; /* Mobile pe full width */
   }
 
   header h1 {
@@ -345,35 +385,4 @@ section h2 {
   .movie-detail h1 {
     font-size: 2rem;
   }
-}
-/* =========================================
-   NOTICE BOX (For Streaming Sites Warning)
-   ========================================= */
-.notice-box {
-  background-color: rgba(255, 159, 67, 0.08); /* Subtle orange background */
-  border: 1px solid rgba(255, 159, 67, 0.2);
-  border-left: 4px solid #ff9f43; /* Orange accent line */
-  border-radius: 12px;
-  padding: 16px 20px;
-  margin-bottom: 25px;
-}
-
-.notice-box h4 {
-  color: #ff9f43; /* Orange heading */
-  font-size: 1rem;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.notice-box p {
-  color: #ccc;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.notice-box strong {
-  color: #ffffff;
 }
