@@ -294,3 +294,12 @@ section h2, section h1 {
 footer .watermark strong {
   color: #a29bfe !important;
 }
+/* 1. Category Card Headings (Movies, Games, Reading, Political, etc.) - Dark Blue */
+.card h3 {
+  color: #4a69bd !important;
+}
+
+/* 2. Footer "Abhinav" Name - Light Purple */
+footer .watermark strong {
+  color: #a29bfe !important;
+}
