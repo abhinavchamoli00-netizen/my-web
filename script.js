@@ -88,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatFab = document.getElementById('chatFab');
   const chatWidget = document.getElementById('chatWidget');
   const chatClose = document.getElementById('chatClose');
+  const chatMaximize = document.getElementById('chatMaximize');
   const chatForm = document.getElementById('chatForm');
   const chatInput = document.getElementById('chatInput');
   const chatMessages = document.getElementById('chatMessages');
@@ -108,6 +109,19 @@ document.addEventListener('DOMContentLoaded', () => {
     chatClose.addEventListener('click', (e) => {
       e.stopPropagation();
       chatWidget.classList.remove('active');
+      chatWidget.classList.remove('maximized');
+    });
+  }
+
+  // ✨ Maximize Button Toggle
+  if (chatMaximize) {
+    chatMaximize.addEventListener('click', (e) => {
+      e.stopPropagation();
+      chatWidget.classList.toggle('maximized');
+      
+      setTimeout(() => {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }, 100);
     });
   }
 

@@ -574,6 +574,12 @@ section h2 {
   50% { opacity: 0.5; }
 }
 
+.ai-chat-header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .ai-chat-toggle {
   background: rgba(255, 255, 255, 0.15);
   border: none;
@@ -591,6 +597,10 @@ section h2 {
 
 .ai-chat-toggle:hover {
   background: rgba(255, 255, 255, 0.3);
+}
+
+.ai-chat-toggle svg {
+  display: block;
 }
 
 .ai-chat-messages {
@@ -722,7 +732,40 @@ section h2 {
 }
 
 /* =========================================
-   15. RESPONSIVE / MOBILE
+   15. CHAT MAXIMIZE / FULLSCREEN MODE
+   ========================================= */
+.ai-chat-widget.maximized {
+  top: 20px !important;
+  right: 20px !important;
+  bottom: 20px !important;
+  left: 20px !important;
+  width: auto !important;
+  max-width: none !important;
+  height: auto;
+  border-radius: 20px;
+  animation: expandIn 0.35s ease;
+}
+
+.ai-chat-widget.maximized .ai-chat-messages {
+  height: calc(100vh - 180px);
+  max-height: none;
+}
+
+.ai-chat-widget.maximized .ai-msg-bot {
+  max-width: 75%;
+}
+
+.ai-chat-widget.maximized .ai-msg-user {
+  max-width: 75%;
+}
+
+@keyframes expandIn {
+  from { opacity: 0.7; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* =========================================
+   16. RESPONSIVE / MOBILE
    ========================================= */
 @media (max-width: 600px) {
   .movie-poster-large {
@@ -786,5 +829,17 @@ section h2 {
   
   .ai-chat-messages {
     height: 320px;
+  }
+
+  .ai-chat-widget.maximized {
+    top: 10px !important;
+    right: 10px !important;
+    bottom: 10px !important;
+    left: 10px !important;
+    border-radius: 16px;
+  }
+  
+  .ai-chat-widget.maximized .ai-chat-messages {
+    height: calc(100vh - 170px);
   }
 }
