@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 📱 Mobile Keyboard Fix - Fit widget inside visual viewport
+  // 📱 Mobile Keyboard Fix
   function adjustChatForKeyboard() {
     if (!chatWidget || !chatWidget.classList.contains('active')) return;
 
@@ -168,7 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } else {
       if (isKeyboardOpen) {
-        // Normal mode: move widget to top of visual viewport and shrink height
         const availableHeight = viewportHeight - 20;
         chatWidget.style.top = (viewportTop + 10) + 'px';
         chatWidget.style.bottom = 'auto';
