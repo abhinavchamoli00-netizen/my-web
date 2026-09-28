@@ -659,7 +659,7 @@ section h2 {
 }
 
 /* =========================================
-   14. AI CHAT LAUNCHER (TOP RIGHT)
+   14. AI CHAT LAUNCHER
    ========================================= */
 .ai-chat-launcher {
   position: fixed;
@@ -700,13 +700,6 @@ section h2 {
   width: 22px;
   height: 22px;
   display: block;
-}
-
-.ai-launcher-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
 }
 
 .ai-launcher-title {
@@ -888,37 +881,37 @@ section h2 {
 }
 
 /* =========================================
-   CHAT MESSAGE WRAPPER (for image + text)
+   IMAGE MESSAGE (no purple bg for image+button)
    ========================================= */
-.ai-msg-wrapper {
+.ai-msg-media {
+  align-self: flex-end;
+  max-width: 90%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  max-width: 90%;
+  gap: 6px;
   align-items: flex-start;
 }
 
-.ai-msg-wrapper-user {
-  align-self: flex-end;
-  align-items: flex-end;
-}
-
-.ai-msg-wrapper-bot {
-  align-self: flex-start;
-  align-items: flex-start;
-}
-
-.ai-msg-wrapper > .ai-msg {
+.ai-msg-media .ai-msg {
   max-width: 100%;
+  align-self: flex-start;
 }
 
-/* Image inside wrapper has NO background */
-.ai-msg-wrapper > .ai-msg-image {
-  margin-top: 0;
+.ai-msg-image {
+  max-width: 140px;
+  max-height: 140px;
+  width: auto;
+  height: auto;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  align-self: flex-start;
 }
 
-.ai-msg-wrapper > .analyze-btn {
-  margin-top: 0;
+.ai-msg-image:hover {
+  transform: scale(1.05);
 }
 
 /* =========================================
@@ -1174,25 +1167,8 @@ section h2 {
   justify-content: center;
 }
 
-/* Chat message image - NO purple bg, just image */
-.ai-msg-image {
-  max-width: 140px;
-  max-height: 140px;
-  width: auto;
-  height: auto;
-  object-fit: cover;
-  border-radius: 10px;
-  display: block;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.ai-msg-image:hover {
-  transform: scale(1.05);
-}
-
 /* =========================================
-   ANALYZE BUTTON - Normal dark bg
+   ANALYZE BUTTON - LEFT ALIGNED, DARK BG
    ========================================= */
 .analyze-btn {
   position: relative;
@@ -1211,6 +1187,8 @@ section h2 {
   font-family: inherit;
   overflow: hidden;
   z-index: 1;
+  margin-top: 4px;
+  align-self: flex-start;
 }
 
 .analyze-btn::before {

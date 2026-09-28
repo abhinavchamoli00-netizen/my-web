@@ -489,16 +489,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // 📎 IMAGE UPLOAD
+  // 📎 IMAGE UPLOAD (with compression + hosting)
   // =========================================
   const imageBtn = document.getElementById('imageBtn');
   const imageInput = document.getElementById('imageInput');
   const imagePreview = document.getElementById('imagePreview');
   const previewImg = document.getElementById('previewImg');
   const removeImage = document.getElementById('removeImage');
-  let uploadedImageData = null;
+  let uploadedImageData = null;   // Compressed preview (base64, for display)
+  let uploadedImageUrl = null;    // Hosted URL (for AI vision)
+  let isUploading = false;
 
-  function compressImage(dataUrl, maxSize = 800, quality = 0.7) {
+  function compressImage(dataUrl, maxSize = 900, quality = 0.75) {
     return new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
@@ -528,6 +530,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Upload to catbox.moe (free, no key, CORS enabled)
+  async function uploadImageToHost(dataUrl) {
+    try {
+      // Convert dataURL to Blob
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      
+      const formData = new FormData();
+      formData.append('reqtype', 'fileupload');
+      formData.append('fileToUpload', blob, 'nexus_img.jpg');
+      
+      const uploadRes = await fetch('https://catbox.moe/user/api.php', {
+        method: 'POST',
+        body: formData
+      });
+      
+      const url = await uploadRes.text();
+      
+      if (url && url.trim().startsWith('https://')) {
+        return url.trim();
+      }
+      return null;
+    } catch (err) {
+      console.log('Image host upload failed:', err);
+      return null;
+    }
+  }
+
   if (imageBtn && imageInput) {
     imageBtn.addEventListener('click', () => imageInput.click());
 
@@ -538,18 +568,28 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Image too large. Max 5MB.');
         return;
       }
+      
       const reader = new FileReader();
       reader.onload = async (ev) => {
-        const compressed = await compressImage(ev.target.result, 800, 0.7);
+        // Step 1: Compress for display
+        const compressed = await compressImage(ev.target.result, 900, 0.75);
         uploadedImageData = compressed;
         previewImg.src = compressed;
         imagePreview.style.display = 'block';
+        
+        // Step 2: Upload to host in background
+        isUploading = true;
+        uploadedImageUrl = await uploadImageToHost(compressed);
+        isUploading = false;
+        
+        console.log('Image URL:', uploadedImageUrl || 'Upload failed - using base64');
       };
       reader.readAsDataURL(file);
     });
 
     removeImage.addEventListener('click', () => {
       uploadedImageData = null;
+      uploadedImageUrl = null;
       imageInput.value = '';
       imagePreview.style.display = 'none';
       previewImg.src = '';
@@ -562,7 +602,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentlySpeaking = false;
   let currentSpeakBtn = null;
   let currentMessageEl = null;
-  let currentPosMap = [];
 
   function stopSpeaking() {
     if ('speechSynthesis' in window) {
@@ -580,12 +619,9 @@ document.addEventListener('DOMContentLoaded', () => {
     currentlySpeaking = false;
     currentSpeakBtn = null;
     currentMessageEl = null;
-    currentPosMap = [];
   }
 
-  // Prepare message DOM for TTS and build char position map
   function prepareForTTS(rootEl) {
-    // Unwrap previous wrapping
     if (rootEl.dataset.speechWrapped === 'true') {
       rootEl.querySelectorAll('.speak-word').forEach(span => {
         const text = document.createTextNode(span.textContent);
@@ -618,11 +654,9 @@ document.addEventListener('DOMContentLoaded', () => {
           fragment.appendChild(document.createTextNode(part));
           cleanText += part;
         } else {
-          // Clean emojis/markdown from this word for TTS
           const cleanWord = part.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').replace(/[*#_`~]/g, '');
 
           if (!cleanWord) {
-            // Only emojis/symbols — keep in DOM but not in clean text
             fragment.appendChild(document.createTextNode(part));
             return;
           }
@@ -650,7 +684,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function speakWithHighlight(messageDiv, speakBtn, text, lang = 'en-IN') {
     if (!('speechSynthesis' in window)) return;
 
-    // If same button is speaking, stop it
     if (currentlySpeaking && currentSpeakBtn === speakBtn) {
       stopSpeaking();
       return;
@@ -668,7 +701,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     currentMessageEl = messageDiv;
     currentSpeakBtn = speakBtn;
-    currentPosMap = posMap;
     currentlySpeaking = true;
 
     speakBtn.innerHTML = '⏹ Stop';
@@ -679,13 +711,11 @@ document.addEventListener('DOMContentLoaded', () => {
     utterance.rate = 1;
     utterance.pitch = 1;
 
-    // 🔥 PERFECT SYNC: onboundary fires exactly when each word is spoken
     utterance.onboundary = (e) => {
       if (!currentlySpeaking) return;
       
       const charIndex = e.charIndex;
       
-      // Find the span that contains this character position
       let match = null;
       for (const p of posMap) {
         if (charIndex >= p.charStart && charIndex < p.charEnd) {
@@ -695,14 +725,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       if (match && match.span) {
-        // Clear previous highlights
         posMap.forEach(p => {
           if (p.span) p.span.classList.remove('speaking');
         });
-        // Highlight current word
         match.span.classList.add('speaking');
         
-        // Auto-scroll if needed
         try {
           match.span.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         } catch (err) {}
@@ -758,9 +785,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isChatSending) return;
 
       let message = chatInput.value.trim();
-      const currentImage = uploadedImageData;
+      const currentImageData = uploadedImageData;
+      const currentImageUrl = uploadedImageUrl;
 
-      if (!message && !currentImage) return;
+      if (!message && !currentImageData) return;
 
       // 🖼️ Image generation
       if (message && isImageRequest(message)) {
@@ -796,47 +824,68 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // 🔥 User message with image
-      const wrapper = addChatMessageWithImage(message, 'user', currentImage);
-      
+      // 🔥 User message with image (image on top, text below)
+      const mediaWrapper = document.createElement('div');
+      mediaWrapper.className = 'ai-msg-media';
+
+      // Image first (on top)
+      if (currentImageData) {
+        const img = document.createElement('img');
+        img.className = 'ai-msg-image';
+        img.src = currentImageData;
+        img.onclick = () => window.open(currentImageData, '_blank');
+        mediaWrapper.appendChild(img);
+      }
+
+      // Text bubble below
+      if (message) {
+        const textBubble = document.createElement('div');
+        textBubble.className = 'ai-msg ai-msg-user';
+        textBubble.textContent = message;
+        mediaWrapper.appendChild(textBubble);
+      }
+
+      // Analyze button (left-aligned)
       let analyzeBtnEl = null;
-      if (currentImage) {
+      if (currentImageData) {
         analyzeBtnEl = document.createElement('button');
         analyzeBtnEl.className = 'analyze-btn';
         analyzeBtnEl.innerHTML = '🔍 Analyze Image';
         analyzeBtnEl.type = 'button';
         analyzeBtnEl.addEventListener('click', (e) => {
           e.stopPropagation();
-          const imageToAnalyze = currentImage;
           analyzeBtnEl.disabled = true;
           analyzeBtnEl.innerHTML = '⏳ Analyzing...';
           
           sendToAI(
             'Please analyze this image in detail. Tell me what you see.',
-            imageToAnalyze,
+            currentImageUrl || currentImageData,
             analyzeBtnEl
           );
         });
-        wrapper.appendChild(analyzeBtnEl);
+        mediaWrapper.appendChild(analyzeBtnEl);
       }
+
+      chatMessages.appendChild(mediaWrapper);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
 
       chatInput.value = '';
 
-      const imageToSend = currentImage;
+      // Clear uploaded image
+      const imageToSend = currentImageUrl || currentImageData;
       
-      if (currentImage && message) {
+      if (currentImageData) {
         uploadedImageData = null;
+        uploadedImageUrl = null;
         imageInput.value = '';
         imagePreview.style.display = 'none';
         previewImg.src = '';
+      }
+
+      // Send message to AI only if there's text (image-only waits for Analyze click)
+      if (message) {
         await sendToAI(message, imageToSend, analyzeBtnEl);
-      } else if (!currentImage && message) {
-        await sendToAI(message, null, null);
       } else {
-        uploadedImageData = null;
-        imageInput.value = '';
-        imagePreview.style.display = 'none';
-        previewImg.src = '';
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
     });
@@ -890,38 +939,6 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (analyzeBtn) finalizeAnalyzeButton(analyzeBtn);
     }
-  }
-
-  // =========================================
-  // CHAT MESSAGE HELPERS
-  // =========================================
-  function addChatMessageWithImage(text, type, imageData) {
-    // Wrapper: text bubble (purple for user) + image (no bg) + button (no bg)
-    const wrapper = document.createElement('div');
-    wrapper.className = 'ai-msg-wrapper ' + (type === 'user' ? 'ai-msg-wrapper-user' : 'ai-msg-wrapper-bot');
-
-    if (text) {
-      const textBubble = document.createElement('div');
-      textBubble.className = 'ai-msg ' + (type === 'user' ? 'ai-msg-user' : 'ai-msg-bot');
-      if (type === 'bot') {
-        textBubble.innerHTML = formatAIResponse(text);
-      } else {
-        textBubble.textContent = text;
-      }
-      wrapper.appendChild(textBubble);
-    }
-
-    if (imageData) {
-      const img = document.createElement('img');
-      img.className = 'ai-msg-image';
-      img.src = imageData;
-      img.onclick = () => window.open(imageData, '_blank');
-      wrapper.appendChild(img);
-    }
-
-    chatMessages.appendChild(wrapper);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    return wrapper;
   }
 
   function formatAIResponse(text) {
