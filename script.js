@@ -1,7 +1,3 @@
-// =========================================
-// NEXUS - Main Script
-// =========================================
-
 document.addEventListener('DOMContentLoaded', () => {
 
   // =========================================
@@ -96,28 +92,32 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // 4. AI CHAT WIDGET
+  // 4. AI CHAT WIDGET (Floating)
   // =========================================
+  const chatFab = document.getElementById('chatFab');
+  const chatWidget = document.getElementById('chatWidget');
+  const chatClose = document.getElementById('chatClose');
   const chatForm = document.getElementById('chatForm');
   const chatInput = document.getElementById('chatInput');
   const chatMessages = document.getElementById('chatMessages');
-  const chatBody = document.getElementById('chatBody');
-  const chatToggle = document.getElementById('chatToggle');
-  const chatHeader = document.getElementById('chatHeader');
 
   let chatHistory = [];
   let isChatSending = false;
 
-  function toggleChat() {
-    chatBody.classList.toggle('collapsed');
-    chatToggle.textContent = chatBody.classList.contains('collapsed') ? '+' : '−';
+  if (chatFab) {
+    chatFab.addEventListener('click', () => {
+      chatWidget.classList.toggle('active');
+      if (chatWidget.classList.contains('active')) {
+        chatInput.focus();
+      }
+    });
   }
 
-  if (chatHeader) chatHeader.addEventListener('click', toggleChat);
-  if (chatToggle) chatToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleChat();
-  });
+  if (chatClose) {
+    chatClose.addEventListener('click', () => {
+      chatWidget.classList.remove('active');
+    });
+  }
 
   if (chatForm) {
     chatForm.addEventListener('submit', async (e) => {
@@ -154,11 +154,11 @@ document.addEventListener('DOMContentLoaded', () => {
           chatHistory.push({ role: 'user', text: message });
           chatHistory.push({ role: 'model', text: data.reply });
         } else {
-          addChatMessage('Sorry, something went wrong. Please try again.', 'bot');
+          addChatMessage('⚠️ Error: ' + (data.details || data.error || 'Unknown'), 'bot');
         }
       } catch (err) {
         typingEl.remove();
-        addChatMessage('Network error. Please check your connection.', 'bot');
+        addChatMessage('❌ Network error. Please check your connection.', 'bot');
       } finally {
         isChatSending = false;
         sendBtn.disabled = false;

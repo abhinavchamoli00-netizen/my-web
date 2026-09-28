@@ -437,11 +437,36 @@ section h2 {
 }
 
 /* =========================================
-   12. AI CHAT WIDGET
+   12. AI CHAT WIDGET (Floating)
    ========================================= */
-.ai-chat-widget {
+.chat-fab {
   position: fixed;
   bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6c5ce7, #7b4fbf);
+  color: #fff;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(108, 92, 231, 0.5);
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.chat-fab:hover {
+  transform: scale(1.1);
+}
+
+.ai-chat-widget {
+  display: none;
+  position: fixed;
+  bottom: 90px;
   right: 20px;
   width: 340px;
   max-width: calc(100vw - 40px);
@@ -452,6 +477,16 @@ section h2 {
   overflow: hidden;
   z-index: 9999;
   font-family: 'Space Grotesk', sans-serif;
+}
+
+.ai-chat-widget.active {
+  display: block;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .ai-chat-header {
@@ -493,7 +528,7 @@ section h2 {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  font-size: 18px;
+  font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -503,16 +538,6 @@ section h2 {
 
 .ai-chat-toggle:hover {
   background: rgba(255, 255, 255, 0.3);
-}
-
-.ai-chat-body {
-  max-height: 450px;
-  transition: max-height 0.3s ease;
-  overflow: hidden;
-}
-
-.ai-chat-body.collapsed {
-  max-height: 0;
 }
 
 .ai-chat-messages {
@@ -641,10 +666,18 @@ section h2 {
   .ai-chat-widget {
     width: calc(100vw - 20px);
     right: 10px;
-    bottom: 10px;
+    bottom: 85px;
   }
   
   .ai-chat-messages {
     height: 260px;
+  }
+  
+  .chat-fab {
+    width: 55px;
+    height: 55px;
+    bottom: 15px;
+    right: 15px;
+    font-size: 22px;
   }
 }

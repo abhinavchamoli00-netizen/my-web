@@ -18,58 +18,53 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Message is required' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'API key not configured' });
+    return res.status(500).json({ error: 'GROQ_API_KEY not configured in Vercel' });
   }
 
-  const systemContext = `You are Nexus AI, a helpful assistant on a website called Nexus. 
+  const messages = [
+    { role: 'system', content: `You are Nexus AI, a helpful assistant on a website called Nexus. 
 The website features movie reviews, game reviews, reading recommendations, and Marvel content. 
 You should help users with: Movie suggestions, reviews, and trivia, Game recommendations and tips, Book recommendations, Marvel universe questions, General questions about the Nexus website.
 Keep your answers friendly, helpful, and concise (2-3 short paragraphs max). 
-If someone asks something inappropriate or unrelated to these topics, politely redirect them.
-Always be respectful and encouraging.`;
-
-  const contents = [
-    { role: 'user', parts: [{ text: systemContext }] },
-    { role: 'model', parts: [{ text: 'Got it! I am Nexus AI, ready to help with movies, games, books, Marvel, and anything about Nexus.' }] }
+If someone asks something inappropriate or unrelated to these topics, politely redirect them.` }
   ];
 
   for (const item of history) {
-    contents.push({
-      role: item.role === 'user' ? 'user' : 'model',
-      parts: [{ text: item.text }]
+    messages.push({
+      role: item.role === 'user' ? 'user' : 'assistant',
+      content: item.text
     });
   }
 
-  contents.push({ role: 'user', parts: [{ text: message }] });
+  messages.push({ role: 'user', content: message });
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: contents,
-          generationConfig: { temperature: 0.8, maxOutputTokens: 500 },
-          safetySettings: [
-            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' }
-          ]
-        })
-      }
-    );
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: messages,
+        temperature: 0.8,
+        max_tokens: 500
+      })
+    });
 
     const data = await response.json();
 
     if (!response.ok) {
-      return res.status(500).json({ error: 'AI request failed', details: data.error?.message || 'Unknown error' });
+      return res.status(500).json({ 
+        error: 'Groq API failed', 
+        details: data.error?.message || 'Unknown error' 
+      });
     }
 
-    const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response. Please try again.";
+    const aiText = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
     return res.status(200).json({ success: true, reply: aiText.trim() });
 
   } catch (error) {

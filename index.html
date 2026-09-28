@@ -140,14 +140,16 @@
     <p id="feedbackStatus"></p>
   </div>
 
-  <!-- 🤖 AI CHAT WIDGET -->
-  <div class="ai-chat-widget">
+  <!-- 🤖 AI CHAT WIDGET (Floating) -->
+  <button class="chat-fab" id="chatFab">💬</button>
+
+  <div class="ai-chat-widget" id="chatWidget">
     <div class="ai-chat-header" id="chatHeader">
       <div class="ai-chat-title">
         <span class="ai-dot"></span>
         <span>Nexus AI</span>
       </div>
-      <button class="ai-chat-toggle" id="chatToggle">−</button>
+      <button class="ai-chat-toggle" id="chatClose">✕</button>
     </div>
 
     <div class="ai-chat-body" id="chatBody">
