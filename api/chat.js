@@ -38,7 +38,7 @@ LANGUAGE RULES:
 
 GENERAL BEHAVIOR:
 Answer ANY question - general knowledge, science, history, coding, math, sports, movies, games, books, Marvel, or anything else.
-Keep answers friendly, helpful, and concise (2-3 short paragraphs max).
+Keep answers friendly, helpful, and concise.
 If someone asks something harmful or inappropriate, politely decline.
 Always be respectful and warm.` }
   ];
@@ -52,7 +52,6 @@ Always be respectful and warm.` }
 
   messages.push({ role: 'user', content: message });
 
-  // List of models to try in order (fallback chain)
   const modelsToTry = [
     'openai/gpt-oss-120b',
     'qwen/qwen3-32b',
@@ -73,7 +72,7 @@ Always be respectful and warm.` }
           model: modelName,
           messages: messages,
           temperature: 0.7,
-          max_tokens: 500
+          max_tokens: 2048
         })
       });
 
@@ -84,7 +83,6 @@ Always be respectful and warm.` }
         return res.status(200).json({ success: true, reply: aiText.trim(), model: modelName });
       }
 
-      // Store error and try next model
       lastError = data.error?.message || 'Unknown error';
       
     } catch (err) {
@@ -92,7 +90,6 @@ Always be respectful and warm.` }
     }
   }
 
-  // Agar saare models fail ho gaye
   return res.status(500).json({ 
     error: 'All AI models failed', 
     details: lastError || 'Please check your Groq API key and try again later.' 

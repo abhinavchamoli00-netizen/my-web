@@ -24,7 +24,7 @@ module.exports = async function handler(req, res) {
   if (!botToken || !chatId) {
     return res.status(500).json({ 
       error: 'Config missing', 
-      details: 'TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is not set in Vercel Environment Variables' 
+      details: 'TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is not set' 
     });
   }
 
