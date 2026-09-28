@@ -4,25 +4,19 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // =========================================
-  // 1. AUTO-REMOVE FEEDBACK FORM (Non-Home Pages)
-  // =========================================
   const path = window.location.pathname;
   const isHomePage = path.endsWith('/') || path.endsWith('index.html') || path === '';
 
+  // 1. AUTO-REMOVE FEEDBACK FORM (Non-Home Pages)
   if (!isHomePage) {
     const feedbackSection = document.querySelector('.feedback-section');
     if (feedbackSection) feedbackSection.remove();
   }
 
-  // =========================================
   // 2. VISITOR TRACKING (Only Once Per Session)
-  // =========================================
   const hasTrackedVisit = sessionStorage.getItem('nexus_visit_tracked');
-
   if (!hasTrackedVisit) {
     sessionStorage.setItem('nexus_visit_tracked', 'true');
-
     const referrer = document.referrer || 'Direct';
     const page = path.split('/').pop() || 'index.html';
     const device = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
@@ -37,9 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }).catch(err => console.log('Visitor tracking skipped'));
   }
 
-  // =========================================
-  // 3. FEEDBACK FORM (Prevent Double Submission)
-  // =========================================
+  // 3. FEEDBACK FORM
   const feedbackForm = document.getElementById('feedbackForm');
   let isSubmitting = false;
 
@@ -54,10 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const statusEl = document.getElementById('feedbackStatus');
       const submitBtn = document.getElementById('feedbackSubmit');
 
-      if (!message) {
-        isSubmitting = false;
-        return;
-      }
+      if (!message) { isSubmitting = false; return; }
 
       submitBtn.disabled = true;
       submitBtn.style.pointerEvents = 'none';
@@ -77,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
           statusEl.style.color = '#2ecc71';
           feedbackForm.reset();
         } else {
-          statusEl.textContent = '❌ Something went wrong. Please try again.';
+          statusEl.textContent = '❌ ' + (data.details || data.error || 'Something went wrong.');
           statusEl.style.color = '#e74c3c';
         }
       } catch (err) {
@@ -95,9 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // =========================================
-  // 4. AI CHAT WIDGET (Floating)
-  // =========================================
+  // 4. AI CHAT WIDGET
   const chatFab = document.getElementById('chatFab');
   const chatWidget = document.getElementById('chatWidget');
   const chatClose = document.getElementById('chatClose');
@@ -111,9 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (chatFab) {
     chatFab.addEventListener('click', () => {
       chatWidget.classList.toggle('active');
-      if (chatWidget.classList.contains('active')) {
-        chatInput.focus();
-      }
+      if (chatWidget.classList.contains('active')) chatInput.focus();
     });
   }
 
@@ -133,7 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       addChatMessage(message, 'user');
       chatInput.value = '';
-
       const typingEl = addChatMessage('Thinking...', 'typing');
 
       isChatSending = true;
@@ -144,10 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            message: message, 
-            history: chatHistory.slice(-10)
-          })
+          body: JSON.stringify({ message, history: chatHistory.slice(-10) })
         });
 
         const data = await res.json();

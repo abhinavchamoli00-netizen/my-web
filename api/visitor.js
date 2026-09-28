@@ -1,5 +1,3 @@
-// In-memory cache to prevent duplicate visits
-// (Resets when Vercel function cold-starts, but good enough for most cases)
 const recentVisits = new Map();
 
 module.exports = async function handler(req, res) {
@@ -20,12 +18,10 @@ module.exports = async function handler(req, res) {
   const device = (body && body.device) || 'Unknown';
   const browser = (body && body.browser) || 'Unknown';
 
-  // Get visitor IP
   const ip = req.headers['x-forwarded-for']?.split(',')[0] || 
              req.headers['x-real-ip'] || 
              'Unknown';
 
-  // Prevent duplicate: same IP + same page within 10 seconds
   const cacheKey = `${ip}_${page}`;
   const now = Date.now();
   const lastVisit = recentVisits.get(cacheKey);
@@ -35,7 +31,6 @@ module.exports = async function handler(req, res) {
   }
   recentVisits.set(cacheKey, now);
 
-  // Clean old entries (keep map small)
   if (recentVisits.size > 100) {
     for (const [key, time] of recentVisits) {
       if (now - time > 60000) recentVisits.delete(key);
@@ -49,7 +44,6 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Config missing' });
   }
 
-  // Get location from IP (optional, uses free API)
   let location = 'Unknown';
   try {
     if (ip !== 'Unknown') {
@@ -59,9 +53,7 @@ module.exports = async function handler(req, res) {
         location = `${geoData.city}, ${geoData.countryCode}`;
       }
     }
-  } catch (e) {
-    // Ignore geo errors
-  }
+  } catch (e) {}
 
   const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
   const text = `👀 New Visitor on Nexus\n\n🔗 From: ${referrer}\n🌍 Location: ${location}\n💻 Device: ${device} (${browser})\n📄 Page: ${page}\n🕐 Time: ${dateStr}`;
