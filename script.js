@@ -113,6 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
       chatWidget.classList.remove('keyboard-open');
       chatWidget.style.height = '';
       chatWidget.style.bottom = '';
+      chatWidget.style.top = '';
+      chatWidget.style.maxHeight = '';
       document.body.style.overflow = '';
     });
   }
@@ -125,14 +127,12 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (chatWidget.classList.contains('maximized')) {
         document.body.style.overflow = 'hidden';
-        if (window.visualViewport) {
-          chatWidget.style.height = window.visualViewport.height + 'px';
-          chatWidget.style.bottom = 'auto';
-        }
       } else {
         document.body.style.overflow = '';
         chatWidget.style.height = '';
         chatWidget.style.bottom = '';
+        chatWidget.style.top = '';
+        chatWidget.style.maxHeight = '';
         chatWidget.classList.remove('keyboard-open');
       }
       
@@ -142,39 +142,63 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 📱 Mobile Keyboard Fix - Works for both maximized AND normal mode
-  if (window.visualViewport) {
-    const adjustChatHeight = () => {
-      if (!chatWidget || !chatWidget.classList.contains('active')) return;
+  // 📱 Mobile Keyboard Fix - Robust version with focus events
+  function adjustChatForKeyboard() {
+    if (!chatWidget || !chatWidget.classList.contains('active')) return;
 
-      const viewportHeight = window.visualViewport.height;
-      const windowHeight = window.innerHeight;
-      const keyboardHeight = windowHeight - viewportHeight;
+    const viewportHeight = window.visualViewport 
+      ? window.visualViewport.height 
+      : window.innerHeight;
+    const windowHeight = window.innerHeight;
+    const keyboardHeight = windowHeight - viewportHeight;
 
-      if (chatWidget.classList.contains('maximized')) {
-        // MAXIMIZED mode: full screen, adjust height
+    if (chatWidget.classList.contains('maximized')) {
+      if (keyboardHeight > 100) {
         chatWidget.style.height = viewportHeight + 'px';
+        chatWidget.style.top = '0';
         chatWidget.style.bottom = 'auto';
         chatWidget.classList.add('keyboard-open');
       } else {
-        // NORMAL mode: shift chat widget UP so input is above keyboard
-        if (keyboardHeight > 150) {
-          chatWidget.style.bottom = keyboardHeight + 'px';
-          chatWidget.classList.add('keyboard-open');
-        } else {
-          chatWidget.style.bottom = '';
-          chatWidget.classList.remove('keyboard-open');
-        }
+        chatWidget.style.height = '';
+        chatWidget.style.top = '0';
+        chatWidget.style.bottom = '0';
+        chatWidget.classList.remove('keyboard-open');
       }
+    } else {
+      if (keyboardHeight > 150) {
+        chatWidget.style.top = 'auto';
+        chatWidget.style.bottom = (keyboardHeight + 10) + 'px';
+        chatWidget.style.maxHeight = (viewportHeight - 20) + 'px';
+        chatWidget.classList.add('keyboard-open');
+      } else {
+        chatWidget.style.top = '';
+        chatWidget.style.bottom = '';
+        chatWidget.style.maxHeight = '';
+        chatWidget.classList.remove('keyboard-open');
+      }
+    }
 
-      setTimeout(() => {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }, 100);
-    };
-
-    window.visualViewport.addEventListener('resize', adjustChatHeight);
-    window.visualViewport.addEventListener('scroll', adjustChatHeight);
+    setTimeout(() => {
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }, 150);
   }
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', adjustChatForKeyboard);
+    window.visualViewport.addEventListener('scroll', adjustChatForKeyboard);
+  }
+
+  if (chatInput) {
+    chatInput.addEventListener('focus', () => {
+      setTimeout(adjustChatForKeyboard, 300);
+      setTimeout(adjustChatForKeyboard, 600);
+    });
+    chatInput.addEventListener('blur', () => {
+      setTimeout(adjustChatForKeyboard, 300);
+    });
+  }
+
+  window.addEventListener('resize', adjustChatForKeyboard);
 
   if (chatForm) {
     chatForm.addEventListener('submit', async (e) => {
@@ -223,7 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ✨ Markdown Formatter for AI responses
   function formatAIResponse(text) {
     let html = text
       .replace(/&/g, '&amp;')

@@ -531,7 +531,7 @@ section h2 {
   z-index: 9999;
   font-family: 'Space Grotesk', sans-serif;
   flex-direction: column;
-  transition: bottom 0.2s ease;
+  transition: bottom 0.2s ease, top 0.2s ease, max-height 0.2s ease;
 }
 
 .ai-chat-widget.active {
@@ -815,7 +815,19 @@ section h2 {
    16. MOBILE KEYBOARD OPEN STATE (NORMAL MODE)
    ========================================= */
 .ai-chat-widget.keyboard-open:not(.maximized) {
-  transition: bottom 0.2s ease;
+  transition: bottom 0.2s ease, top 0.2s ease, max-height 0.2s ease;
+  overflow: hidden;
+}
+
+.ai-chat-widget.keyboard-open:not(.maximized) .ai-chat-messages {
+  height: auto;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.ai-chat-widget.keyboard-open:not(.maximized) .ai-chat-body {
+  max-height: calc(100% - 50px);
 }
 
 /* =========================================
