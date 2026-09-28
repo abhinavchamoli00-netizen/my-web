@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // 3. FEEDBACK FORM (Bulletproof against double submission)
+  // 3. FEEDBACK FORM (Prevent Double Submission)
   // =========================================
   const feedbackForm = document.getElementById('feedbackForm');
   let isSubmitting = false;
@@ -46,8 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (feedbackForm) {
     feedbackForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
-      // Agar pehle se submit ho raha hai, toh kuch mat kar
       if (isSubmitting) return;
       isSubmitting = true;
 
@@ -61,7 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Button ko turant disable karo (double click rokne ke liye)
       submitBtn.disabled = true;
       submitBtn.style.pointerEvents = 'none';
       submitBtn.style.opacity = '0.6';
@@ -75,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify({ name, message })
         });
         const data = await res.json();
-        
         if (data.success) {
           statusEl.textContent = '✅ Thanks! Your feedback has been sent.';
           statusEl.style.color = '#2ecc71';
@@ -88,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
         statusEl.textContent = '❌ Network error. Please try again.';
         statusEl.style.color = '#e74c3c';
       } finally {
-        // 3 second ka wait karo, phir button wapas enable karo
         setTimeout(() => {
           submitBtn.disabled = false;
           submitBtn.style.pointerEvents = 'auto';
@@ -98,6 +93,91 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
       }
     });
+  }
+
+  // =========================================
+  // 4. AI CHAT WIDGET
+  // =========================================
+  const chatForm = document.getElementById('chatForm');
+  const chatInput = document.getElementById('chatInput');
+  const chatMessages = document.getElementById('chatMessages');
+  const chatBody = document.getElementById('chatBody');
+  const chatToggle = document.getElementById('chatToggle');
+  const chatHeader = document.getElementById('chatHeader');
+
+  let chatHistory = [];
+  let isChatSending = false;
+
+  function toggleChat() {
+    chatBody.classList.toggle('collapsed');
+    chatToggle.textContent = chatBody.classList.contains('collapsed') ? '+' : '−';
+  }
+
+  if (chatHeader) chatHeader.addEventListener('click', toggleChat);
+  if (chatToggle) chatToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleChat();
+  });
+
+  if (chatForm) {
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (isChatSending) return;
+
+      const message = chatInput.value.trim();
+      if (!message) return;
+
+      addChatMessage(message, 'user');
+      chatInput.value = '';
+
+      const typingEl = addChatMessage('Thinking...', 'typing');
+
+      isChatSending = true;
+      const sendBtn = document.getElementById('chatSend');
+      sendBtn.disabled = true;
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            message: message, 
+            history: chatHistory.slice(-10)
+          })
+        });
+
+        const data = await res.json();
+        typingEl.remove();
+
+        if (data.success) {
+          addChatMessage(data.reply, 'bot');
+          chatHistory.push({ role: 'user', text: message });
+          chatHistory.push({ role: 'model', text: data.reply });
+        } else {
+          addChatMessage('Sorry, something went wrong. Please try again.', 'bot');
+        }
+      } catch (err) {
+        typingEl.remove();
+        addChatMessage('Network error. Please check your connection.', 'bot');
+      } finally {
+        isChatSending = false;
+        sendBtn.disabled = false;
+        chatInput.focus();
+      }
+    });
+  }
+
+  function addChatMessage(text, type) {
+    const div = document.createElement('div');
+    div.className = 'ai-msg ' + (
+      type === 'user' ? 'ai-msg-user' : 
+      type === 'typing' ? 'ai-msg-typing' : 
+      'ai-msg-bot'
+    );
+    div.textContent = text;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    return div;
   }
 
 });

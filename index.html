@@ -128,6 +128,7 @@
 
   </section>
 
+  <!-- 🟢 FEEDBACK FORM -->
   <div class="feedback-section">
     <h3>📩 Send Feedback</h3>
     <p>Found a broken link? Have a suggestion? Send us a message!</p>
@@ -137,6 +138,30 @@
       <button type="submit" id="feedbackSubmit">Send Message</button>
     </form>
     <p id="feedbackStatus"></p>
+  </div>
+
+  <!-- 🤖 AI CHAT WIDGET -->
+  <div class="ai-chat-widget">
+    <div class="ai-chat-header" id="chatHeader">
+      <div class="ai-chat-title">
+        <span class="ai-dot"></span>
+        <span>Nexus AI</span>
+      </div>
+      <button class="ai-chat-toggle" id="chatToggle">−</button>
+    </div>
+
+    <div class="ai-chat-body" id="chatBody">
+      <div class="ai-chat-messages" id="chatMessages">
+        <div class="ai-msg ai-msg-bot">
+          Hey! 👋 I'm Nexus AI. Ask me anything about movies, games, books, or Marvel!
+        </div>
+      </div>
+
+      <form class="ai-chat-input" id="chatForm">
+        <input type="text" id="chatInput" placeholder="Type your message..." autocomplete="off" />
+        <button type="submit" id="chatSend">➤</button>
+      </form>
+    </div>
   </div>
 
   <footer>
