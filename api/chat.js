@@ -60,7 +60,7 @@ Always be respectful and warm.` }
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'qwen/qwen3.6-27b', // ✅ Ye model free tier mein available hai
         messages: messages,
         temperature: 0.7,
         max_tokens: 500
