@@ -1,6 +1,3 @@
-// In-memory cache to prevent duplicate feedback
-const recentFeedback = new Map();
-
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -19,23 +16,6 @@ module.exports = async function handler(req, res) {
 
   if (!message || message.trim() === '') {
     return res.status(400).json({ error: 'Message is required' });
-  }
-
-  // Prevent duplicate: same message within 10 seconds
-  const cacheKey = `${name}_${message}`.substring(0, 100);
-  const now = Date.now();
-  const lastFeedback = recentFeedback.get(cacheKey);
-
-  if (lastFeedback && (now - lastFeedback) < 10000) {
-    return res.status(200).json({ success: true, skipped: 'duplicate' });
-  }
-  recentFeedback.set(cacheKey, now);
-
-  // Clean old entries
-  if (recentFeedback.size > 100) {
-    for (const [key, time] of recentFeedback) {
-      if (now - time > 60000) recentFeedback.delete(key);
-    }
   }
 
   const botToken = process.env.TELEGRAM_BOT_TOKEN;

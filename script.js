@@ -30,21 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     navigator.userAgent.includes('Firefox') ? 'Firefox' :
                     navigator.userAgent.includes('Safari') ? 'Safari' : 'Other';
 
-    // Send visitor notification to Telegram via API
     fetch('/api/visitor', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        referrer: referrer,
-        page: page,
-        device: device,
-        browser: browser
-      })
+      body: JSON.stringify({ referrer, page, device, browser })
     }).catch(err => console.log('Visitor tracking skipped'));
   }
 
   // =========================================
-  // 3. FEEDBACK FORM (Prevent Double Submission)
+  // 3. FEEDBACK FORM (Bulletproof against double submission)
   // =========================================
   const feedbackForm = document.getElementById('feedbackForm');
   let isSubmitting = false;
@@ -52,7 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (feedbackForm) {
     feedbackForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-
+      
+      // Agar pehle se submit ho raha hai, toh kuch mat kar
       if (isSubmitting) return;
       isSubmitting = true;
 
@@ -66,7 +61,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      // Button ko turant disable karo (double click rokne ke liye)
       submitBtn.disabled = true;
+      submitBtn.style.pointerEvents = 'none';
+      submitBtn.style.opacity = '0.6';
       submitBtn.textContent = 'Sending...';
       statusEl.textContent = '';
 
@@ -77,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify({ name, message })
         });
         const data = await res.json();
+        
         if (data.success) {
           statusEl.textContent = '✅ Thanks! Your feedback has been sent.';
           statusEl.style.color = '#2ecc71';
@@ -89,9 +88,14 @@ document.addEventListener('DOMContentLoaded', () => {
         statusEl.textContent = '❌ Network error. Please try again.';
         statusEl.style.color = '#e74c3c';
       } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Send Message';
-        isSubmitting = false;
+        // 3 second ka wait karo, phir button wapas enable karo
+        setTimeout(() => {
+          submitBtn.disabled = false;
+          submitBtn.style.pointerEvents = 'auto';
+          submitBtn.style.opacity = '1';
+          submitBtn.textContent = 'Send Message';
+          isSubmitting = false;
+        }, 3000);
       }
     });
   }
