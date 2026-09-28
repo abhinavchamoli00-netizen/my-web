@@ -1,83 +1,70 @@
+// =========================================
+// NEXUS - Main Script
+// =========================================
+
 document.addEventListener('DOMContentLoaded', () => {
 
   // =========================================
-  // 1. VISITOR TRACKING (Send to Telegram)
-  // =========================================
-  if (!sessionStorage.getItem('visitTracked')) {
-    sessionStorage.setItem('visitTracked', 'true');
-
-    const getSource = () => {
-      const ref = document.referrer;
-      if (!ref) return '🔗 Direct / Unknown';
-      if (ref.includes('instagram.com')) return '📸 Instagram';
-      if (ref.includes('facebook.com')) return '📘 Facebook';
-      if (ref.includes('google.')) return '🔍 Google Search';
-      if (ref.includes('youtube.com')) return '▶️ YouTube';
-      if (ref.includes('twitter.com') || ref.includes('x.com')) return '🐦 Twitter/X';
-      if (ref.includes('whatsapp.com') || ref.includes('wa.me')) return '💬 WhatsApp';
-      if (ref.includes('t.me') || ref.includes('telegram')) return '✈️ Telegram';
-      if (ref.includes('reddit.com')) return '👽 Reddit';
-      if (ref.includes('linkedin.com')) return '💼 LinkedIn';
-      if (ref.includes('pinterest.')) return '📌 Pinterest';
-      return '🌐 ' + ref;
-    };
-
-    const getDevice = () => {
-      const ua = navigator.userAgent;
-      let device = '💻 Desktop';
-      let browser = 'Unknown';
-      if (/Mobi|Android/i.test(ua)) device = '📱 Mobile';
-      else if (/Tablet|iPad/i.test(ua)) device = '📟 Tablet';
-      if (ua.includes('Edg')) browser = 'Edge';
-      else if (ua.includes('Chrome')) browser = 'Chrome';
-      else if (ua.includes('Safari')) browser = 'Safari';
-      else if (ua.includes('Firefox')) browser = 'Firefox';
-      else if (ua.includes('OPR') || ua.includes('Opera')) browser = 'Opera';
-      return `${device} (${browser})`;
-    };
-
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-
-    fetch('/api/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        source: getSource(),
-        device: getDevice(),
-        page: currentPage,
-        referrer: document.referrer || 'None'
-      })
-    }).catch(() => {});
-  }
-
-  // =========================================
-  // 2. AUTO-REMOVE FEEDBACK FORM FROM NON-HOME PAGES
+  // 1. AUTO-REMOVE FEEDBACK FORM (Non-Home Pages)
   // =========================================
   const path = window.location.pathname;
   const isHomePage = path.endsWith('/') || path.endsWith('index.html') || path === '';
 
   if (!isHomePage) {
     const feedbackSection = document.querySelector('.feedback-section');
-    if (feedbackSection) {
-      feedbackSection.remove();
-    }
+    if (feedbackSection) feedbackSection.remove();
   }
 
   // =========================================
-  // 3. FEEDBACK FORM HANDLING
+  // 2. VISITOR TRACKING (Only Once Per Session)
+  // =========================================
+  const hasTrackedVisit = sessionStorage.getItem('nexus_visit_tracked');
+
+  if (!hasTrackedVisit) {
+    sessionStorage.setItem('nexus_visit_tracked', 'true');
+
+    const referrer = document.referrer || 'Direct';
+    const page = path.split('/').pop() || 'index.html';
+    const device = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+    const browser = navigator.userAgent.includes('Chrome') ? 'Chrome' : 
+                    navigator.userAgent.includes('Firefox') ? 'Firefox' :
+                    navigator.userAgent.includes('Safari') ? 'Safari' : 'Other';
+
+    // Send visitor notification to Telegram via API
+    fetch('/api/visitor', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        referrer: referrer,
+        page: page,
+        device: device,
+        browser: browser
+      })
+    }).catch(err => console.log('Visitor tracking skipped'));
+  }
+
+  // =========================================
+  // 3. FEEDBACK FORM (Prevent Double Submission)
   // =========================================
   const feedbackForm = document.getElementById('feedbackForm');
+  let isSubmitting = false;
 
   if (feedbackForm) {
     feedbackForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      if (isSubmitting) return;
+      isSubmitting = true;
 
       const name = document.getElementById('feedbackName').value.trim();
       const message = document.getElementById('feedbackMessage').value.trim();
       const statusEl = document.getElementById('feedbackStatus');
       const submitBtn = document.getElementById('feedbackSubmit');
 
-      if (!message) return;
+      if (!message) {
+        isSubmitting = false;
+        return;
+      }
 
       submitBtn.disabled = true;
       submitBtn.textContent = 'Sending...';
@@ -89,9 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, message })
         });
-
         const data = await res.json();
-
         if (data.success) {
           statusEl.textContent = '✅ Thanks! Your feedback has been sent.';
           statusEl.style.color = '#2ecc71';
@@ -106,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Send Message';
+        isSubmitting = false;
       }
     });
   }

@@ -1,3 +1,6 @@
+// In-memory cache to prevent duplicate feedback
+const recentFeedback = new Map();
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -18,6 +21,23 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Message is required' });
   }
 
+  // Prevent duplicate: same message within 10 seconds
+  const cacheKey = `${name}_${message}`.substring(0, 100);
+  const now = Date.now();
+  const lastFeedback = recentFeedback.get(cacheKey);
+
+  if (lastFeedback && (now - lastFeedback) < 10000) {
+    return res.status(200).json({ success: true, skipped: 'duplicate' });
+  }
+  recentFeedback.set(cacheKey, now);
+
+  // Clean old entries
+  if (recentFeedback.size > 100) {
+    for (const [key, time] of recentFeedback) {
+      if (now - time > 60000) recentFeedback.delete(key);
+    }
+  }
+
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
@@ -26,13 +46,13 @@ module.exports = async function handler(req, res) {
   }
 
   const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-  const text = `📩 *New Feedback from Nexus*\n\n👤 *Name:* ${name || 'Anonymous'}\n\n💬 *Message:*\n${message}\n\n🕐 *Time:* ${dateStr}`;
+  const text = `📩 New Feedback from Nexus\n\n👤 Name: ${name || 'Anonymous'}\n\n💬 Message:\n${message}\n\n🕐 Time: ${dateStr}`;
 
   try {
     const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: 'Markdown' })
+      body: JSON.stringify({ chat_id: chatId, text: text })
     });
     const data = await response.json();
     if (!data.ok) return res.status(500).json({ error: 'Telegram failed' });
