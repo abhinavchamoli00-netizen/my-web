@@ -942,7 +942,6 @@ section h2 {
     padding-bottom: 15px;
   }
 
-  /* Mobile: keyboard open pe widget thoda neeche */
   .ai-chat-widget.keyboard-open:not(.maximized) {
     top: 75px !important;
     max-height: calc(100vh - 90px) !important;
