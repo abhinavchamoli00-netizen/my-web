@@ -700,19 +700,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!text) return false;
     const lower = text.toLowerCase();
     
-    const patterns = [
-      /\b(generate|janrate|genrate|generte|genarate|creat|create|make)\s+(me\s+)?(an?\s+)?(image|photo|picture|img|pic|artwork|art|drawing|imagination)/i,
-      /\b(draw|paint|sketch|imagine)\s+(me\s+)?/i,
-      /\b(image|photo|picture|img|pic|artwork|art|drawing)\s+(banao|bana|bna|generate|create|make|draw|paint|of|for|de|do)/i,
-      /\b(banao|bana|bna)\s+(image|photo|picture|img|pic|artwork|art|drawing)/i,
-      /^\/image\s+/i,
-      /\bi\s+(want|need|wanna)\s+(an?\s+)?(image|photo|picture|img|pic|artwork|art|drawing)/i,
-      /\bshow\s+me\s+(an?\s+)?(image|photo|picture|img|pic|artwork|art|drawing)/i
-    ];
+    const actionWords = /\b(generate|janrate|genrate|generte|genarate|creat|create|make|draw|paint|imagine|banao|bana|bna)\b/i;
+    const imageWords = /\b(image|imag|imge|iimage|ianges|img|pic|photo|picture|artwork|art|drawing|imagination)\b/i;
     
-    for (const p of patterns) {
-      if (p.test(lower)) return true;
-    }
+    if (actionWords.test(lower) && imageWords.test(lower)) return true;
+    
+    if (/\b(image|imag|imge|ianges)\s+(of|for|about|on|banao|bana|bna)\b/i.test(lower)) return true;
+    
     return false;
   }
 
@@ -723,13 +717,10 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/^(bro|bhai|yaar|yrr|hey|hi|hello|hola|oi|oye|please|plz|ok|okay|so|now)\s+/gi, '');
     
     cleaned = cleaned
-      .replace(/^(generate|janrate|genrate|generte|genarate|create|creat|make|draw|paint|sketch|imagine|banao|bana|bna)\s+(me\s+)?(an?\s+)?(image|photo|picture|img|pic|artwork|art|drawing|imagination)?\s*(of|for|about|with|:)?\s*/gi, '')
-      .replace(/^(image|photo|picture|img|pic|artwork|art|drawing)\s+(banao|bana|bna|generate|create|make|draw|paint|of|for|about|:)?\s*/gi, '')
-      .replace(/^(i\s+(want|need|wanna)\s+(an?\s+)?(image|photo|picture|img|pic|artwork|art|drawing)\s*(of|for|about|:)?\s*)/gi, '')
-      .replace(/^(make|show)\s+me\s+(an?\s+)?(image|photo|picture|img|pic|artwork|art|drawing)\s*(of|for|about|:)?\s*/gi, '')
-      .replace(/^\/image\s+/i, '')
-      .replace(/^imagine\s+/i, '');
+      .replace(/\b(generate|janrate|genrate|generte|genarate|creat|create|make|draw|paint|sketch|imagine|banao|bana|bna)\b/gi, '')
+      .replace(/\b(image|imag|imge|iimage|ianges|img|pic|photo|picture|artwork|art|drawing|imagination)\b/gi, '');
     
+    cleaned = cleaned.replace(/\s+/g, ' ').trim();
     cleaned = cleaned.replace(/^(a|an|the|of|for|about|with)\s+/gi, '').trim();
     
     return cleaned || text;
