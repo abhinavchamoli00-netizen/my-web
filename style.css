@@ -754,21 +754,23 @@ section h2 {
   to { opacity: 1; transform: scale(1); }
 }
 
+/* Chat Header — Transparent, no gradient */
 .ai-chat-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 14px 18px;
-  background: linear-gradient(135deg, #6c5ce7, #7b4fbf);
+  background: transparent;
   cursor: pointer;
   flex-shrink: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .ai-chat-title {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #fff;
+  color: #e0e0e0;
   font-weight: 600;
   font-size: 0.95rem;
 }
@@ -794,9 +796,9 @@ section h2 {
 }
 
 .ai-chat-toggle {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
   border: none;
-  color: #fff;
+  color: #e0e0e0;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -809,7 +811,7 @@ section h2 {
 }
 
 .ai-chat-toggle:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .ai-chat-body {
@@ -850,7 +852,6 @@ section h2 {
   width: fit-content;
 }
 
-/* AI message — left aligned */
 .ai-msg-bot {
   background-color: #1c1b22;
   color: #e0e0e0;
@@ -861,7 +862,6 @@ section h2 {
   margin-left: 0;
 }
 
-/* User message — right aligned, LIGHT PURPLE */
 .ai-msg-user {
   background-color: #8b7ae7;
   color: #ffffff;
@@ -1074,7 +1074,7 @@ section h2 {
 }
 
 /* =========================================
-   ANALYZE BUTTON - LEFT ALIGNED, DARK BG
+   ANALYZE BUTTON
    ========================================= */
 .analyze-btn {
   position: relative;
