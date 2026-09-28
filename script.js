@@ -87,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 4. AI CHAT WIDGET
   const chatFab = document.getElementById('chatFab');
   const chatWidget = document.getElementById('chatWidget');
+  const chatBackdrop = document.getElementById('chatBackdrop');
   const chatClose = document.getElementById('chatClose');
   const chatMaximize = document.getElementById('chatMaximize');
   const chatForm = document.getElementById('chatForm');
@@ -96,15 +97,37 @@ document.addEventListener('DOMContentLoaded', () => {
   let chatHistory = [];
   let isChatSending = false;
 
+  // Open/Close Chat
   if (chatFab) {
     chatFab.addEventListener('click', () => {
+      const isOpening = !chatWidget.classList.contains('active');
       chatWidget.classList.toggle('active');
-      if (chatWidget.classList.contains('active')) {
+      
+      if (isOpening) {
         chatInput.focus();
+        if (chatBackdrop) chatBackdrop.classList.add('active');
+      } else {
+        if (chatBackdrop) chatBackdrop.classList.remove('active');
       }
     });
   }
 
+  // Backdrop pe click karne se chat band ho jaye
+  if (chatBackdrop) {
+    chatBackdrop.addEventListener('click', () => {
+      chatWidget.classList.remove('active');
+      chatWidget.classList.remove('maximized');
+      chatWidget.classList.remove('keyboard-open');
+      chatWidget.style.height = '';
+      chatWidget.style.bottom = '';
+      chatWidget.style.top = '';
+      chatWidget.style.maxHeight = '';
+      chatBackdrop.classList.remove('active');
+      document.body.style.overflow = '';
+    });
+  }
+
+  // Close Button
   if (chatClose) {
     chatClose.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -115,10 +138,12 @@ document.addEventListener('DOMContentLoaded', () => {
       chatWidget.style.bottom = '';
       chatWidget.style.top = '';
       chatWidget.style.maxHeight = '';
+      if (chatBackdrop) chatBackdrop.classList.remove('active');
       document.body.style.overflow = '';
     });
   }
 
+  // Maximize Button
   if (chatMaximize) {
     chatMaximize.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -126,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (chatWidget.classList.contains('maximized')) {
         document.body.style.overflow = 'hidden';
+        if (chatBackdrop) chatBackdrop.classList.remove('active');
       } else {
         document.body.style.overflow = '';
         chatWidget.style.height = '';
@@ -133,6 +159,9 @@ document.addEventListener('DOMContentLoaded', () => {
         chatWidget.style.top = '';
         chatWidget.style.maxHeight = '';
         chatWidget.classList.remove('keyboard-open');
+        if (chatWidget.classList.contains('active') && chatBackdrop) {
+          chatBackdrop.classList.add('active');
+        }
       }
       
       setTimeout(() => {
@@ -205,6 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('resize', adjustChatForKeyboard);
 
+  // Chat Form Submit
   if (chatForm) {
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();

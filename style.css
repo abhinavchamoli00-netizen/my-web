@@ -437,7 +437,42 @@ section h2 {
 }
 
 /* =========================================
-   12. AI CHAT LAUNCHER (TOP RIGHT)
+   12. CHAT BACKDROP
+   ========================================= */
+.chat-backdrop {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9997;
+  cursor: pointer;
+  animation: fadeIn 0.2s ease;
+}
+
+.chat-backdrop.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (min-width: 601px) {
+  .chat-backdrop {
+    background: rgba(0, 0, 0, 0.3);
+  }
+}
+
+body:has(.ai-chat-widget.maximized) .chat-backdrop {
+  display: none !important;
+}
+
+/* =========================================
+   13. AI CHAT LAUNCHER (TOP RIGHT)
    ========================================= */
 .ai-chat-launcher {
   position: fixed;
@@ -514,7 +549,7 @@ section h2 {
 }
 
 /* =========================================
-   13. AI CHAT WIDGET PANEL
+   14. AI CHAT WIDGET PANEL
    ========================================= */
 .ai-chat-widget {
   display: none;
@@ -711,7 +746,7 @@ section h2 {
 }
 
 /* =========================================
-   14. AI MESSAGE FORMATTING STYLES
+   15. AI MESSAGE FORMATTING STYLES
    ========================================= */
 .ai-msg-bot strong {
   color: #ffffff;
@@ -745,7 +780,7 @@ section h2 {
 }
 
 /* =========================================
-   15. CHAT MAXIMIZE / FULLSCREEN MODE
+   16. CHAT MAXIMIZE / FULLSCREEN MODE
    ========================================= */
 .ai-chat-widget.maximized {
   top: 0 !important;
@@ -814,7 +849,7 @@ section h2 {
 }
 
 /* =========================================
-   16. MOBILE KEYBOARD OPEN STATE (NORMAL MODE)
+   17. MOBILE KEYBOARD OPEN STATE
    ========================================= */
 .ai-chat-widget.keyboard-open:not(.maximized) {
   overflow: hidden;
@@ -842,7 +877,7 @@ section h2 {
 }
 
 /* =========================================
-   17. RESPONSIVE / MOBILE
+   18. RESPONSIVE / MOBILE
    ========================================= */
 @media (max-width: 600px) {
   .movie-poster-large {
