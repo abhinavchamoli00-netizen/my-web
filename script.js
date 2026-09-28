@@ -97,6 +97,42 @@ document.addEventListener('DOMContentLoaded', () => {
   let chatHistory = [];
   let isChatSending = false;
 
+  // 🔙 History state tracking for back button
+  let chatHistoryState = false; // Does our dummy history entry exist?
+
+  // Helper: Close chat fully (no history pop)
+  function closeChatFully() {
+    chatWidget.classList.remove('active');
+    chatWidget.classList.remove('maximized');
+    chatWidget.classList.remove('keyboard-open');
+    chatWidget.style.height = '';
+    chatWidget.style.bottom = '';
+    chatWidget.style.top = '';
+    chatWidget.style.maxHeight = '';
+    if (chatBackdrop) {
+      chatBackdrop.classList.remove('active');
+      chatBackdrop.classList.remove('locked');
+    }
+    document.body.style.overflow = '';
+  }
+
+  // Helper: Add history state when chat opens
+  function pushChatHistory() {
+    if (!chatHistoryState) {
+      history.pushState({ nexusChat: true }, '');
+      chatHistoryState = true;
+    }
+  }
+
+  // 🔙 Handle browser back button
+  window.addEventListener('popstate', (e) => {
+    if (chatHistoryState && chatWidget.classList.contains('active')) {
+      // Chat is open — close it instead of navigating
+      chatHistoryState = false;
+      closeChatFully();
+    }
+  });
+
   // Open/Close Chat
   if (chatFab) {
     chatFab.addEventListener('click', () => {
@@ -106,10 +142,16 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isOpening) {
         chatInput.focus();
         if (chatBackdrop) chatBackdrop.classList.add('active');
+        pushChatHistory();
       } else {
         if (chatBackdrop) {
           chatBackdrop.classList.remove('active');
           chatBackdrop.classList.remove('locked');
+        }
+        // Remove history entry if we added one
+        if (chatHistoryState) {
+          chatHistoryState = false;
+          history.back();
         }
       }
     });
@@ -118,18 +160,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Backdrop pe click — sirf normal mode mein band kare, maximized mein nahi
   if (chatBackdrop) {
     chatBackdrop.addEventListener('click', () => {
-      // Agar maximized hai, toh click ignore kar (block ho, band na ho)
       if (chatWidget.classList.contains('maximized')) return;
       
-      chatWidget.classList.remove('active');
-      chatWidget.classList.remove('keyboard-open');
-      chatWidget.style.height = '';
-      chatWidget.style.bottom = '';
-      chatWidget.style.top = '';
-      chatWidget.style.maxHeight = '';
-      chatBackdrop.classList.remove('active');
-      chatBackdrop.classList.remove('locked');
-      document.body.style.overflow = '';
+      if (chatHistoryState) {
+        chatHistoryState = false;
+        history.back();
+      } else {
+        closeChatFully();
+      }
     });
   }
 
@@ -137,18 +175,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if (chatClose) {
     chatClose.addEventListener('click', (e) => {
       e.stopPropagation();
-      chatWidget.classList.remove('active');
-      chatWidget.classList.remove('maximized');
-      chatWidget.classList.remove('keyboard-open');
-      chatWidget.style.height = '';
-      chatWidget.style.bottom = '';
-      chatWidget.style.top = '';
-      chatWidget.style.maxHeight = '';
-      if (chatBackdrop) {
-        chatBackdrop.classList.remove('active');
-        chatBackdrop.classList.remove('locked');
+      if (chatHistoryState) {
+        chatHistoryState = false;
+        history.back();
+      } else {
+        closeChatFully();
       }
-      document.body.style.overflow = '';
     });
   }
 
@@ -159,14 +191,13 @@ document.addEventListener('DOMContentLoaded', () => {
       chatWidget.classList.toggle('maximized');
       
       if (chatWidget.classList.contains('maximized')) {
-        // Maximized: body scroll lock + backdrop locked (block clicks only)
         document.body.style.overflow = 'hidden';
         if (chatBackdrop) {
           chatBackdrop.classList.add('active');
           chatBackdrop.classList.add('locked');
         }
+        pushChatHistory();
       } else {
-        // Back to normal: unlock backdrop
         document.body.style.overflow = '';
         chatWidget.style.height = '';
         chatWidget.style.bottom = '';
