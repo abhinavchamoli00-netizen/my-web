@@ -168,8 +168,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } else {
       if (isKeyboardOpen) {
-        const availableHeight = viewportHeight - 20;
-        chatWidget.style.top = (viewportTop + 10) + 'px';
+        const availableHeight = viewportHeight - 90;
+        chatWidget.style.top = (viewportTop + 75) + 'px';
         chatWidget.style.bottom = 'auto';
         chatWidget.style.height = availableHeight + 'px';
         chatWidget.style.maxHeight = availableHeight + 'px';
