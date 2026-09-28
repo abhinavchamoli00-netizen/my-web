@@ -142,6 +142,7 @@ Always be respectful and warm.` }
   ];
 
   let lastError = null;
+  let lastErrorStatus = null;
 
   for (const modelName of modelsToTry) {
     try {
@@ -167,14 +168,33 @@ Always be respectful and warm.` }
       }
 
       lastError = data.error?.message || 'Unknown error';
+      lastErrorStatus = response.status;
       
     } catch (err) {
       lastError = err.message;
     }
   }
 
+  // 🔥 Check if it's a rate limit / quota issue
+  const isRateLimit = 
+    lastErrorStatus === 429 ||
+    (lastError && (
+      lastError.toLowerCase().includes('rate limit') ||
+      lastError.toLowerCase().includes('quota') ||
+      lastError.toLowerCase().includes('too many requests') ||
+      lastError.toLowerCase().includes('tokens per day') ||
+      lastError.toLowerCase().includes('requests per day')
+    ));
+
+  if (isRateLimit) {
+    return res.status(429).json({ 
+      error: 'limit_reached',
+      details: 'Nexus AI has reached its daily limit.'
+    });
+  }
+
   return res.status(500).json({ 
     error: 'All AI models failed', 
-    details: lastError || 'Please check your Groq API key and try again later.' 
+    details: lastError || 'Please try again later.' 
   });
 };

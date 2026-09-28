@@ -96,11 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let chatHistory = [];
   let isChatSending = false;
+  let chatHistoryState = false;
 
-  // 🔙 History state tracking for back button
-  let chatHistoryState = false; // Does our dummy history entry exist?
-
-  // Helper: Close chat fully (no history pop)
   function closeChatFully() {
     chatWidget.classList.remove('active');
     chatWidget.classList.remove('maximized');
@@ -116,7 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.style.overflow = '';
   }
 
-  // Helper: Add history state when chat opens
   function pushChatHistory() {
     if (!chatHistoryState) {
       history.pushState({ nexusChat: true }, '');
@@ -124,16 +120,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 🔙 Handle browser back button
   window.addEventListener('popstate', (e) => {
     if (chatHistoryState && chatWidget.classList.contains('active')) {
-      // Chat is open — close it instead of navigating
       chatHistoryState = false;
       closeChatFully();
     }
   });
 
-  // Open/Close Chat
   if (chatFab) {
     chatFab.addEventListener('click', () => {
       const isOpening = !chatWidget.classList.contains('active');
@@ -148,7 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
           chatBackdrop.classList.remove('active');
           chatBackdrop.classList.remove('locked');
         }
-        // Remove history entry if we added one
         if (chatHistoryState) {
           chatHistoryState = false;
           history.back();
@@ -157,7 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Backdrop pe click — sirf normal mode mein band kare, maximized mein nahi
   if (chatBackdrop) {
     chatBackdrop.addEventListener('click', () => {
       if (chatWidget.classList.contains('maximized')) return;
@@ -171,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Close Button (X) — ye hamesha kaam karega
   if (chatClose) {
     chatClose.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -184,7 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Maximize Button
   if (chatMaximize) {
     chatMaximize.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -218,7 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 📱 Mobile Keyboard Fix
   function adjustChatForKeyboard() {
     if (!chatWidget || !chatWidget.classList.contains('active')) return;
 
@@ -316,6 +304,18 @@ document.addEventListener('DOMContentLoaded', () => {
           addChatMessage(data.reply, 'bot');
           chatHistory.push({ role: 'user', text: message });
           chatHistory.push({ role: 'model', text: data.reply });
+        } else if (data.error === 'limit_reached') {
+          // 🔥 Friendly "Limit Reached" message
+          addChatMessage(
+            `🚫 **Nexus AI is taking a short break!**\n\n` +
+            `We've reached our **daily limit** for AI responses. This means many people are using Nexus AI right now — which is great! 🎉\n\n` +
+            `**What you can do:**\n` +
+            `• Come back in a few hours and try again\n` +
+            `• The limit resets automatically\n` +
+            `• Meanwhile, feel free to explore movies, games, and Marvel content!\n\n` +
+            `Thanks for your patience! 🙏`,
+            'bot'
+          );
         } else {
           addChatMessage('⚠️ Error: ' + (data.details || data.error || 'Unknown'), 'bot');
         }
