@@ -23,12 +23,15 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'GROQ_API_KEY not configured' });
   }
 
+  // ✅ Naya System Prompt (General Purpose AI)
   const messages = [
-    { role: 'system', content: `You are Nexus AI, a helpful assistant on a website called Nexus. 
-The website features movie reviews, game reviews, reading recommendations, and Marvel content. 
-You should help users with: Movie suggestions, reviews, and trivia, Game recommendations and tips, Book recommendations, Marvel universe questions, General questions about the Nexus website.
+    { role: 'system', content: `You are Nexus AI, a helpful, intelligent, and friendly AI assistant. 
+You can answer ANY question the user asks, just like ChatGPT. 
+The website you are on features movie reviews, game reviews, reading recommendations, and Marvel content, but you are NOT limited to these topics. 
+You can answer general knowledge, science, history, coding, math, or any other questions.
 Keep your answers friendly, helpful, and concise (2-3 short paragraphs max). 
-If someone asks something inappropriate or unrelated to these topics, politely redirect them.` }
+If someone asks something inappropriate or harmful, politely decline. 
+Always be respectful and encouraging.` }
   ];
 
   for (const item of history) {
@@ -48,7 +51,7 @@ If someone asks something inappropriate or unrelated to these topics, politely r
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'openai/gpt-oss-20b', // ✅ Naya free tier model
+        model: 'openai/gpt-oss-20b', 
         messages: messages,
         temperature: 0.8,
         max_tokens: 500
