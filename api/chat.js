@@ -48,7 +48,7 @@ If someone asks something inappropriate or unrelated to these topics, politely r
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant', // ✅ Free tier model
+        model: 'openai/gpt-oss-20b', // ✅ Naya free tier model
         messages: messages,
         temperature: 0.8,
         max_tokens: 500
