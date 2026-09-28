@@ -530,10 +530,11 @@ section h2 {
   overflow: hidden;
   z-index: 9999;
   font-family: 'Space Grotesk', sans-serif;
+  flex-direction: column;
 }
 
 .ai-chat-widget.active {
-  display: block;
+  display: flex;
   animation: slideDown 0.3s ease;
 }
 
@@ -549,6 +550,7 @@ section h2 {
   padding: 14px 18px;
   background: linear-gradient(135deg, #6c5ce7, #7b4fbf);
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .ai-chat-title {
@@ -601,6 +603,13 @@ section h2 {
 
 .ai-chat-toggle svg {
   display: block;
+}
+
+.ai-chat-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .ai-chat-messages {
@@ -659,6 +668,7 @@ section h2 {
   gap: 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   background-color: #0f0f18;
+  flex-shrink: 0;
 }
 
 .ai-chat-input input {
@@ -746,9 +756,21 @@ section h2 {
   animation: expandIn 0.35s ease;
 }
 
+.ai-chat-widget.maximized .ai-chat-body {
+  flex: 1;
+  min-height: 0;
+}
+
 .ai-chat-widget.maximized .ai-chat-messages {
-  height: calc(100vh - 180px);
+  flex: 1;
+  height: auto;
   max-height: none;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.ai-chat-widget.maximized .ai-chat-input {
+  flex-shrink: 0;
 }
 
 .ai-chat-widget.maximized .ai-msg-bot {
@@ -840,6 +862,7 @@ section h2 {
   }
   
   .ai-chat-widget.maximized .ai-chat-messages {
-    height: calc(100vh - 170px);
+    flex: 1;
+    height: auto;
   }
 }
