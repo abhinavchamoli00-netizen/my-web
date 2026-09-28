@@ -1,12 +1,11 @@
-// Telegram logging function
+// Telegram logging
 async function logQuestionToTelegram(question, req) {
   try {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
     if (!botToken || !chatId) return;
 
-    const ip = req.headers['x-forwarded-for']?.split(',')[0] || 
-               req.headers['x-real-ip'] || 'Unknown';
+    const ip = req.headers['x-forwarded-for']?.split(',')[0] || 'Unknown';
     const ua = req.headers['user-agent'] || '';
     const referrer = req.headers['referer'] || 'Direct';
 
@@ -49,6 +48,58 @@ async function logQuestionToTelegram(question, req) {
   } catch (e) {}
 }
 
+// =====================
+// VISION: Use Pollinations AI (free, no key needed)
+// =====================
+async function analyzeImageWithPollinations(imageBase64, userQuestion) {
+  try {
+    // Pollinations accepts OpenAI-style vision format
+    const response = await fetch('https://text.pollinations.ai/openai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'openai',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { 
+                type: 'text', 
+                text: userQuestion || 'Describe this image in detail. What do you see? Identify any people, objects, text, and describe the scene.' 
+              },
+              { 
+                type: 'image_url', 
+                image_url: { url: imageBase64 } 
+              }
+            ]
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 800
+      })
+    });
+
+    if (!response.ok) {
+      return { success: false, error: `HTTP ${response.status}` };
+    }
+
+    const data = await response.json();
+    
+    if (data.choices && data.choices[0] && data.choices[0].message) {
+      return { success: true, reply: data.choices[0].message.content };
+    }
+    
+    // Some responses come as plain text
+    if (typeof data === 'string') {
+      return { success: true, reply: data };
+    }
+    
+    return { success: false, error: 'Unexpected response format' };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+}
+
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -71,12 +122,36 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Message or image required' });
   }
 
+  logQuestionToTelegram(message || '(image sent)', req);
+
+  // =====================
+  // 🔥 IMAGE PATH: Use Pollinations vision
+  // =====================
+  if (image) {
+    const result = await analyzeImageWithPollinations(
+      image, 
+      message || 'Describe this image in detail. What do you see?'
+    );
+
+    if (result.success) {
+      return res.status(200).json({ success: true, reply: result.reply.trim(), source: 'pollinations' });
+    }
+
+    // Fallback if Pollinations fails
+    return res.status(200).json({ 
+      success: true, 
+      reply: `⚠️ **Image analysis is having trouble right now.**\n\nHere's what you can do:\n\n• **Describe the image** in text (people, colors, objects, text)\n• Then I'll answer your question about it\n\nSorry for the inconvenience! 🙏`,
+      source: 'fallback'
+    });
+  }
+
+  // =====================
+  // TEXT PATH: Use Groq
+  // =====================
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return res.status(500).json({ error: 'GROQ_API_KEY not configured' });
   }
-
-  logQuestionToTelegram(message || '(image sent)', req);
 
   const systemPrompt = `You are Nexus AI, a helpful, intelligent, and friendly AI assistant on the Nexus website.
 
@@ -89,9 +164,6 @@ LANGUAGE RULES:
    - Hinglish (Roman Hindi) → Hinglish
 4. Stay in the same language.
 5. If user asks another language, politely refuse and continue in English.
-
-IMAGE HANDLING:
-If the user sends an image, describe exactly what you see in detail. Identify people, objects, text, colors, and context. Do NOT talk about yourself. Focus entirely on the image.
 
 FORMATTING RULES:
 1. Use **bold** for keywords.
@@ -118,29 +190,13 @@ Always be respectful and warm.`;
     });
   }
 
-  if (image) {
-    messages.push({
-      role: 'user',
-      content: [
-        { type: 'text', text: message || 'Describe this image in detail. What do you see?' },
-        { type: 'image_url', image_url: { url: image } }
-      ]
-    });
-  } else {
-    messages.push({ role: 'user', content: message });
-  }
+  messages.push({ role: 'user', content: message });
 
-  // Vision models for image, text models for text
-  const modelsToTry = image 
-    ? [
-        'meta-llama/llama-4-scout-17b-16e-instruct',
-        'meta-llama/llama-4-maverick-17b-128e-instruct'
-      ]
-    : [
-        'openai/gpt-oss-120b',
-        'qwen/qwen3-32b',
-        'qwen/qwen3.6-27b'
-      ];
+  const modelsToTry = [
+    'openai/gpt-oss-120b',
+    'qwen/qwen3-32b',
+    'qwen/qwen3.6-27b'
+  ];
 
   let lastError = null;
   let lastErrorStatus = null;
@@ -189,38 +245,6 @@ Always be respectful and warm.`;
       error: 'limit_reached',
       details: 'Nexus AI has reached its daily limit.'
     });
-  }
-
-  // Vision failed but text still works - fallback to general chat
-  if (image && lastError) {
-    // Try again with text model as fallback (AI will say it can't see image)
-    try {
-      const fallbackRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'openai/gpt-oss-120b',
-          messages: [
-            ...messages.slice(0, -1),
-            { role: 'user', content: `The user uploaded an image and asked: "${message}". You cannot see the image right now, so please politely tell them that image analysis is temporarily unavailable and ask them to describe what's in the image in text. Then help with their question based on their text description.` }
-          ],
-          temperature: 0.7,
-          max_tokens: 500
-        })
-      });
-      
-      const fallbackData = await fallbackRes.json();
-      if (fallbackRes.ok && fallbackData.choices && fallbackData.choices[0]) {
-        return res.status(200).json({ 
-          success: true, 
-          reply: fallbackData.choices[0].message?.content || "Image analysis is temporarily unavailable. Please describe the image in text.",
-          model: 'fallback'
-        });
-      }
-    } catch (e) {}
   }
 
   return res.status(500).json({ 
