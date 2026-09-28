@@ -258,6 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let chatHistory = [];
   let isChatSending = false;
   let chatHistoryState = false;
+  let isClosingChat = false;
 
   function closeChatFully() {
     chatWidget.classList.remove('active');
@@ -281,8 +282,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Back button handler — closes chat if it's open
   window.addEventListener('popstate', () => {
-    if (chatHistoryState && chatWidget.classList.contains('active')) {
+    if (chatWidget.classList.contains('active')) {
       chatHistoryState = false;
       closeChatFully();
     }
@@ -290,6 +292,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (chatFab) {
     chatFab.addEventListener('click', () => {
+      if (isClosingChat) return;
+      
       const isOpening = !chatWidget.classList.contains('active');
       chatWidget.classList.toggle('active');
       
@@ -312,24 +316,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (chatBackdrop) {
     chatBackdrop.addEventListener('click', () => {
+      if (isClosingChat) return;
+      isClosingChat = true;
+      
+      // Close chat IMMEDIATELY
+      closeChatFully();
+      
+      // Then remove history entry
       if (chatHistoryState) {
         chatHistoryState = false;
         history.back();
-      } else {
-        closeChatFully();
       }
+      
+      setTimeout(() => { isClosingChat = false; }, 400);
     });
   }
 
   if (chatClose) {
     chatClose.addEventListener('click', (e) => {
       e.stopPropagation();
+      e.preventDefault();
+      
+      // Prevent double-click race
+      if (isClosingChat) return;
+      isClosingChat = true;
+      
+      // Close chat IMMEDIATELY (this was the fix)
+      closeChatFully();
+      
+      // Then remove the history entry in background
       if (chatHistoryState) {
         chatHistoryState = false;
         history.back();
-      } else {
-        closeChatFully();
       }
+      
+      setTimeout(() => { isClosingChat = false; }, 400);
     });
   }
 
@@ -694,7 +715,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // 🖼️ IMAGE GENERATION DETECTION (with typo support)
+  // 🖼️ IMAGE GENERATION DETECTION
   // =========================================
   function isImageRequest(text) {
     if (!text) return false;
