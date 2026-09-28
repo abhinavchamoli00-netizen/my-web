@@ -110,14 +110,21 @@ document.addEventListener('DOMContentLoaded', () => {
       e.stopPropagation();
       chatWidget.classList.remove('active');
       chatWidget.classList.remove('maximized');
+      document.body.style.overflow = '';
     });
   }
 
-  // ✨ Maximize Button Toggle
+  // ✨ Maximize Button Toggle (with body scroll lock)
   if (chatMaximize) {
     chatMaximize.addEventListener('click', (e) => {
       e.stopPropagation();
       chatWidget.classList.toggle('maximized');
+      
+      if (chatWidget.classList.contains('maximized')) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
       
       setTimeout(() => {
         chatMessages.scrollTop = chatMessages.scrollHeight;
