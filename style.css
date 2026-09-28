@@ -1137,10 +1137,10 @@ section h2 {
   justify-content: center;
 }
 
-/* Chat message image (smaller) */
+/* Chat message image - smaller */
 .ai-msg-image {
-  max-width: 180px;
-  max-height: 180px;
+  max-width: 120px;
+  max-height: 120px;
   width: auto;
   height: auto;
   object-fit: cover;
@@ -1152,30 +1152,51 @@ section h2 {
 }
 
 .ai-msg-image:hover {
-  transform: scale(1.03);
+  transform: scale(1.05);
 }
 
-/* Analyze button under image */
+/* Analyze button - transparent with pulse animation */
 .analyze-btn {
-  background: linear-gradient(135deg, #6c5ce7, #7b4fbf);
-  color: #fff;
-  border: none;
-  padding: 8px 16px;
+  background: transparent;
+  color: #a29bfe;
+  border: 1px solid rgba(108, 92, 231, 0.5);
+  padding: 6px 14px;
   border-radius: 20px;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   margin-top: 8px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: 0.2s;
+  transition: all 0.25s ease;
   font-family: inherit;
+  position: relative;
+  animation: analyzePulse 2s infinite;
 }
 
 .analyze-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(108, 92, 231, 0.5);
+  background: rgba(108, 92, 231, 0.15);
+  color: #fff;
+  border-color: #6c5ce7;
+  transform: translateY(-1px);
+}
+
+.analyze-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  animation: none;
+}
+
+@keyframes analyzePulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.6);
+    border-color: rgba(108, 92, 231, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(108, 92, 231, 0);
+    border-color: rgba(108, 92, 231, 0.9);
+  }
 }
 
 .msg-speak-btn {
@@ -1311,7 +1332,6 @@ section h2 {
     padding-bottom: 15px;
   }
 
-  /* Keyboard fix - chat aur upar shift */
   .ai-chat-widget.keyboard-open:not(.maximized) {
     top: 50px !important;
     max-height: calc(100vh - 60px) !important;
@@ -1344,7 +1364,7 @@ section h2 {
   }
 
   .ai-msg-image {
-    max-width: 150px;
-    max-height: 150px;
+    max-width: 100px;
+    max-height: 100px;
   }
 }

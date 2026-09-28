@@ -65,7 +65,7 @@ module.exports = async function handler(req, res) {
 
   const message = (body && body.message) || '';
   const history = (body && body.history) || [];
-  const image = (body && body.image) || ''; // Base64 image data
+  const image = (body && body.image) || '';
 
   if (!message && !image) {
     return res.status(400).json({ error: 'Message or image required' });
@@ -76,7 +76,6 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'GROQ_API_KEY not configured' });
   }
 
-  // Log to Telegram
   logQuestionToTelegram(message || '(image sent)', req);
 
   const systemPrompt = `You are Nexus AI, a helpful, intelligent, and friendly AI assistant on the Nexus website.
@@ -85,22 +84,22 @@ LANGUAGE RULES:
 1. You can speak in ENGLISH, HINDI, and HINGLISH (Roman Hindi).
 2. Treat common greetings like "Hello", "Hallo", "Hi", "Hey" as ENGLISH. Always reply warmly.
 3. Match the user's language:
-   - English message → Reply in English
-   - Hindi (Devanagari script) → Reply in Hindi
-   - Hinglish (Roman Hindi like "kaise ho") → Reply in Hinglish
-4. Stay in the same language for the entire conversation.
-5. If the user asks for another language (Chinese, Spanish, etc.), politely refuse and continue in English.
+   - English → English
+   - Hindi (Devanagari) → Hindi
+   - Hinglish (Roman Hindi) → Hinglish
+4. Stay in the same language.
+5. If user asks another language, politely refuse and continue in English.
 
 IMAGE HANDLING:
-If the user sends an image, describe what you see in detail, answer their questions about it, or provide analysis. Do NOT talk about yourself. Focus entirely on the image and the user's query about it.
+If the user sends an image, describe exactly what you see in detail. Identify people, objects, text, colors, and context. Do NOT talk about yourself. Focus entirely on the image.
 
 FORMATTING RULES:
-1. Use **bold** for important keywords.
-2. Use bullet points (start line with "• ") for lists.
-3. Use numbered lists (1. 2. 3.) for steps.
-4. Leave a BLANK LINE between paragraphs.
+1. Use **bold** for keywords.
+2. Use bullet points (•) for lists.
+3. Use numbered lists for steps.
+4. Blank line between paragraphs.
 5. Use ## headers for major sections.
-6. Break long answers into short paragraphs.
+6. Short paragraphs, not walls of text.
 7. Add a friendly emoji occasionally.
 
 GENERAL BEHAVIOR:
@@ -108,12 +107,10 @@ Answer ANY question - general knowledge, science, history, coding, math, sports,
 If someone asks something harmful, politely decline.
 Always be respectful and warm.`;
 
-  // Build messages array
   const messages = [
     { role: 'system', content: systemPrompt }
   ];
 
-  // Add history
   for (const item of history) {
     messages.push({
       role: item.role === 'user' ? 'user' : 'assistant',
@@ -121,13 +118,11 @@ Always be respectful and warm.`;
     });
   }
 
-  // Add current message with optional image
   if (image) {
-    // Vision model format
     messages.push({
       role: 'user',
       content: [
-        { type: 'text', text: message || 'What is in this image? Describe it in detail.' },
+        { type: 'text', text: message || 'Describe this image in detail. What do you see?' },
         { type: 'image_url', image_url: { url: image } }
       ]
     });
@@ -135,12 +130,11 @@ Always be respectful and warm.`;
     messages.push({ role: 'user', content: message });
   }
 
-  // If image is present, use vision-capable model
+  // Vision models for image, text models for text
   const modelsToTry = image 
     ? [
         'meta-llama/llama-4-scout-17b-16e-instruct',
-        'llama-3.2-90b-vision-preview',
-        'llama-3.2-11b-vision-preview'
+        'meta-llama/llama-4-maverick-17b-128e-instruct'
       ]
     : [
         'openai/gpt-oss-120b',
@@ -197,12 +191,36 @@ Always be respectful and warm.`;
     });
   }
 
-  // If image failed but text models might work, fallback
+  // Vision failed but text still works - fallback to general chat
   if (image && lastError) {
-    return res.status(500).json({ 
-      error: 'Image analysis failed', 
-      details: 'Vision model unavailable. Please describe your image in text.'
-    });
+    // Try again with text model as fallback (AI will say it can't see image)
+    try {
+      const fallbackRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'openai/gpt-oss-120b',
+          messages: [
+            ...messages.slice(0, -1),
+            { role: 'user', content: `The user uploaded an image and asked: "${message}". You cannot see the image right now, so please politely tell them that image analysis is temporarily unavailable and ask them to describe what's in the image in text. Then help with their question based on their text description.` }
+          ],
+          temperature: 0.7,
+          max_tokens: 500
+        })
+      });
+      
+      const fallbackData = await fallbackRes.json();
+      if (fallbackRes.ok && fallbackData.choices && fallbackData.choices[0]) {
+        return res.status(200).json({ 
+          success: true, 
+          reply: fallbackData.choices[0].message?.content || "Image analysis is temporarily unavailable. Please describe the image in text.",
+          model: 'fallback'
+        });
+      }
+    } catch (e) {}
   }
 
   return res.status(500).json({ 

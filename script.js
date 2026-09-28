@@ -634,8 +634,8 @@ document.addEventListener('DOMContentLoaded', () => {
           e.stopPropagation();
           const imageToAnalyze = currentImage;
           analyzeBtn.disabled = true;
-          analyzeBtn.style.opacity = '0.5';
-          analyzeBtn.textContent = 'Analyzing...';
+          analyzeBtn.innerHTML = '⏳ Analyzing...';
+          analyzeBtn.style.animation = 'none';
           sendToAI('Please analyze this image in detail. Tell me what you see.', imageToAnalyze);
         });
         userMsgDiv.appendChild(analyzeBtn);
@@ -653,10 +653,8 @@ document.addEventListener('DOMContentLoaded', () => {
         previewImg.src = '';
         await sendToAI(message, imageToSend);
       } else if (!currentImage && message) {
-        // Only text, send
         await sendToAI(message, null);
       } else {
-        // Only image, wait for analyze button
         uploadedImageData = null;
         imageInput.value = '';
         imagePreview.style.display = 'none';
