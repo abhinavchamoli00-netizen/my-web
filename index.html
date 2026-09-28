@@ -180,7 +180,7 @@
     <span class="ai-launcher-pulse"></span>
   </div>
 
-  <!-- 🤖 AI CHAT WIDGET -->
+  <!-- 🤖 AI CHAT WIDGET (Fullscreen) -->
   <div class="ai-chat-widget" id="chatWidget">
     <div class="ai-chat-header" id="chatHeader">
       <div class="ai-chat-title">
@@ -188,12 +188,8 @@
         <span>Nexus AI</span>
       </div>
       <div class="ai-chat-header-buttons">
-        <button class="ai-chat-toggle" id="chatMaximize" title="Maximize">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/>
-          </svg>
-        </button>
-        <button class="ai-chat-toggle" id="chatClose">✕</button>
+        <!-- Minimize button removed — chat opens fullscreen by default -->
+        <button class="ai-chat-toggle" id="chatClose" title="Close">✕</button>
       </div>
     </div>
 
@@ -204,7 +200,7 @@
         </div>
       </div>
 
-      <!-- 📎 Image Preview (hidden by default) -->
+      <!-- 📎 Image Preview -->
       <div class="image-preview" id="imagePreview" style="display:none;">
         <img id="previewImg" src="" alt="preview" />
         <button type="button" id="removeImage" class="remove-img">✕</button>
