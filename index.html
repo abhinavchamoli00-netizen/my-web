@@ -140,20 +140,19 @@
     <p id="feedbackStatus"></p>
   </div>
 
-  <!-- 💬 LIVE COMMENTS SECTION -->
+  <!-- 💬 REVIEWS / COMMENTS SECTION (Compact) -->
   <div class="comments-section">
-    <h3>💬 Community Wall</h3>
-    <p class="comments-subtitle">Share your thoughts with everyone!</p>
+    <h4 class="comments-title">💬 Reviews</h4>
 
     <div class="comment-input-box">
-      <input type="text" id="commentName" placeholder="Your name (leave empty for Anonymous)" maxlength="30" />
-      <textarea id="commentMessage" placeholder="Write a comment..." maxlength="300" required></textarea>
-      <button id="commentSubmit">Post Comment</button>
+      <input type="text" id="commentName" placeholder="Name (optional)" maxlength="30" />
+      <textarea id="commentMessage" placeholder="Write a review..." maxlength="300" required></textarea>
+      <button id="commentSubmit">Post</button>
       <p id="commentStatus"></p>
     </div>
 
     <div class="comments-list" id="commentsList">
-      <p class="comments-loading">Loading comments...</p>
+      <p class="comments-loading">Loading...</p>
     </div>
   </div>
 
@@ -188,7 +187,6 @@
         <span>Nexus AI</span>
       </div>
       <div class="ai-chat-header-buttons">
-        <!-- Minimize button removed — chat opens fullscreen by default -->
         <button class="ai-chat-toggle" id="chatClose" title="Close">✕</button>
       </div>
     </div>
