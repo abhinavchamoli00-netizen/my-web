@@ -119,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ✨ Maximize Button Toggle
   if (chatMaximize) {
     chatMaximize.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -142,20 +141,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 📱 Mobile Keyboard Fix - Robust version with focus events
+  // 📱 Mobile Keyboard Fix - Fit widget inside visual viewport
   function adjustChatForKeyboard() {
     if (!chatWidget || !chatWidget.classList.contains('active')) return;
 
-    const viewportHeight = window.visualViewport 
-      ? window.visualViewport.height 
-      : window.innerHeight;
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const viewportHeight = vv.height;
+    const viewportTop = vv.offsetTop || 0;
     const windowHeight = window.innerHeight;
     const keyboardHeight = windowHeight - viewportHeight;
+    const isKeyboardOpen = keyboardHeight > 100;
 
     if (chatWidget.classList.contains('maximized')) {
-      if (keyboardHeight > 100) {
+      if (isKeyboardOpen) {
         chatWidget.style.height = viewportHeight + 'px';
-        chatWidget.style.top = '0';
+        chatWidget.style.top = viewportTop + 'px';
         chatWidget.style.bottom = 'auto';
         chatWidget.classList.add('keyboard-open');
       } else {
@@ -165,14 +167,18 @@ document.addEventListener('DOMContentLoaded', () => {
         chatWidget.classList.remove('keyboard-open');
       }
     } else {
-      if (keyboardHeight > 150) {
-        chatWidget.style.top = 'auto';
-        chatWidget.style.bottom = (keyboardHeight + 10) + 'px';
-        chatWidget.style.maxHeight = (viewportHeight - 20) + 'px';
+      if (isKeyboardOpen) {
+        // Normal mode: move widget to top of visual viewport and shrink height
+        const availableHeight = viewportHeight - 20;
+        chatWidget.style.top = (viewportTop + 10) + 'px';
+        chatWidget.style.bottom = 'auto';
+        chatWidget.style.height = availableHeight + 'px';
+        chatWidget.style.maxHeight = availableHeight + 'px';
         chatWidget.classList.add('keyboard-open');
       } else {
         chatWidget.style.top = '';
         chatWidget.style.bottom = '';
+        chatWidget.style.height = '';
         chatWidget.style.maxHeight = '';
         chatWidget.classList.remove('keyboard-open');
       }

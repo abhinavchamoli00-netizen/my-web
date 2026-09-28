@@ -531,7 +531,7 @@ section h2 {
   z-index: 9999;
   font-family: 'Space Grotesk', sans-serif;
   flex-direction: column;
-  transition: bottom 0.2s ease, top 0.2s ease, max-height 0.2s ease;
+  transition: top 0.2s ease, bottom 0.2s ease, height 0.2s ease;
 }
 
 .ai-chat-widget.active {
@@ -620,6 +620,8 @@ section h2 {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex: 1;
+  min-height: 0;
 }
 
 .ai-chat-messages::-webkit-scrollbar {
@@ -815,7 +817,14 @@ section h2 {
    16. MOBILE KEYBOARD OPEN STATE (NORMAL MODE)
    ========================================= */
 .ai-chat-widget.keyboard-open:not(.maximized) {
-  transition: bottom 0.2s ease, top 0.2s ease, max-height 0.2s ease;
+  overflow: hidden;
+}
+
+.ai-chat-widget.keyboard-open:not(.maximized) .ai-chat-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -823,11 +832,13 @@ section h2 {
   height: auto;
   flex: 1;
   min-height: 0;
+  max-height: none;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
-.ai-chat-widget.keyboard-open:not(.maximized) .ai-chat-body {
-  max-height: calc(100% - 50px);
+.ai-chat-widget.keyboard-open:not(.maximized) .ai-chat-input {
+  flex-shrink: 0;
 }
 
 /* =========================================
@@ -893,8 +904,15 @@ section h2 {
     top: 110px;
   }
   
-  .ai-chat-messages {
-    height: 320px;
+  .ai-chat-widget:not(.maximized) .ai-chat-messages {
+    height: 280px;
+    flex: 0 1 auto;
+  }
+
+  .ai-chat-widget.keyboard-open:not(.maximized) .ai-chat-messages {
+    height: auto;
+    flex: 1;
+    min-height: 0;
   }
 
   .ai-chat-widget.maximized {
