@@ -107,27 +107,33 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.focus();
         if (chatBackdrop) chatBackdrop.classList.add('active');
       } else {
-        if (chatBackdrop) chatBackdrop.classList.remove('active');
+        if (chatBackdrop) {
+          chatBackdrop.classList.remove('active');
+          chatBackdrop.classList.remove('locked');
+        }
       }
     });
   }
 
-  // Backdrop pe click karne se chat band ho jaye
+  // Backdrop pe click — sirf normal mode mein band kare, maximized mein nahi
   if (chatBackdrop) {
     chatBackdrop.addEventListener('click', () => {
+      // Agar maximized hai, toh click ignore kar (block ho, band na ho)
+      if (chatWidget.classList.contains('maximized')) return;
+      
       chatWidget.classList.remove('active');
-      chatWidget.classList.remove('maximized');
       chatWidget.classList.remove('keyboard-open');
       chatWidget.style.height = '';
       chatWidget.style.bottom = '';
       chatWidget.style.top = '';
       chatWidget.style.maxHeight = '';
       chatBackdrop.classList.remove('active');
+      chatBackdrop.classList.remove('locked');
       document.body.style.overflow = '';
     });
   }
 
-  // Close Button
+  // Close Button (X) — ye hamesha kaam karega
   if (chatClose) {
     chatClose.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -138,7 +144,10 @@ document.addEventListener('DOMContentLoaded', () => {
       chatWidget.style.bottom = '';
       chatWidget.style.top = '';
       chatWidget.style.maxHeight = '';
-      if (chatBackdrop) chatBackdrop.classList.remove('active');
+      if (chatBackdrop) {
+        chatBackdrop.classList.remove('active');
+        chatBackdrop.classList.remove('locked');
+      }
       document.body.style.overflow = '';
     });
   }
@@ -150,17 +159,25 @@ document.addEventListener('DOMContentLoaded', () => {
       chatWidget.classList.toggle('maximized');
       
       if (chatWidget.classList.contains('maximized')) {
+        // Maximized: body scroll lock + backdrop locked (block clicks only)
         document.body.style.overflow = 'hidden';
-        if (chatBackdrop) chatBackdrop.classList.remove('active');
+        if (chatBackdrop) {
+          chatBackdrop.classList.add('active');
+          chatBackdrop.classList.add('locked');
+        }
       } else {
+        // Back to normal: unlock backdrop
         document.body.style.overflow = '';
         chatWidget.style.height = '';
         chatWidget.style.bottom = '';
         chatWidget.style.top = '';
         chatWidget.style.maxHeight = '';
         chatWidget.classList.remove('keyboard-open');
-        if (chatWidget.classList.contains('active') && chatBackdrop) {
-          chatBackdrop.classList.add('active');
+        if (chatBackdrop) {
+          chatBackdrop.classList.remove('locked');
+          if (chatWidget.classList.contains('active')) {
+            chatBackdrop.classList.add('active');
+          }
         }
       }
       

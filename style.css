@@ -456,6 +456,12 @@ section h2 {
   display: block;
 }
 
+/* Maximized mode mein backdrop pe click kaam na kare, sirf block kare */
+.chat-backdrop.active.locked {
+  cursor: default;
+  background: rgba(0, 0, 0, 0);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -465,10 +471,6 @@ section h2 {
   .chat-backdrop {
     background: rgba(0, 0, 0, 0.3);
   }
-}
-
-body:has(.ai-chat-widget.maximized) .chat-backdrop {
-  display: none !important;
 }
 
 /* =========================================
