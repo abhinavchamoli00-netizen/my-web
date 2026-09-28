@@ -278,6 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
       chatBackdrop.classList.remove('locked');
     }
     document.body.style.overflow = '';
+    stopSpeaking();
   }
 
   function pushChatHistory() {
@@ -494,7 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // 📎 IMAGE UPLOAD
+  // 📎 IMAGE UPLOAD (with compression)
   // =========================================
   const imageBtn = document.getElementById('imageBtn');
   const imageInput = document.getElementById('imageInput');
@@ -502,6 +503,37 @@ document.addEventListener('DOMContentLoaded', () => {
   const previewImg = document.getElementById('previewImg');
   const removeImage = document.getElementById('removeImage');
   let uploadedImageData = null;
+
+  // Compress image before storing
+  function compressImage(dataUrl, maxSize = 800, quality = 0.7) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+        
+        if (width > height) {
+          if (width > maxSize) {
+            height = (maxSize / width) * height;
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width = (maxSize / height) * width;
+            height = maxSize;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
+  }
 
   if (imageBtn && imageInput) {
     imageBtn.addEventListener('click', () => imageInput.click());
@@ -514,9 +546,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       const reader = new FileReader();
-      reader.onload = (ev) => {
-        uploadedImageData = ev.target.result;
-        previewImg.src = uploadedImageData;
+      reader.onload = async (ev) => {
+        // Compress to under 800px
+        const compressed = await compressImage(ev.target.result, 800, 0.7);
+        uploadedImageData = compressed;
+        previewImg.src = compressed;
         imagePreview.style.display = 'block';
       };
       reader.readAsDataURL(file);
@@ -531,12 +565,121 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // 🔊 TEXT-TO-SPEECH
+  // 🔊 TEXT-TO-SPEECH WITH WORD HIGHLIGHT
   // =========================================
-  function speakText(text, lang = 'en-IN') {
+  let currentlySpeaking = false;
+  let currentSpeakBtn = null;
+  let currentMessageEl = null;
+  let currentWordMap = [];
+
+  function stopSpeaking() {
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+    }
+    // Clear highlights
+    if (currentMessageEl) {
+      currentMessageEl.querySelectorAll('.speak-word.speaking').forEach(el => {
+        el.classList.remove('speaking');
+      });
+    }
+    // Reset button
+    if (currentSpeakBtn) {
+      currentSpeakBtn.innerHTML = '🔊 Listen';
+      currentSpeakBtn.classList.remove('speaking-active');
+    }
+    currentlySpeaking = false;
+    currentSpeakBtn = null;
+    currentMessageEl = null;
+    currentWordMap = [];
+  }
+
+  function wrapWordsForSpeech(rootEl) {
+    // If already wrapped, rebuild map
+    if (rootEl.dataset.speechWrapped === 'true') {
+      const spans = rootEl.querySelectorAll('.speak-word');
+      return Array.from(spans).map(span => ({
+        start: parseInt(span.dataset.start),
+        end: parseInt(span.dataset.end),
+        span
+      }));
+    }
+    
+    const walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT, {
+      acceptNode: (node) => {
+        if (!node.textContent.trim()) return NodeFilter.FILTER_REJECT;
+        // Skip speak button content
+        if (node.parentElement && node.parentElement.closest('.msg-speak-btn')) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    
+    const textNodes = [];
+    let node;
+    while (node = walker.nextNode()) {
+      textNodes.push(node);
+    }
+    
+    let cumulativeIndex = 0;
+    const wordMap = [];
+    
+    textNodes.forEach(textNode => {
+      const text = textNode.textContent;
+      const fragment = document.createDocumentFragment();
+      const parts = text.split(/(\s+)/);
+      
+      parts.forEach(part => {
+        if (part === '') return;
+        if (/^\s+$/.test(part)) {
+          fragment.appendChild(document.createTextNode(part));
+          cumulativeIndex += part.length;
+        } else {
+          const span = document.createElement('span');
+          span.className = 'speak-word';
+          span.textContent = part;
+          span.dataset.start = cumulativeIndex;
+          span.dataset.end = cumulativeIndex + part.length;
+          wordMap.push({ 
+            start: cumulativeIndex, 
+            end: cumulativeIndex + part.length, 
+            span 
+          });
+          fragment.appendChild(span);
+          cumulativeIndex += part.length;
+        }
+      });
+      
+      textNode.parentNode.replaceChild(fragment, textNode);
+    });
+    
+    rootEl.dataset.speechWrapped = 'true';
+    return wordMap;
+  }
+
+  function speakWithHighlight(messageDiv, speakBtn, text, lang = 'en-IN') {
     if (!('speechSynthesis' in window)) return;
+    
+    // If already speaking, stop first
+    if (currentlySpeaking) {
+      stopSpeaking();
+      // If same button, just stop and return
+      if (currentSpeakBtn === speakBtn) return;
+    }
+    
     speechSynthesis.cancel();
     
+    // Wrap words for highlighting
+    const wordMap = wrapWordsForSpeech(messageDiv);
+    currentWordMap = wordMap;
+    currentMessageEl = messageDiv;
+    currentSpeakBtn = speakBtn;
+    currentlySpeaking = true;
+    
+    speakBtn.innerHTML = '⏹ Stop';
+    speakBtn.classList.add('speaking-active');
+    
+    // Clean text for speech
     const clean = text
       .replace(/[*#_`~]/g, '')
       .replace(/•/g, ',')
@@ -547,6 +690,27 @@ document.addEventListener('DOMContentLoaded', () => {
     utterance.lang = lang;
     utterance.rate = 1;
     utterance.pitch = 1;
+    
+    utterance.onboundary = (e) => {
+      const charIndex = e.charIndex;
+      // Clear previous highlights
+      wordMap.forEach(w => w.span.classList.remove('speaking'));
+      
+      // Find the word being spoken
+      const match = wordMap.find(w => charIndex >= w.start && charIndex < w.end);
+      if (match) {
+        match.span.classList.add('speaking');
+      }
+    };
+    
+    utterance.onend = () => {
+      stopSpeaking();
+    };
+    
+    utterance.onerror = () => {
+      stopSpeaking();
+    };
+    
     speechSynthesis.speak(utterance);
   }
 
@@ -635,7 +799,6 @@ document.addEventListener('DOMContentLoaded', () => {
           const imageToAnalyze = currentImage;
           analyzeBtn.disabled = true;
           analyzeBtn.innerHTML = '⏳ Analyzing...';
-          analyzeBtn.style.animation = 'none';
           sendToAI('Please analyze this image in detail. Tell me what you see.', imageToAnalyze);
         });
         userMsgDiv.appendChild(analyzeBtn);
@@ -785,7 +948,13 @@ document.addEventListener('DOMContentLoaded', () => {
         speakBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           const isHindi = /[\u0900-\u097F]/.test(text);
-          speakText(text, isHindi ? 'hi-IN' : 'en-IN');
+          
+          // If currently speaking this button, stop
+          if (currentlySpeaking && currentSpeakBtn === speakBtn) {
+            stopSpeaking();
+          } else {
+            speakWithHighlight(div, speakBtn, text, isHindi ? 'hi-IN' : 'en-IN');
+          }
         });
         div.appendChild(speakBtn);
       }

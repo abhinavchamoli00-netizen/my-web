@@ -1155,12 +1155,15 @@ section h2 {
   transform: scale(1.05);
 }
 
-/* Analyze button - transparent with pulse animation */
+/* =========================================
+   ANALYZE BUTTON - MAGIC ANIMATION
+   ========================================= */
 .analyze-btn {
+  position: relative;
   background: transparent;
   color: #a29bfe;
   border: 1px solid rgba(108, 92, 231, 0.5);
-  padding: 6px 14px;
+  padding: 7px 16px;
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -1171,34 +1174,73 @@ section h2 {
   gap: 6px;
   transition: all 0.25s ease;
   font-family: inherit;
-  position: relative;
-  animation: analyzePulse 2s infinite;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Shimmer effect - light sweep */
+.analyze-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(162, 155, 254, 0.4), transparent);
+  animation: shimmerSweep 2.5s infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+
+@keyframes shimmerSweep {
+  0% { left: -100%; }
+  50%, 100% { left: 100%; }
+}
+
+/* Rotating gradient border */
+.analyze-btn::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(90deg, #6c5ce7, #a29bfe, #7b4fbf, #6c5ce7);
+  background-size: 300% 100%;
+  animation: borderRotate 3s linear infinite;
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes borderRotate {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
 }
 
 .analyze-btn:hover {
   background: rgba(108, 92, 231, 0.15);
   color: #fff;
-  border-color: #6c5ce7;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(108, 92, 231, 0.5);
 }
 
 .analyze-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.analyze-btn:disabled::before,
+.analyze-btn:disabled::after {
   animation: none;
 }
 
-@keyframes analyzePulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.6);
-    border-color: rgba(108, 92, 231, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 0 6px rgba(108, 92, 231, 0);
-    border-color: rgba(108, 92, 231, 0.9);
-  }
-}
-
+/* =========================================
+   SPEAK BUTTON + WORD HIGHLIGHT
+   ========================================= */
 .msg-speak-btn {
   background: rgba(108, 92, 231, 0.15);
   border: none;
@@ -1213,6 +1255,7 @@ section h2 {
   gap: 5px;
   transition: 0.2s;
   font-family: inherit;
+  position: relative;
 }
 
 .msg-speak-btn:hover {
@@ -1220,6 +1263,41 @@ section h2 {
   color: #fff;
 }
 
+.msg-speak-btn.speaking-active {
+  background: #e74c3c;
+  color: #fff;
+  animation: speakPulse 1.2s infinite;
+}
+
+@keyframes speakPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.6); }
+  50% { box-shadow: 0 0 0 8px rgba(231, 76, 60, 0); }
+}
+
+/* Word highlight during speech */
+.speak-word {
+  transition: background-color 0.15s ease, color 0.15s ease;
+  border-radius: 3px;
+  padding: 0 2px;
+  display: inline;
+}
+
+.speak-word.speaking {
+  background-color: #6c5ce7;
+  color: #ffffff;
+  animation: wordPop 0.4s ease;
+  box-shadow: 0 0 10px rgba(108, 92, 231, 0.6);
+}
+
+@keyframes wordPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* =========================================
+   IMAGE GENERATION LOADING
+   ========================================= */
 .img-loading {
   padding: 20px;
   text-align: center;
@@ -1228,6 +1306,19 @@ section h2 {
   background: #1c1b22;
   border-radius: 10px;
   margin-top: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.img-loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(108, 92, 231, 0.2), transparent);
+  animation: shimmerSweep 2s infinite;
 }
 
 /* =========================================
