@@ -11,12 +11,10 @@ module.exports = async function handler(req, res) {
     try { body = JSON.parse(body); } catch (e) { body = {}; }
   }
 
-  const name = (body && body.name) || '';
-  const message = (body && body.message) || '';
+  const { source, device, page } = body || {};
 
-  if (!message || message.trim() === '') {
-    return res.status(400).json({ error: 'Message is required' });
-  }
+  const city = req.headers['x-vercel-ip-city'] || 'Unknown';
+  const country = req.headers['x-vercel-ip-country'] || 'Unknown';
 
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -26,18 +24,17 @@ module.exports = async function handler(req, res) {
   }
 
   const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-  const text = `📩 *New Feedback from Nexus*\n\n👤 *Name:* ${name || 'Anonymous'}\n\n💬 *Message:*\n${message}\n\n🕐 *Time:* ${dateStr}`;
+
+  const text = `👀 *New Visitor on Nexus*\n\n📍 *From:* ${source || 'Unknown'}\n🌍 *Location:* ${city}, ${country}\n💻 *Device:* ${device || 'Unknown'}\n📄 *Page:* ${page || 'Home'}\n🕐 *Time:* ${dateStr}`;
 
   try {
-    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: 'Markdown' })
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'Markdown' })
     });
-    const data = await response.json();
-    if (!data.ok) return res.status(500).json({ error: 'Telegram failed' });
     return res.status(200).json({ success: true });
   } catch (error) {
-    return res.status(500).json({ error: 'Internal error' });
+    return res.status(500).json({ error: 'Failed' });
   }
 };
