@@ -437,7 +437,193 @@ section h2 {
 }
 
 /* =========================================
-   12. CHAT BACKDROP
+   12. LIVE COMMENTS SECTION
+   ========================================= */
+.comments-section {
+  text-align: center;
+  margin: 30px auto;
+  padding: 25px 20px;
+  background-color: #141414;
+  border-radius: 20px;
+  max-width: 700px;
+  width: 90%;
+  border: 1px solid rgba(108, 92, 231, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.comments-section h3 {
+  color: #a29bfe;
+  margin-bottom: 6px;
+  font-size: 1.4rem;
+}
+
+.comments-subtitle {
+  color: #aaa;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+.comment-input-box {
+  background-color: #1c1b22;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 22px;
+  border: 1px solid rgba(108, 92, 231, 0.25);
+}
+
+.comment-input-box input,
+.comment-input-box textarea {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  background-color: #0f0f18;
+  border: 1px solid rgba(108, 92, 231, 0.3);
+  border-radius: 10px;
+  color: #ffffff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  transition: 0.3s ease;
+}
+
+.comment-input-box input:focus,
+.comment-input-box textarea:focus {
+  border-color: #6c5ce7;
+  box-shadow: 0 0 10px rgba(108, 92, 231, 0.3);
+}
+
+.comment-input-box textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.comment-input-box button {
+  width: 100%;
+  padding: 12px 24px;
+  background-color: #6c5ce7;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s ease;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.comment-input-box button:hover:not(:disabled) {
+  background-color: #4e3ec9;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4);
+}
+
+.comment-input-box button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#commentStatus {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  min-height: 18px;
+  text-align: center;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.comments-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.comments-list::-webkit-scrollbar-thumb {
+  background: #6c5ce7;
+  border-radius: 5px;
+}
+
+.comment-card {
+  background-color: #1c1b22;
+  border-radius: 12px;
+  padding: 14px 16px;
+  border: 1px solid rgba(108, 92, 231, 0.15);
+  animation: commentFadeIn 0.4s ease;
+}
+
+@keyframes commentFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.comment-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6c5ce7, #7b4fbf);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.comment-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.comment-name {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.comment-time {
+  color: #777;
+  font-size: 0.75rem;
+}
+
+.comment-text {
+  color: #ccc;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.comments-loading {
+  color: #888;
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+}
+
+.comments-empty {
+  color: #666;
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+}
+
+/* =========================================
+   13. CHAT BACKDROP
    ========================================= */
 .chat-backdrop {
   display: none;
@@ -456,7 +642,6 @@ section h2 {
   display: block;
 }
 
-/* Maximized mode mein backdrop pe click kaam na kare, sirf block kare */
 .chat-backdrop.active.locked {
   cursor: default;
   background: rgba(0, 0, 0, 0);
@@ -474,7 +659,7 @@ section h2 {
 }
 
 /* =========================================
-   13. AI CHAT LAUNCHER (TOP RIGHT)
+   14. AI CHAT LAUNCHER (TOP RIGHT)
    ========================================= */
 .ai-chat-launcher {
   position: fixed;
@@ -551,7 +736,7 @@ section h2 {
 }
 
 /* =========================================
-   14. AI CHAT WIDGET PANEL
+   15. AI CHAT WIDGET PANEL
    ========================================= */
 .ai-chat-widget {
   display: none;
@@ -705,13 +890,14 @@ section h2 {
 .ai-chat-input {
   display: flex;
   padding: 10px;
-  gap: 8px;
+  gap: 6px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   background-color: #0f0f18;
   flex-shrink: 0;
+  align-items: center;
 }
 
-.ai-chat-input input {
+.ai-chat-input input[type="text"] {
   flex: 1;
   padding: 10px 14px;
   background-color: #1c1b22;
@@ -721,34 +907,37 @@ section h2 {
   font-size: 0.9rem;
   outline: none;
   font-family: inherit;
+  min-width: 0;
 }
 
-.ai-chat-input input:focus {
+.ai-chat-input input[type="text"]:focus {
   border-color: #6c5ce7;
 }
 
-.ai-chat-input button {
+.ai-chat-input button[type="submit"] {
   background-color: #6c5ce7;
   color: #fff;
   border: none;
   padding: 0 16px;
+  height: 40px;
   border-radius: 10px;
   font-size: 1rem;
   cursor: pointer;
   transition: 0.2s;
+  flex-shrink: 0;
 }
 
-.ai-chat-input button:hover {
+.ai-chat-input button[type="submit"]:hover {
   background-color: #4e3ec9;
 }
 
-.ai-chat-input button:disabled {
+.ai-chat-input button[type="submit"]:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* =========================================
-   15. AI MESSAGE FORMATTING STYLES
+   16. AI MESSAGE FORMATTING STYLES
    ========================================= */
 .ai-msg-bot strong {
   color: #ffffff;
@@ -782,7 +971,7 @@ section h2 {
 }
 
 /* =========================================
-   16. CHAT MAXIMIZE / FULLSCREEN MODE
+   17. CHAT MAXIMIZE / FULLSCREEN MODE
    ========================================= */
 .ai-chat-widget.maximized {
   top: 0 !important;
@@ -851,7 +1040,7 @@ section h2 {
 }
 
 /* =========================================
-   17. MOBILE KEYBOARD OPEN STATE
+   18. MOBILE KEYBOARD OPEN STATE
    ========================================= */
 .ai-chat-widget.keyboard-open:not(.maximized) {
   overflow: hidden;
@@ -879,7 +1068,115 @@ section h2 {
 }
 
 /* =========================================
-   18. RESPONSIVE / MOBILE
+   19. CHAT VOICE & IMAGE FEATURES
+   ========================================= */
+.chat-action-btn {
+  background-color: #1c1b22;
+  color: #a29bfe;
+  border: 1px solid rgba(108, 92, 231, 0.3);
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s ease;
+  flex-shrink: 0;
+}
+
+.chat-action-btn:hover {
+  background-color: #6c5ce7;
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.chat-action-btn.recording {
+  background-color: #e74c3c;
+  color: #fff;
+  animation: micPulse 1s infinite;
+}
+
+@keyframes micPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.6); }
+  50% { box-shadow: 0 0 0 8px rgba(231, 76, 60, 0); }
+}
+
+.chat-action-btn svg {
+  display: block;
+}
+
+.image-preview {
+  position: relative;
+  padding: 10px;
+  background-color: #0f0f18;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 150px;
+  border-radius: 10px;
+  display: block;
+}
+
+.remove-img {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  border: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-msg-image {
+  max-width: 100%;
+  border-radius: 10px;
+  margin-top: 8px;
+  display: block;
+}
+
+.msg-speak-btn {
+  background: rgba(108, 92, 231, 0.15);
+  border: none;
+  color: #a29bfe;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: 0.2s;
+  font-family: inherit;
+}
+
+.msg-speak-btn:hover {
+  background: #6c5ce7;
+  color: #fff;
+}
+
+.img-loading {
+  padding: 20px;
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  background: #1c1b22;
+  border-radius: 10px;
+  margin-top: 8px;
+}
+
+/* =========================================
+   20. RESPONSIVE / MOBILE
    ========================================= */
 @media (max-width: 600px) {
   .movie-poster-large {
@@ -969,8 +1266,9 @@ section h2 {
   }
 
   .ai-chat-widget.maximized .ai-chat-input {
-    padding: 10px 12px;
+    padding: 10px 8px;
     padding-bottom: calc(10px + env(safe-area-inset-bottom, 10px));
+    gap: 5px;
   }
 
   .ai-chat-widget.maximized .ai-chat-messages {
@@ -988,5 +1286,20 @@ section h2 {
     height: auto;
     flex: 1;
     min-height: 0;
+  }
+
+  .chat-action-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .chat-action-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .ai-chat-input button[type="submit"] {
+    padding: 0 12px;
+    height: 36px;
   }
 }
