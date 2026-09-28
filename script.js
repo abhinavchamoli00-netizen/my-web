@@ -251,7 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatWidget = document.getElementById('chatWidget');
   const chatBackdrop = document.getElementById('chatBackdrop');
   const chatClose = document.getElementById('chatClose');
-  const chatMaximize = document.getElementById('chatMaximize');
   const chatForm = document.getElementById('chatForm');
   const chatInput = document.getElementById('chatInput');
   const chatMessages = document.getElementById('chatMessages');
@@ -262,7 +261,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function closeChatFully() {
     chatWidget.classList.remove('active');
-    chatWidget.classList.remove('maximized');
     chatWidget.classList.remove('keyboard-open');
     chatWidget.style.height = '';
     chatWidget.style.bottom = '';
@@ -314,8 +312,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (chatBackdrop) {
     chatBackdrop.addEventListener('click', () => {
-      if (chatWidget.classList.contains('maximized')) return;
-      
       if (chatHistoryState) {
         chatHistoryState = false;
         history.back();
@@ -337,39 +333,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (chatMaximize) {
-    chatMaximize.addEventListener('click', (e) => {
-      e.stopPropagation();
-      chatWidget.classList.toggle('maximized');
-      
-      if (chatWidget.classList.contains('maximized')) {
-        document.body.style.overflow = 'hidden';
-        if (chatBackdrop) {
-          chatBackdrop.classList.add('active');
-          chatBackdrop.classList.add('locked');
-        }
-        pushChatHistory();
-      } else {
-        document.body.style.overflow = '';
-        chatWidget.style.height = '';
-        chatWidget.style.bottom = '';
-        chatWidget.style.top = '';
-        chatWidget.style.maxHeight = '';
-        chatWidget.classList.remove('keyboard-open');
-        if (chatBackdrop) {
-          chatBackdrop.classList.remove('locked');
-          if (chatWidget.classList.contains('active')) {
-            chatBackdrop.classList.add('active');
-          }
-        }
-      }
-      
-      setTimeout(() => {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }, 100);
-    });
-  }
-
   function adjustChatForKeyboard() {
     if (!chatWidget || !chatWidget.classList.contains('active')) return;
 
@@ -382,33 +345,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const keyboardHeight = windowHeight - viewportHeight;
     const isKeyboardOpen = keyboardHeight > 100;
 
-    if (chatWidget.classList.contains('maximized')) {
-      if (isKeyboardOpen) {
-        chatWidget.style.height = viewportHeight + 'px';
-        chatWidget.style.top = viewportTop + 'px';
-        chatWidget.style.bottom = 'auto';
-        chatWidget.classList.add('keyboard-open');
-      } else {
-        chatWidget.style.height = '';
-        chatWidget.style.top = '0';
-        chatWidget.style.bottom = '0';
-        chatWidget.classList.remove('keyboard-open');
-      }
+    if (isKeyboardOpen) {
+      chatWidget.style.height = viewportHeight + 'px';
+      chatWidget.style.top = viewportTop + 'px';
+      chatWidget.style.bottom = 'auto';
+      chatWidget.classList.add('keyboard-open');
     } else {
-      if (isKeyboardOpen) {
-        const availableHeight = viewportHeight - 70;
-        chatWidget.style.top = (viewportTop + 50) + 'px';
-        chatWidget.style.bottom = 'auto';
-        chatWidget.style.height = availableHeight + 'px';
-        chatWidget.style.maxHeight = availableHeight + 'px';
-        chatWidget.classList.add('keyboard-open');
-      } else {
-        chatWidget.style.top = '';
-        chatWidget.style.bottom = '';
-        chatWidget.style.height = '';
-        chatWidget.style.maxHeight = '';
-        chatWidget.classList.remove('keyboard-open');
-      }
+      chatWidget.style.height = '';
+      chatWidget.style.top = '0';
+      chatWidget.style.bottom = '0';
+      chatWidget.classList.remove('keyboard-open');
     }
 
     setTimeout(() => {
@@ -489,16 +435,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // 📎 IMAGE UPLOAD (with compression + hosting)
+  // 📎 IMAGE UPLOAD
   // =========================================
   const imageBtn = document.getElementById('imageBtn');
   const imageInput = document.getElementById('imageInput');
   const imagePreview = document.getElementById('imagePreview');
   const previewImg = document.getElementById('previewImg');
   const removeImage = document.getElementById('removeImage');
-  let uploadedImageData = null;   // Compressed preview (base64, for display)
-  let uploadedImageUrl = null;    // Hosted URL (for AI vision)
-  let isUploading = false;
+  let uploadedImageData = null;
+  let uploadedImageUrl = null;
 
   function compressImage(dataUrl, maxSize = 900, quality = 0.75) {
     return new Promise((resolve) => {
@@ -530,10 +475,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Upload to catbox.moe (free, no key, CORS enabled)
   async function uploadImageToHost(dataUrl) {
     try {
-      // Convert dataURL to Blob
       const res = await fetch(dataUrl);
       const blob = await res.blob();
       
@@ -571,17 +514,12 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const reader = new FileReader();
       reader.onload = async (ev) => {
-        // Step 1: Compress for display
         const compressed = await compressImage(ev.target.result, 900, 0.75);
         uploadedImageData = compressed;
         previewImg.src = compressed;
         imagePreview.style.display = 'block';
         
-        // Step 2: Upload to host in background
-        isUploading = true;
         uploadedImageUrl = await uploadImageToHost(compressed);
-        isUploading = false;
-        
         console.log('Image URL:', uploadedImageUrl || 'Upload failed - using base64');
       };
       reader.readAsDataURL(file);
@@ -756,24 +694,45 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // 🖼️ IMAGE GENERATION
+  // 🖼️ IMAGE GENERATION DETECTION (with typo support)
   // =========================================
   function isImageRequest(text) {
+    if (!text) return false;
     const lower = text.toLowerCase();
-    return lower.startsWith('generate image') ||
-           lower.startsWith('create image') ||
-           lower.startsWith('make image') ||
-           lower.startsWith('draw ') ||
-           lower.startsWith('banao image') ||
-           lower.startsWith('image banao') ||
-           lower.startsWith('/image ') ||
-           lower.startsWith('imagine ');
+    
+    const patterns = [
+      /\b(generate|janrate|genrate|generte|genarate|creat|create|make)\s+(me\s+)?(an?\s+)?(image|photo|picture|img|pic|artwork|art|drawing|imagination)/i,
+      /\b(draw|paint|sketch|imagine)\s+(me\s+)?/i,
+      /\b(image|photo|picture|img|pic|artwork|art|drawing)\s+(banao|bana|bna|generate|create|make|draw|paint|of|for|de|do)/i,
+      /\b(banao|bana|bna)\s+(image|photo|picture|img|pic|artwork|art|drawing)/i,
+      /^\/image\s+/i,
+      /\bi\s+(want|need|wanna)\s+(an?\s+)?(image|photo|picture|img|pic|artwork|art|drawing)/i,
+      /\bshow\s+me\s+(an?\s+)?(image|photo|picture|img|pic|artwork|art|drawing)/i
+    ];
+    
+    for (const p of patterns) {
+      if (p.test(lower)) return true;
+    }
+    return false;
   }
 
   function extractImagePrompt(text) {
-    return text
-      .replace(/^(generate image|create image|make image|draw|banao image|image banao|\/image|imagine)\s*(of|:)?\s*/i, '')
-      .trim();
+    if (!text) return '';
+    
+    let cleaned = text
+      .replace(/^(bro|bhai|yaar|yrr|hey|hi|hello|hola|oi|oye|please|plz|ok|okay|so|now)\s+/gi, '');
+    
+    cleaned = cleaned
+      .replace(/^(generate|janrate|genrate|generte|genarate|create|creat|make|draw|paint|sketch|imagine|banao|bana|bna)\s+(me\s+)?(an?\s+)?(image|photo|picture|img|pic|artwork|art|drawing|imagination)?\s*(of|for|about|with|:)?\s*/gi, '')
+      .replace(/^(image|photo|picture|img|pic|artwork|art|drawing)\s+(banao|bana|bna|generate|create|make|draw|paint|of|for|about|:)?\s*/gi, '')
+      .replace(/^(i\s+(want|need|wanna)\s+(an?\s+)?(image|photo|picture|img|pic|artwork|art|drawing)\s*(of|for|about|:)?\s*)/gi, '')
+      .replace(/^(make|show)\s+me\s+(an?\s+)?(image|photo|picture|img|pic|artwork|art|drawing)\s*(of|for|about|:)?\s*/gi, '')
+      .replace(/^\/image\s+/i, '')
+      .replace(/^imagine\s+/i, '');
+    
+    cleaned = cleaned.replace(/^(a|an|the|of|for|about|with)\s+/gi, '').trim();
+    
+    return cleaned || text;
   }
 
   // =========================================
@@ -824,11 +783,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // 🔥 User message with image (image on top, text below)
+      // 🔥 User message with image
       const mediaWrapper = document.createElement('div');
       mediaWrapper.className = 'ai-msg-media';
 
-      // Image first (on top)
       if (currentImageData) {
         const img = document.createElement('img');
         img.className = 'ai-msg-image';
@@ -837,7 +795,6 @@ document.addEventListener('DOMContentLoaded', () => {
         mediaWrapper.appendChild(img);
       }
 
-      // Text bubble below
       if (message) {
         const textBubble = document.createElement('div');
         textBubble.className = 'ai-msg ai-msg-user';
@@ -845,7 +802,6 @@ document.addEventListener('DOMContentLoaded', () => {
         mediaWrapper.appendChild(textBubble);
       }
 
-      // Analyze button (left-aligned)
       let analyzeBtnEl = null;
       if (currentImageData) {
         analyzeBtnEl = document.createElement('button');
@@ -871,7 +827,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       chatInput.value = '';
 
-      // Clear uploaded image
       const imageToSend = currentImageUrl || currentImageData;
       
       if (currentImageData) {
@@ -882,7 +837,6 @@ document.addEventListener('DOMContentLoaded', () => {
         previewImg.src = '';
       }
 
-      // Send message to AI only if there's text (image-only waits for Analyze click)
       if (message) {
         await sendToAI(message, imageToSend, analyzeBtnEl);
       } else {
