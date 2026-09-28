@@ -67,11 +67,12 @@ footer .contact {
 }
 
 /* =========================================
-   3. UPDATE BANNER
+   3. UPDATE BANNER (Left Aligned)
    ========================================= */
 .update-banner {
-  text-align: center;
+  text-align: left;
   padding: 12px 20px;
+  padding-right: 220px; /* Chat launcher ke liye space */
   background-color: rgba(108, 178, 235, 0.1);
   border-bottom: 1px solid rgba(108, 178, 235, 0.2);
   color: #6cb2eb;
@@ -519,7 +520,7 @@ section h2 {
 .ai-chat-widget {
   display: none;
   position: fixed;
-  top: 120px;
+  top: 125px;
   right: 15px;
   width: 340px;
   max-width: calc(100vw - 30px);
@@ -716,6 +717,11 @@ section h2 {
     font-size: 2rem;
   }
 
+  .update-banner {
+    padding-right: 150px;
+    font-size: 0.8rem;
+  }
+
   .ai-chat-launcher {
     top: 65px;
     right: 10px;
@@ -740,7 +746,7 @@ section h2 {
   .ai-chat-widget {
     width: calc(100vw - 20px);
     right: 10px;
-    top: 110px;
+    top: 115px;
   }
   
   .ai-chat-messages {
