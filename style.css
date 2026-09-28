@@ -1115,7 +1115,7 @@ section h2 {
 
 .image-preview img {
   max-width: 100%;
-  max-height: 150px;
+  max-height: 120px;
   border-radius: 10px;
   display: block;
 }
@@ -1137,11 +1137,45 @@ section h2 {
   justify-content: center;
 }
 
+/* Chat message image (smaller) */
 .ai-msg-image {
-  max-width: 100%;
+  max-width: 180px;
+  max-height: 180px;
+  width: auto;
+  height: auto;
+  object-fit: cover;
   border-radius: 10px;
   margin-top: 8px;
   display: block;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.ai-msg-image:hover {
+  transform: scale(1.03);
+}
+
+/* Analyze button under image */
+.analyze-btn {
+  background: linear-gradient(135deg, #6c5ce7, #7b4fbf);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s;
+  font-family: inherit;
+}
+
+.analyze-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(108, 92, 231, 0.5);
 }
 
 .msg-speak-btn {
@@ -1277,9 +1311,15 @@ section h2 {
     padding-bottom: 15px;
   }
 
+  /* Keyboard fix - chat aur upar shift */
   .ai-chat-widget.keyboard-open:not(.maximized) {
-    top: 75px !important;
-    max-height: calc(100vh - 90px) !important;
+    top: 50px !important;
+    max-height: calc(100vh - 60px) !important;
+    bottom: auto !important;
+  }
+
+  .ai-chat-widget.keyboard-open:not(.maximized) .ai-chat-body {
+    max-height: calc(100vh - 110px);
   }
 
   .ai-chat-widget.keyboard-open:not(.maximized) .ai-chat-messages {
@@ -1301,5 +1341,10 @@ section h2 {
   .ai-chat-input button[type="submit"] {
     padding: 0 12px;
     height: 36px;
+  }
+
+  .ai-msg-image {
+    max-width: 150px;
+    max-height: 150px;
   }
 }

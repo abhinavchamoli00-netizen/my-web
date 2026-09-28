@@ -1,4 +1,4 @@
-// Telegram logging function (fire-and-forget, doesn't block response)
+// Telegram logging function
 async function logQuestionToTelegram(question, req) {
   try {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
@@ -6,8 +6,7 @@ async function logQuestionToTelegram(question, req) {
     if (!botToken || !chatId) return;
 
     const ip = req.headers['x-forwarded-for']?.split(',')[0] || 
-               req.headers['x-real-ip'] || 
-               'Unknown';
+               req.headers['x-real-ip'] || 'Unknown';
     const ua = req.headers['user-agent'] || '';
     const referrer = req.headers['referer'] || 'Direct';
 
@@ -40,17 +39,12 @@ async function logQuestionToTelegram(question, req) {
     }
 
     const time = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-
     const text = `💬 *New Question*\n\n🌍 Location: ${location}\n💻 Device: ${device} (${browser})\n📄 Page: ${page}\n🕐 Time: ${time}\n\n❓ *Question:*\n${question}`;
 
     await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        chat_id: chatId, 
-        text: text, 
-        parse_mode: 'Markdown' 
-      })
+      body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: 'Markdown' })
     });
   } catch (e) {}
 }
@@ -71,9 +65,10 @@ module.exports = async function handler(req, res) {
 
   const message = (body && body.message) || '';
   const history = (body && body.history) || [];
+  const image = (body && body.image) || ''; // Base64 image data
 
-  if (!message || message.trim() === '') {
-    return res.status(400).json({ error: 'Message is required' });
+  if (!message && !image) {
+    return res.status(400).json({ error: 'Message or image required' });
   }
 
   const apiKey = process.env.GROQ_API_KEY;
@@ -81,11 +76,10 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'GROQ_API_KEY not configured' });
   }
 
-  // Log question to Telegram (fire-and-forget)
-  logQuestionToTelegram(message, req);
+  // Log to Telegram
+  logQuestionToTelegram(message || '(image sent)', req);
 
-  const messages = [
-    { role: 'system', content: `You are Nexus AI, a helpful, intelligent, and friendly AI assistant on the Nexus website.
+  const systemPrompt = `You are Nexus AI, a helpful, intelligent, and friendly AI assistant on the Nexus website.
 
 LANGUAGE RULES:
 1. You can speak in ENGLISH, HINDI, and HINGLISH (Roman Hindi).
@@ -94,38 +88,32 @@ LANGUAGE RULES:
    - English message → Reply in English
    - Hindi (Devanagari script) → Reply in Hindi
    - Hinglish (Roman Hindi like "kaise ho") → Reply in Hinglish
-4. Stay in the same language for the entire conversation. Only switch if the user switches.
+4. Stay in the same language for the entire conversation.
 5. If the user asks for another language (Chinese, Spanish, etc.), politely refuse and continue in English.
 
-FORMATTING RULES (VERY IMPORTANT):
-Always format your responses beautifully using markdown:
-1. Use **bold** for important keywords, topic names, or key points.
-2. Use bullet points (start line with "• " or "- ") for lists of items, tips, or steps.
-3. Use numbered lists (1. 2. 3.) for sequential steps or ordered points.
-4. Leave a BLANK LINE between paragraphs for proper spacing.
-5. Use ## headers (like "## Key Points") for major sections when answer is long.
-6. Break long answers into short 1-2 sentence paragraphs. Do NOT write huge walls of text.
-7. Add a friendly emoji at the end sometimes (like 🚀, 💡, ✅) but not in every message.
+IMAGE HANDLING:
+If the user sends an image, describe what you see in detail, answer their questions about it, or provide analysis. Do NOT talk about yourself. Focus entirely on the image and the user's query about it.
 
-EXAMPLE FORMAT:
-"Here are a few tips:
-
-**Tip 1:** Stay calm and patient.
-
-**Tip 2:** Focus on self-improvement.
-
-• Respect her decision
-• Give her space
-• Work on yourself
-
-Take care! 🚀"
+FORMATTING RULES:
+1. Use **bold** for important keywords.
+2. Use bullet points (start line with "• ") for lists.
+3. Use numbered lists (1. 2. 3.) for steps.
+4. Leave a BLANK LINE between paragraphs.
+5. Use ## headers for major sections.
+6. Break long answers into short paragraphs.
+7. Add a friendly emoji occasionally.
 
 GENERAL BEHAVIOR:
 Answer ANY question - general knowledge, science, history, coding, math, sports, movies, games, books, Marvel, or anything else.
-If someone asks something harmful or inappropriate, politely decline.
-Always be respectful and warm.` }
+If someone asks something harmful, politely decline.
+Always be respectful and warm.`;
+
+  // Build messages array
+  const messages = [
+    { role: 'system', content: systemPrompt }
   ];
 
+  // Add history
   for (const item of history) {
     messages.push({
       role: item.role === 'user' ? 'user' : 'assistant',
@@ -133,13 +121,32 @@ Always be respectful and warm.` }
     });
   }
 
-  messages.push({ role: 'user', content: message });
+  // Add current message with optional image
+  if (image) {
+    // Vision model format
+    messages.push({
+      role: 'user',
+      content: [
+        { type: 'text', text: message || 'What is in this image? Describe it in detail.' },
+        { type: 'image_url', image_url: { url: image } }
+      ]
+    });
+  } else {
+    messages.push({ role: 'user', content: message });
+  }
 
-  const modelsToTry = [
-    'openai/gpt-oss-120b',
-    'qwen/qwen3-32b',
-    'qwen/qwen3.6-27b'
-  ];
+  // If image is present, use vision-capable model
+  const modelsToTry = image 
+    ? [
+        'meta-llama/llama-4-scout-17b-16e-instruct',
+        'llama-3.2-90b-vision-preview',
+        'llama-3.2-11b-vision-preview'
+      ]
+    : [
+        'openai/gpt-oss-120b',
+        'qwen/qwen3-32b',
+        'qwen/qwen3.6-27b'
+      ];
 
   let lastError = null;
   let lastErrorStatus = null;
@@ -175,21 +182,26 @@ Always be respectful and warm.` }
     }
   }
 
-  // 🔥 Check if it's a rate limit / quota issue
   const isRateLimit = 
     lastErrorStatus === 429 ||
     (lastError && (
       lastError.toLowerCase().includes('rate limit') ||
       lastError.toLowerCase().includes('quota') ||
-      lastError.toLowerCase().includes('too many requests') ||
-      lastError.toLowerCase().includes('tokens per day') ||
-      lastError.toLowerCase().includes('requests per day')
+      lastError.toLowerCase().includes('too many requests')
     ));
 
   if (isRateLimit) {
     return res.status(429).json({ 
       error: 'limit_reached',
       details: 'Nexus AI has reached its daily limit.'
+    });
+  }
+
+  // If image failed but text models might work, fallback
+  if (image && lastError) {
+    return res.status(500).json({ 
+      error: 'Image analysis failed', 
+      details: 'Vision model unavailable. Please describe your image in text.'
     });
   }
 

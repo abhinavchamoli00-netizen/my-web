@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!isHomePage) {
     const feedbackSection = document.querySelector('.feedback-section');
     if (feedbackSection) feedbackSection.remove();
+    const commentsSection = document.querySelector('.comments-section');
+    if (commentsSection) commentsSection.remove();
   }
 
   // 2. VISITOR TRACKING (Only Once Per Session)
@@ -398,8 +400,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } else {
       if (isKeyboardOpen) {
-        const availableHeight = viewportHeight - 90;
-        chatWidget.style.top = (viewportTop + 75) + 'px';
+        const availableHeight = viewportHeight - 70;
+        chatWidget.style.top = (viewportTop + 50) + 'px';
         chatWidget.style.bottom = 'auto';
         chatWidget.style.height = availableHeight + 'px';
         chatWidget.style.maxHeight = availableHeight + 'px';
@@ -436,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('resize', adjustChatForKeyboard);
 
   // =========================================
-  // 🎤 VOICE INPUT (Speech to Text)
+  // 🎤 VOICE INPUT
   // =========================================
   const voiceBtn = document.getElementById('voiceBtn');
   let recognition = null;
@@ -549,7 +551,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // 🖼️ IMAGE GENERATION (Pollinations.ai)
+  // 🖼️ IMAGE GENERATION
   // =========================================
   function isImageRequest(text) {
     const lower = text.toLowerCase();
@@ -582,7 +584,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!message && !currentImage) return;
 
-      // 🖼️ Check if image generation is requested
+      // 🖼️ Image generation check
       if (message && isImageRequest(message)) {
         const prompt = extractImagePrompt(message);
         if (prompt) {
@@ -606,6 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
             img.className = 'ai-msg-image';
             img.src = imgUrl;
             img.alt = prompt;
+            img.onclick = () => window.open(imgUrl, '_blank');
             img.onload = () => {
               chatMessages.scrollTop = chatMessages.scrollHeight;
             };
@@ -618,59 +621,100 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // 🔥 Normal message flow
-      addChatMessageWithImage(message, 'user', currentImage);
-      chatInput.value = '';
+      // 🔥 User message with image
+      const userMsgDiv = addChatMessageWithImage(message, 'user', currentImage);
       
+      // Agar image hai, toh Analyze button add karo
       if (currentImage) {
+        const analyzeBtn = document.createElement('button');
+        analyzeBtn.className = 'analyze-btn';
+        analyzeBtn.innerHTML = '🔍 Analyze Image';
+        analyzeBtn.type = 'button';
+        analyzeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const imageToAnalyze = currentImage;
+          analyzeBtn.disabled = true;
+          analyzeBtn.style.opacity = '0.5';
+          analyzeBtn.textContent = 'Analyzing...';
+          sendToAI('Please analyze this image in detail. Tell me what you see.', imageToAnalyze);
+        });
+        userMsgDiv.appendChild(analyzeBtn);
+      }
+
+      chatInput.value = '';
+
+      // If image + message both, send to AI automatically
+      const imageToSend = currentImage;
+      
+      if (currentImage && message) {
         uploadedImageData = null;
         imageInput.value = '';
         imagePreview.style.display = 'none';
         previewImg.src = '';
-      }
-
-      const typingEl = addChatMessage('Thinking...', 'typing');
-
-      isChatSending = true;
-      const sendBtn = document.getElementById('chatSend');
-      sendBtn.disabled = true;
-
-      try {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            message: message || '(image sent)',
-            history: chatHistory.slice(-10)
-          })
-        });
-
-        const data = await res.json();
-        typingEl.remove();
-
-        if (data.success) {
-          addChatMessage(data.reply, 'bot');
-          chatHistory.push({ role: 'user', text: message });
-          chatHistory.push({ role: 'model', text: data.reply });
-        } else if (data.error === 'limit_reached') {
-          addChatMessage(
-            `🚫 **Nexus AI is taking a short break!**\n\n` +
-            `We've reached our **daily limit** for AI responses. Please come back in a few hours.\n\n` +
-            `Thanks for your patience! 🙏`,
-            'bot'
-          );
-        } else {
-          addChatMessage('⚠️ Error: ' + (data.details || data.error || 'Unknown'), 'bot');
-        }
-      } catch (err) {
-        typingEl.remove();
-        addChatMessage('❌ Network error. Please check your connection.', 'bot');
-      } finally {
-        isChatSending = false;
-        sendBtn.disabled = false;
-        chatInput.focus();
+        await sendToAI(message, imageToSend);
+      } else if (!currentImage && message) {
+        // Only text, send
+        await sendToAI(message, null);
+      } else {
+        // Only image, wait for analyze button
+        uploadedImageData = null;
+        imageInput.value = '';
+        imagePreview.style.display = 'none';
+        previewImg.src = '';
+        chatMessages.scrollTop = chatMessages.scrollHeight;
       }
     });
+  }
+
+  // Send message to AI
+  async function sendToAI(message, imageData) {
+    if (isChatSending) return;
+    
+    const typingEl = addChatMessage('Thinking...', 'typing');
+    isChatSending = true;
+    const sendBtn = document.getElementById('chatSend');
+    if (sendBtn) sendBtn.disabled = true;
+
+    try {
+      const payload = { 
+        message: message || '',
+        history: chatHistory.slice(-10)
+      };
+      
+      if (imageData) {
+        payload.image = imageData;
+      }
+
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      typingEl.remove();
+
+      if (data.success) {
+        addChatMessage(data.reply, 'bot');
+        chatHistory.push({ role: 'user', text: message || '(image)' });
+        chatHistory.push({ role: 'model', text: data.reply });
+      } else if (data.error === 'limit_reached') {
+        addChatMessage(
+          `🚫 **Nexus AI is taking a short break!**\n\n` +
+          `We've reached our **daily limit**. Please come back in a few hours.\n\n` +
+          `Thanks for your patience! 🙏`,
+          'bot'
+        );
+      } else {
+        addChatMessage('⚠️ Error: ' + (data.details || data.error || 'Unknown'), 'bot');
+      }
+    } catch (err) {
+      typingEl.remove();
+      addChatMessage('❌ Network error. Please try again.', 'bot');
+    } finally {
+      isChatSending = false;
+      if (sendBtn) sendBtn.disabled = false;
+    }
   }
 
   // =========================================
@@ -694,6 +738,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const img = document.createElement('img');
       img.className = 'ai-msg-image';
       img.src = imageData;
+      img.onclick = () => window.open(imageData, '_blank');
       div.appendChild(img);
     }
 
@@ -734,11 +779,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (type === 'bot' && text) {
       div.innerHTML = formatAIResponse(text);
       
-      // Add speak button (not for welcome/thinking)
-      if (!text.includes('Thinking') && !text.includes('Welcome')) {
+      if (!text.includes('Thinking') && !text.includes('Welcome') && !text.includes('short break')) {
         const speakBtn = document.createElement('button');
         speakBtn.className = 'msg-speak-btn';
         speakBtn.innerHTML = '🔊 Listen';
+        speakBtn.type = 'button';
         speakBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           const isHindi = /[\u0900-\u097F]/.test(text);
