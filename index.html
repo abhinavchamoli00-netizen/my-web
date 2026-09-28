@@ -140,9 +140,30 @@
     <p id="feedbackStatus"></p>
   </div>
 
-  <!-- 🤖 AI CHAT WIDGET (Floating) -->
-  <button class="chat-fab" id="chatFab">💬</button>
+  <!-- 🤖 AI CHAT LAUNCHER (Top Right) -->
+  <div class="ai-chat-launcher" id="chatFab">
+    <div class="ai-launcher-icon">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" fill="url(#aiGradient)"/>
+        <circle cx="9" cy="11" r="1.2" fill="#fff"/>
+        <circle cx="15" cy="11" r="1.2" fill="#fff"/>
+        <path d="M8.5 15c1 1 2.2 1.5 3.5 1.5s2.5-.5 3.5-1.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="aiGradient" x1="0" y1="0" x2="24" y2="24">
+            <stop offset="0%" stop-color="#6c5ce7"/>
+            <stop offset="100%" stop-color="#7b4fbf"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <div class="ai-launcher-text">
+      <span class="ai-launcher-title">Nexus AI</span>
+      <span class="ai-launcher-sub">Chat with our AI</span>
+    </div>
+    <span class="ai-launcher-pulse"></span>
+  </div>
 
+  <!-- 🤖 AI CHAT WIDGET -->
   <div class="ai-chat-widget" id="chatWidget">
     <div class="ai-chat-header" id="chatHeader">
       <div class="ai-chat-title">

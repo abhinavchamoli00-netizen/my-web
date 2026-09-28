@@ -7,13 +7,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const path = window.location.pathname;
   const isHomePage = path.endsWith('/') || path.endsWith('index.html') || path === '';
 
+  // =========================================
   // 1. AUTO-REMOVE FEEDBACK FORM (Non-Home Pages)
+  // =========================================
   if (!isHomePage) {
     const feedbackSection = document.querySelector('.feedback-section');
     if (feedbackSection) feedbackSection.remove();
   }
 
+  // =========================================
   // 2. VISITOR TRACKING (Only Once Per Session)
+  // =========================================
   const hasTrackedVisit = sessionStorage.getItem('nexus_visit_tracked');
   if (!hasTrackedVisit) {
     sessionStorage.setItem('nexus_visit_tracked', 'true');
@@ -31,7 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }).catch(err => console.log('Visitor tracking skipped'));
   }
 
+  // =========================================
   // 3. FEEDBACK FORM
+  // =========================================
   const feedbackForm = document.getElementById('feedbackForm');
   let isSubmitting = false;
 
@@ -84,7 +90,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // =========================================
   // 4. AI CHAT WIDGET
+  // =========================================
   const chatFab = document.getElementById('chatFab');
   const chatWidget = document.getElementById('chatWidget');
   const chatClose = document.getElementById('chatClose');
@@ -98,12 +106,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if (chatFab) {
     chatFab.addEventListener('click', () => {
       chatWidget.classList.toggle('active');
-      if (chatWidget.classList.contains('active')) chatInput.focus();
+      if (chatWidget.classList.contains('active')) {
+        chatInput.focus();
+      }
     });
   }
 
   if (chatClose) {
-    chatClose.addEventListener('click', () => {
+    chatClose.addEventListener('click', (e) => {
+      e.stopPropagation();
       chatWidget.classList.remove('active');
     });
   }
@@ -128,7 +139,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message, history: chatHistory.slice(-10) })
+          body: JSON.stringify({ 
+            message: message, 
+            history: chatHistory.slice(-10)
+          })
         });
 
         const data = await res.json();
