@@ -1,10 +1,8 @@
-// =========================================
-// NEXUS - Main Script
-// =========================================
-
 document.addEventListener('DOMContentLoaded', () => {
 
-  // Hide feedback form on all pages except home
+  // =========================================
+  // 1. AUTO-REMOVE FEEDBACK FORM FROM NON-HOME PAGES
+  // =========================================
   const path = window.location.pathname;
   const isHomePage = path.endsWith('/') || path.endsWith('index.html') || path === '';
 
@@ -15,9 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Feedback form handling
+  // =========================================
+  // 2. FEEDBACK FORM HANDLING (Only on Home Page)
+  // =========================================
   const feedbackForm = document.getElementById('feedbackForm');
-  
+
   if (feedbackForm) {
     feedbackForm.addEventListener('submit', async (e) => {
       e.preventDefault();
