@@ -20,7 +20,7 @@ module.exports = async function handler(req, res) {
 
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'GROQ_API_KEY not configured in Vercel' });
+    return res.status(500).json({ error: 'GROQ_API_KEY not configured' });
   }
 
   const messages = [
@@ -48,7 +48,7 @@ If someone asks something inappropriate or unrelated to these topics, politely r
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'llama-3.1-8b-instant', // ✅ Free tier model
         messages: messages,
         temperature: 0.8,
         max_tokens: 500
