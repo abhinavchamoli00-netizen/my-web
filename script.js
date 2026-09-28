@@ -125,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (chatWidget.classList.contains('maximized')) {
         document.body.style.overflow = 'hidden';
-        // Set initial height
         if (window.visualViewport) {
           chatWidget.style.height = window.visualViewport.height + 'px';
           chatWidget.style.bottom = 'auto';
@@ -134,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = '';
         chatWidget.style.height = '';
         chatWidget.style.bottom = '';
+        chatWidget.classList.remove('keyboard-open');
       }
       
       setTimeout(() => {
@@ -142,19 +142,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 📱 Mobile Keyboard Fix - VisualViewport API
+  // 📱 Mobile Keyboard Fix - Works for both maximized AND normal mode
   if (window.visualViewport) {
     const adjustChatHeight = () => {
-      if (chatWidget && chatWidget.classList.contains('maximized')) {
-        const viewportHeight = window.visualViewport.height;
+      if (!chatWidget || !chatWidget.classList.contains('active')) return;
+
+      const viewportHeight = window.visualViewport.height;
+      const windowHeight = window.innerHeight;
+      const keyboardHeight = windowHeight - viewportHeight;
+
+      if (chatWidget.classList.contains('maximized')) {
+        // MAXIMIZED mode: full screen, adjust height
         chatWidget.style.height = viewportHeight + 'px';
         chatWidget.style.bottom = 'auto';
         chatWidget.classList.add('keyboard-open');
-        
-        setTimeout(() => {
-          chatMessages.scrollTop = chatMessages.scrollHeight;
-        }, 100);
+      } else {
+        // NORMAL mode: shift chat widget UP so input is above keyboard
+        if (keyboardHeight > 150) {
+          chatWidget.style.bottom = keyboardHeight + 'px';
+          chatWidget.classList.add('keyboard-open');
+        } else {
+          chatWidget.style.bottom = '';
+          chatWidget.classList.remove('keyboard-open');
+        }
       }
+
+      setTimeout(() => {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }, 100);
     };
 
     window.visualViewport.addEventListener('resize', adjustChatHeight);

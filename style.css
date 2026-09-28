@@ -531,6 +531,7 @@ section h2 {
   z-index: 9999;
   font-family: 'Space Grotesk', sans-serif;
   flex-direction: column;
+  transition: bottom 0.2s ease;
 }
 
 .ai-chat-widget.active {
@@ -762,7 +763,6 @@ section h2 {
   transition: height 0.15s ease;
 }
 
-/* Jab keyboard khule - JS se height set hogi */
 .ai-chat-widget.maximized.keyboard-open {
   bottom: auto !important;
 }
@@ -812,7 +812,14 @@ section h2 {
 }
 
 /* =========================================
-   16. RESPONSIVE / MOBILE
+   16. MOBILE KEYBOARD OPEN STATE (NORMAL MODE)
+   ========================================= */
+.ai-chat-widget.keyboard-open:not(.maximized) {
+  transition: bottom 0.2s ease;
+}
+
+/* =========================================
+   17. RESPONSIVE / MOBILE
    ========================================= */
 @media (max-width: 600px) {
   .movie-poster-large {
