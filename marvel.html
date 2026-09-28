@@ -9,97 +9,23 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
   <header>
-    <a href="index.html" style="text-decoration:none; color:inherit;">
-      <h1>NEXUS</h1>
-    </a>
+    <a href="index.html" style="text-decoration:none; color:inherit;"><h1>NEXUS</h1></a>
     <p>Marvel</p>
   </header>
-
   <section id="marvel">
     <h2>Marvel</h2>
     <div class="card-container">
-      
-      <!-- Iron Man -->
-      <a href="ironman.html" class="poster-link">
-        <div class="poster-card"><img src="images/marvel/iron%20man.jpg.jpg" alt="Iron Man"><p>Iron Man</p></div>
-      </a>
-      
-      <!-- Iron Man 2 -->
-      <a href="ironman2.html" class="poster-link">
-        <div class="poster-card"><img src="images/marvel/iron%20man2.jpg.jpg" alt="Iron Man 2"><p>Iron Man 2</p></div>
-      </a>
-      
-      <!-- Spider-Man 2 -->
-      <a href="spiderman2.html" class="poster-link">
-        <div class="poster-card"><img src="images/marvel/spiderman2.jpg" alt="Spider-Man 2"><p>Spider-Man 2</p></div>
-      </a>
-      
-      <!-- Thor -->
-      <a href="thor.html" class="poster-link">
-        <div class="poster-card"><img src="images/marvel/thor.jpg.jpg" alt="Thor"><p>Thor</p></div>
-      </a>
-
+      <a href="ironman.html" class="poster-link"><div class="poster-card"><img src="images/marvel/iron%20man.jpg.jpg" alt="Iron Man"><p>Iron Man</p></div></a>
+      <a href="ironman2.html" class="poster-link"><div class="poster-card"><img src="images/marvel/iron%20man2.jpg.jpg" alt="Iron Man 2"><p>Iron Man 2</p></div></a>
+      <a href="spiderman2.html" class="poster-link"><div class="poster-card"><img src="images/marvel/spiderman2.jpg" alt="Spider-Man 2"><p>Spider-Man 2</p></div></a>
+      <a href="thor.html" class="poster-link"><div class="poster-card"><img src="images/marvel/thor.jpg.jpg" alt="Thor"><p>Thor</p></div></a>
     </div>
   </section>
-
-  
-<div class="feedback-section">
-  <h3>📩 Send Feedback</h3>
-  <p>Found a broken link? Have a suggestion? Send us a message!</p>
-  <form id="feedbackForm">
-    <input type="text" id="feedbackName" placeholder="Your name (optional)" />
-    <textarea id="feedbackMessage" placeholder="Type your message here..." required></textarea>
-    <button type="submit" id="feedbackSubmit">Send Message</button>
-  </form>
-  <p id="feedbackStatus"></p>
-</div>
-
-<script>
-  document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('feedbackName').value.trim();
-    const message = document.getElementById('feedbackMessage').value.trim();
-    const statusEl = document.getElementById('feedbackStatus');
-    const submitBtn = document.getElementById('feedbackSubmit');
-
-    if (!message) return;
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Sending...';
-    statusEl.textContent = '';
-
-    try {
-      const res = await fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, message })
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        statusEl.textContent = '✅ Thanks! Your feedback has been sent.';
-        statusEl.style.color = '#2ecc71';
-        document.getElementById('feedbackForm').reset();
-      } else {
-        statusEl.textContent = '❌ Something went wrong. Please try again.';
-        statusEl.style.color = '#e74c3c';
-      }
-    } catch (err) {
-      statusEl.textContent = '❌ Network error. Please try again.';
-      statusEl.style.color = '#e74c3c';
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Send Message';
-    }
-  });
-</script>
-
-<footer>
+  <footer>
     <p class="watermark">Handled by <strong>Abhinav</strong> with Team <strong>Alpha</strong></p>
     <p class="contact">abhinavchamoli00@gmail.com</p>
   </footer>
-
+  <script src="script.js"></script>
 </body>
 </html>
