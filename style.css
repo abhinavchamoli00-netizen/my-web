@@ -759,6 +759,12 @@ section h2 {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  transition: height 0.15s ease;
+}
+
+/* Jab keyboard khule - JS se height set hogi */
+.ai-chat-widget.maximized.keyboard-open {
+  bottom: auto !important;
 }
 
 .ai-chat-widget.maximized .ai-chat-header {

@@ -110,11 +110,14 @@ document.addEventListener('DOMContentLoaded', () => {
       e.stopPropagation();
       chatWidget.classList.remove('active');
       chatWidget.classList.remove('maximized');
+      chatWidget.classList.remove('keyboard-open');
+      chatWidget.style.height = '';
+      chatWidget.style.bottom = '';
       document.body.style.overflow = '';
     });
   }
 
-  // ✨ Maximize Button Toggle (with body scroll lock)
+  // ✨ Maximize Button Toggle
   if (chatMaximize) {
     chatMaximize.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -122,14 +125,40 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (chatWidget.classList.contains('maximized')) {
         document.body.style.overflow = 'hidden';
+        // Set initial height
+        if (window.visualViewport) {
+          chatWidget.style.height = window.visualViewport.height + 'px';
+          chatWidget.style.bottom = 'auto';
+        }
       } else {
         document.body.style.overflow = '';
+        chatWidget.style.height = '';
+        chatWidget.style.bottom = '';
       }
       
       setTimeout(() => {
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }, 100);
     });
+  }
+
+  // 📱 Mobile Keyboard Fix - VisualViewport API
+  if (window.visualViewport) {
+    const adjustChatHeight = () => {
+      if (chatWidget && chatWidget.classList.contains('maximized')) {
+        const viewportHeight = window.visualViewport.height;
+        chatWidget.style.height = viewportHeight + 'px';
+        chatWidget.style.bottom = 'auto';
+        chatWidget.classList.add('keyboard-open');
+        
+        setTimeout(() => {
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 100);
+      }
+    };
+
+    window.visualViewport.addEventListener('resize', adjustChatHeight);
+    window.visualViewport.addEventListener('scroll', adjustChatHeight);
   }
 
   if (chatForm) {
