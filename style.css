@@ -887,6 +887,43 @@ section h2 {
   font-style: italic;
 }
 
+/* =========================================
+   CHAT MESSAGE WRAPPER (for image + text)
+   ========================================= */
+.ai-msg-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 90%;
+  align-items: flex-start;
+}
+
+.ai-msg-wrapper-user {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.ai-msg-wrapper-bot {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.ai-msg-wrapper > .ai-msg {
+  max-width: 100%;
+}
+
+/* Image inside wrapper has NO background */
+.ai-msg-wrapper > .ai-msg-image {
+  margin-top: 0;
+}
+
+.ai-msg-wrapper > .analyze-btn {
+  margin-top: 0;
+}
+
+/* =========================================
+   16. AI CHAT INPUT
+   ========================================= */
 .ai-chat-input {
   display: flex;
   padding: 10px;
@@ -937,7 +974,7 @@ section h2 {
 }
 
 /* =========================================
-   16. AI MESSAGE FORMATTING STYLES
+   17. AI MESSAGE FORMATTING
    ========================================= */
 .ai-msg-bot strong {
   color: #ffffff;
@@ -971,7 +1008,7 @@ section h2 {
 }
 
 /* =========================================
-   17. CHAT MAXIMIZE / FULLSCREEN MODE
+   18. CHAT MAXIMIZE / FULLSCREEN MODE
    ========================================= */
 .ai-chat-widget.maximized {
   top: 0 !important;
@@ -1040,7 +1077,7 @@ section h2 {
 }
 
 /* =========================================
-   18. MOBILE KEYBOARD OPEN STATE
+   19. MOBILE KEYBOARD OPEN STATE
    ========================================= */
 .ai-chat-widget.keyboard-open:not(.maximized) {
   overflow: hidden;
@@ -1068,7 +1105,7 @@ section h2 {
 }
 
 /* =========================================
-   19. CHAT VOICE & IMAGE FEATURES
+   20. CHAT VOICE & IMAGE FEATURES
    ========================================= */
 .chat-action-btn {
   background-color: #1c1b22;
@@ -1137,15 +1174,14 @@ section h2 {
   justify-content: center;
 }
 
-/* Chat message image - smaller */
+/* Chat message image - NO purple bg, just image */
 .ai-msg-image {
-  max-width: 120px;
-  max-height: 120px;
+  max-width: 140px;
+  max-height: 140px;
   width: auto;
   height: auto;
   object-fit: cover;
   border-radius: 10px;
-  margin-top: 8px;
   display: block;
   cursor: pointer;
   transition: transform 0.2s ease;
@@ -1156,11 +1192,11 @@ section h2 {
 }
 
 /* =========================================
-   ANALYZE BUTTON - MAGIC ANIMATION
+   ANALYZE BUTTON - Normal dark bg
    ========================================= */
 .analyze-btn {
   position: relative;
-  background: transparent;
+  background: #1c1b22;
   color: #a29bfe;
   border: 1px solid rgba(108, 92, 231, 0.5);
   padding: 7px 16px;
@@ -1168,7 +1204,6 @@ section h2 {
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 8px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1237,7 +1272,6 @@ section h2 {
   opacity: 0;
 }
 
-/* When analyzed successfully, fade out and remove */
 .analyze-btn.analyzed {
   opacity: 0 !important;
   transform: scale(0.8);
@@ -1270,7 +1304,6 @@ section h2 {
   color: #fff;
 }
 
-/* PURPLE STOP BUTTON */
 .msg-speak-btn.speaking-active {
   background: linear-gradient(135deg, #6c5ce7, #7b4fbf);
   color: #fff;
@@ -1282,26 +1315,20 @@ section h2 {
   50% { box-shadow: 0 0 0 8px rgba(108, 92, 231, 0); }
 }
 
-/* Word highlight during speech */
 .speak-word {
-  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
-  border-radius: 4px;
-  padding: 1px 3px;
+  transition: background-color 0.1s ease, color 0.1s ease;
+  border-radius: 3px;
+  padding: 0;
   display: inline;
 }
 
 .speak-word.speaking {
   background-color: #6c5ce7;
   color: #ffffff;
-  animation: wordPop 0.4s ease;
-  box-shadow: 0 0 12px rgba(108, 92, 231, 0.8);
+  border-radius: 4px;
+  padding: 1px 3px;
   font-weight: 600;
-}
-
-@keyframes wordPop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.12); }
-  100% { transform: scale(1); }
+  box-shadow: 0 0 10px rgba(108, 92, 231, 0.8);
 }
 
 /* =========================================
@@ -1331,7 +1358,7 @@ section h2 {
 }
 
 /* =========================================
-   20. RESPONSIVE / MOBILE
+   21. RESPONSIVE / MOBILE
    ========================================= */
 @media (max-width: 600px) {
   .movie-poster-large {
@@ -1464,7 +1491,7 @@ section h2 {
   }
 
   .ai-msg-image {
-    max-width: 100px;
-    max-height: 100px;
+    max-width: 110px;
+    max-height: 110px;
   }
 }

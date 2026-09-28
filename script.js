@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const path = window.location.pathname;
   const isHomePage = path.endsWith('/') || path.endsWith('index.html') || path === '';
 
-  // 1. AUTO-REMOVE FEEDBACK FORM (Non-Home Pages)
   if (!isHomePage) {
     const feedbackSection = document.querySelector('.feedback-section');
     if (feedbackSection) feedbackSection.remove();
@@ -15,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (commentsSection) commentsSection.remove();
   }
 
-  // 2. VISITOR TRACKING
   const hasTrackedVisit = sessionStorage.getItem('nexus_visit_tracked');
   if (!hasTrackedVisit) {
     sessionStorage.setItem('nexus_visit_tracked', 'true');
@@ -165,7 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (data.success && Array.isArray(data.comments)) {
         const newHash = JSON.stringify(data.comments);
-        
         if (newHash === lastCommentsHash) return;
         lastCommentsHash = newHash;
         
@@ -231,9 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
           renderComment(data.comment, true);
           lastCommentsHash = '';
 
-          setTimeout(() => {
-            commentStatus.textContent = '';
-          }, 3000);
+          setTimeout(() => { commentStatus.textContent = ''; }, 3000);
         } else {
           commentStatus.textContent = '❌ ' + (data.details || data.error || 'Something went wrong.');
           commentStatus.style.color = '#e74c3c';
@@ -466,8 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
       chatInput.value = transcript;
     };
 
-    recognition.onerror = (event) => {
-      console.log('Voice error:', event.error);
+    recognition.onerror = () => {
       isRecording = false;
       if (voiceBtn) voiceBtn.classList.remove('recording');
       chatInput.placeholder = 'Type your message...';
@@ -495,7 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // 📎 IMAGE UPLOAD (with compression)
+  // 📎 IMAGE UPLOAD
   // =========================================
   const imageBtn = document.getElementById('imageBtn');
   const imageInput = document.getElementById('imageInput');
@@ -563,21 +557,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // 🔊 TEXT-TO-SPEECH WITH WORD HIGHLIGHT
+  // 🔊 TEXT-TO-SPEECH WITH PERFECT SYNC
   // =========================================
   let currentlySpeaking = false;
   let currentSpeakBtn = null;
   let currentMessageEl = null;
-  let currentWordMap = [];
-  let highlightTimer = null;
+  let currentPosMap = [];
 
   function stopSpeaking() {
     if ('speechSynthesis' in window) {
       speechSynthesis.cancel();
-    }
-    if (highlightTimer) {
-      clearTimeout(highlightTimer);
-      highlightTimer = null;
     }
     if (currentMessageEl) {
       currentMessageEl.querySelectorAll('.speak-word.speaking').forEach(el => {
@@ -591,160 +580,146 @@ document.addEventListener('DOMContentLoaded', () => {
     currentlySpeaking = false;
     currentSpeakBtn = null;
     currentMessageEl = null;
-    currentWordMap = [];
+    currentPosMap = [];
   }
 
-  function wrapWordsForSpeech(rootEl) {
+  // Prepare message DOM for TTS and build char position map
+  function prepareForTTS(rootEl) {
+    // Unwrap previous wrapping
     if (rootEl.dataset.speechWrapped === 'true') {
-      const spans = rootEl.querySelectorAll('.speak-word');
-      return Array.from(spans).map(span => ({
-        start: parseInt(span.dataset.start),
-        end: parseInt(span.dataset.end),
-        span,
-        word: span.textContent
-      }));
+      rootEl.querySelectorAll('.speak-word').forEach(span => {
+        const text = document.createTextNode(span.textContent);
+        span.parentNode.replaceChild(text, span);
+      });
+      delete rootEl.dataset.speechWrapped;
     }
-    
-    const walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT, {
-      acceptNode: (node) => {
-        if (!node.textContent.trim()) return NodeFilter.FILTER_REJECT;
-        if (node.parentElement && node.parentElement.closest('.msg-speak-btn')) {
-          return NodeFilter.FILTER_REJECT;
-        }
-        return NodeFilter.FILTER_ACCEPT;
-      }
-    });
-    
+
     const textNodes = [];
+    const walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT);
     let node;
-    while (node = walker.nextNode()) {
+    while ((node = walker.nextNode())) {
+      if (node.parentElement && node.parentElement.closest('.msg-speak-btn')) continue;
+      if (!node.textContent) continue;
       textNodes.push(node);
     }
-    
-    let cumulativeIndex = 0;
-    const wordMap = [];
-    
+
+    let cleanText = '';
+    const posMap = [];
+
     textNodes.forEach(textNode => {
       const text = textNode.textContent;
       const fragment = document.createDocumentFragment();
       const parts = text.split(/(\s+)/);
-      
+
       parts.forEach(part => {
-        if (part === '') return;
+        if (!part) return;
+
         if (/^\s+$/.test(part)) {
           fragment.appendChild(document.createTextNode(part));
-          cumulativeIndex += part.length;
+          cleanText += part;
         } else {
+          // Clean emojis/markdown from this word for TTS
+          const cleanWord = part.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').replace(/[*#_`~]/g, '');
+
+          if (!cleanWord) {
+            // Only emojis/symbols — keep in DOM but not in clean text
+            fragment.appendChild(document.createTextNode(part));
+            return;
+          }
+
           const span = document.createElement('span');
           span.className = 'speak-word';
           span.textContent = part;
-          span.dataset.start = cumulativeIndex;
-          span.dataset.end = cumulativeIndex + part.length;
-          wordMap.push({ 
-            start: cumulativeIndex, 
-            end: cumulativeIndex + part.length, 
-            span,
-            word: part
-          });
+
+          const start = cleanText.length;
+          cleanText += cleanWord;
+          const end = cleanText.length;
+
+          posMap.push({ charStart: start, charEnd: end, span });
           fragment.appendChild(span);
-          cumulativeIndex += part.length;
         }
       });
-      
+
       textNode.parentNode.replaceChild(fragment, textNode);
     });
-    
+
     rootEl.dataset.speechWrapped = 'true';
-    return wordMap;
+    return { cleanText, posMap };
   }
 
   function speakWithHighlight(messageDiv, speakBtn, text, lang = 'en-IN') {
     if (!('speechSynthesis' in window)) return;
-    
-    if (currentlySpeaking) {
+
+    // If same button is speaking, stop it
+    if (currentlySpeaking && currentSpeakBtn === speakBtn) {
       stopSpeaking();
-      if (currentSpeakBtn === speakBtn) return;
+      return;
     }
-    
+
+    stopSpeaking();
     speechSynthesis.cancel();
-    
-    const wordMap = wrapWordsForSpeech(messageDiv);
-    currentWordMap = wordMap;
+
+    const { cleanText, posMap } = prepareForTTS(messageDiv);
+
+    if (!cleanText.trim()) {
+      stopSpeaking();
+      return;
+    }
+
     currentMessageEl = messageDiv;
     currentSpeakBtn = speakBtn;
+    currentPosMap = posMap;
     currentlySpeaking = true;
-    
+
     speakBtn.innerHTML = '⏹ Stop';
     speakBtn.classList.add('speaking-active');
-    
-    const clean = text
-      .replace(/[*#_`~]/g, '')
-      .replace(/•/g, ',')
-      .replace(/[\u{1F300}-\u{1F9FF}]/gu, '')
-      .trim();
-    
-    const wrappedWords = wordMap.filter(w => w.word && w.word.trim().length > 0);
-    const wordDuration = 380;
-    
-    const utterance = new SpeechSynthesisUtterance(clean);
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = lang;
     utterance.rate = 1;
     utterance.pitch = 1;
-    
-    let timerUsed = false;
-    
-    utterance.onstart = () => {
-      // Fallback: use timer-based highlighting
-      timerUsed = true;
-      let wordIndex = 0;
-      
-      const highlightNext = () => {
-        if (!currentlySpeaking) return;
-        if (wordIndex >= wrappedWords.length) return;
-        
-        wordMap.forEach(w => w.span.classList.remove('speaking'));
-        
-        if (wrappedWords[wordIndex]) {
-          wrappedWords[wordIndex].span.classList.add('speaking');
-          wrappedWords[wordIndex].span.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        }
-        
-        wordIndex++;
-        highlightTimer = setTimeout(highlightNext, wordDuration);
-      };
-      
-      highlightNext();
-    };
-    
-    // If browser supports onboundary (more accurate), use it
+
+    // 🔥 PERFECT SYNC: onboundary fires exactly when each word is spoken
     utterance.onboundary = (e) => {
-      if (timerUsed) {
-        if (highlightTimer) {
-          clearTimeout(highlightTimer);
-          highlightTimer = null;
-        }
-      }
+      if (!currentlySpeaking) return;
       
       const charIndex = e.charIndex;
-      wordMap.forEach(w => w.span.classList.remove('speaking'));
-      const match = wordMap.find(w => charIndex >= w.start && charIndex < w.end);
-      if (match) {
+      
+      // Find the span that contains this character position
+      let match = null;
+      for (const p of posMap) {
+        if (charIndex >= p.charStart && charIndex < p.charEnd) {
+          match = p;
+          break;
+        }
+      }
+      
+      if (match && match.span) {
+        // Clear previous highlights
+        posMap.forEach(p => {
+          if (p.span) p.span.classList.remove('speaking');
+        });
+        // Highlight current word
         match.span.classList.add('speaking');
+        
+        // Auto-scroll if needed
+        try {
+          match.span.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        } catch (err) {}
       }
     };
-    
+
     utterance.onend = () => {
       stopSpeaking();
     };
-    
+
     utterance.onerror = () => {
       stopSpeaking();
     };
-    
+
     speechSynthesis.speak(utterance);
   }
 
-  // Finalize analyze button (fade out)
   function finalizeAnalyzeButton(btn) {
     if (!btn) return;
     btn.classList.add('analyzed');
@@ -822,9 +797,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // 🔥 User message with image
-      const userMsgDiv = addChatMessageWithImage(message, 'user', currentImage);
+      const wrapper = addChatMessageWithImage(message, 'user', currentImage);
       
-      // Analyze button
       let analyzeBtnEl = null;
       if (currentImage) {
         analyzeBtnEl = document.createElement('button');
@@ -837,15 +811,13 @@ document.addEventListener('DOMContentLoaded', () => {
           analyzeBtnEl.disabled = true;
           analyzeBtnEl.innerHTML = '⏳ Analyzing...';
           
-          sendToAIWithCallback(
+          sendToAI(
             'Please analyze this image in detail. Tell me what you see.',
             imageToAnalyze,
-            () => {
-              finalizeAnalyzeButton(analyzeBtnEl);
-            }
+            analyzeBtnEl
           );
         });
-        userMsgDiv.appendChild(analyzeBtnEl);
+        wrapper.appendChild(analyzeBtnEl);
       }
 
       chatInput.value = '';
@@ -870,7 +842,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Send message to AI (with optional analyze button finalize)
   async function sendToAI(message, imageData, analyzeBtn) {
     if (isChatSending) return;
     
@@ -885,9 +856,7 @@ document.addEventListener('DOMContentLoaded', () => {
         history: chatHistory.slice(-10)
       };
       
-      if (imageData) {
-        payload.image = imageData;
-      }
+      if (imageData) payload.image = imageData;
 
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -919,18 +888,7 @@ document.addEventListener('DOMContentLoaded', () => {
       isChatSending = false;
       if (sendBtn) sendBtn.disabled = false;
       
-      // Fade out analyze button after response
-      if (analyzeBtn) {
-        finalizeAnalyzeButton(analyzeBtn);
-      }
-    }
-  }
-
-  // Send with callback
-  async function sendToAIWithCallback(message, imageData, onComplete) {
-    await sendToAI(message, imageData, null);
-    if (typeof onComplete === 'function') {
-      onComplete();
+      if (analyzeBtn) finalizeAnalyzeButton(analyzeBtn);
     }
   }
 
@@ -938,17 +896,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // CHAT MESSAGE HELPERS
   // =========================================
   function addChatMessageWithImage(text, type, imageData) {
-    const div = document.createElement('div');
-    div.className = 'ai-msg ' + (type === 'user' ? 'ai-msg-user' : 'ai-msg-bot');
+    // Wrapper: text bubble (purple for user) + image (no bg) + button (no bg)
+    const wrapper = document.createElement('div');
+    wrapper.className = 'ai-msg-wrapper ' + (type === 'user' ? 'ai-msg-wrapper-user' : 'ai-msg-wrapper-bot');
 
     if (text) {
-      const textNode = document.createElement('div');
+      const textBubble = document.createElement('div');
+      textBubble.className = 'ai-msg ' + (type === 'user' ? 'ai-msg-user' : 'ai-msg-bot');
       if (type === 'bot') {
-        textNode.innerHTML = formatAIResponse(text);
+        textBubble.innerHTML = formatAIResponse(text);
       } else {
-        textNode.textContent = text;
+        textBubble.textContent = text;
       }
-      div.appendChild(textNode);
+      wrapper.appendChild(textBubble);
     }
 
     if (imageData) {
@@ -956,12 +916,12 @@ document.addEventListener('DOMContentLoaded', () => {
       img.className = 'ai-msg-image';
       img.src = imageData;
       img.onclick = () => window.open(imageData, '_blank');
-      div.appendChild(img);
+      wrapper.appendChild(img);
     }
 
-    chatMessages.appendChild(div);
+    chatMessages.appendChild(wrapper);
     chatMessages.scrollTop = chatMessages.scrollHeight;
-    return div;
+    return wrapper;
   }
 
   function formatAIResponse(text) {
@@ -1004,12 +964,7 @@ document.addEventListener('DOMContentLoaded', () => {
         speakBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           const isHindi = /[\u0900-\u097F]/.test(text);
-          
-          if (currentlySpeaking && currentSpeakBtn === speakBtn) {
-            stopSpeaking();
-          } else {
-            speakWithHighlight(div, speakBtn, text, isHindi ? 'hi-IN' : 'en-IN');
-          }
+          speakWithHighlight(div, speakBtn, text, isHindi ? 'hi-IN' : 'en-IN');
         });
         div.appendChild(speakBtn);
       }
