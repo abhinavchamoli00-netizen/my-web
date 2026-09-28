@@ -52,34 +52,49 @@ Always be respectful and warm.` }
 
   messages.push({ role: 'user', content: message });
 
-  try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'qwen/qwen3.6-27b', // ✅ Ye model free tier mein available hai
-        messages: messages,
-        temperature: 0.7,
-        max_tokens: 500
-      })
-    });
+  // List of models to try in order (fallback chain)
+  const modelsToTry = [
+    'openai/gpt-oss-120b',
+    'qwen/qwen3-32b',
+    'qwen/qwen3.6-27b'
+  ];
 
-    const data = await response.json();
+  let lastError = null;
 
-    if (!response.ok) {
-      return res.status(500).json({ 
-        error: 'Groq API failed', 
-        details: data.error?.message || 'Unknown error' 
+  for (const modelName of modelsToTry) {
+    try {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: modelName,
+          messages: messages,
+          temperature: 0.7,
+          max_tokens: 500
+        })
       });
+
+      const data = await response.json();
+
+      if (response.ok && data.choices && data.choices[0]) {
+        const aiText = data.choices[0].message?.content || "Sorry, I couldn't generate a response.";
+        return res.status(200).json({ success: true, reply: aiText.trim(), model: modelName });
+      }
+
+      // Store error and try next model
+      lastError = data.error?.message || 'Unknown error';
+      
+    } catch (err) {
+      lastError = err.message;
     }
-
-    const aiText = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
-    return res.status(200).json({ success: true, reply: aiText.trim() });
-
-  } catch (error) {
-    return res.status(500).json({ error: 'Internal error', details: error.message });
   }
+
+  // Agar saare models fail ho gaye
+  return res.status(500).json({ 
+    error: 'All AI models failed', 
+    details: lastError || 'Please check your Groq API key and try again later.' 
+  });
 };
