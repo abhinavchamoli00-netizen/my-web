@@ -158,6 +158,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ✨ Markdown Formatter for AI responses
+  function formatAIResponse(text) {
+    let html = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
+    html = html.replace(/^#{1,4}\s*(.+)$/gm, '<div class="ai-heading">$1</div>');
+    html = html.replace(/^(\d+)\.\s+(.+)$/gm, '<div class="ai-bullet">$1. $2</div>');
+    html = html.replace(/^[•\-]\s+(.+)$/gm, '<div class="ai-bullet">• $1</div>');
+    html = html.replace(/\n/g, '<br>');
+
+    html = html.replace(/<br>(<div class="ai-heading">)/g, '$1');
+    html = html.replace(/<br>(<div class="ai-bullet">)/g, '$1');
+    html = html.replace(/(<\/div>)<br>/g, '$1');
+    html = html.replace(/(<br>){2,}/g, '<div class="ai-spacer"></div>');
+
+    return html;
+  }
+
   function addChatMessage(text, type) {
     const div = document.createElement('div');
     div.className = 'ai-msg ' + (
@@ -165,7 +187,13 @@ document.addEventListener('DOMContentLoaded', () => {
       type === 'typing' ? 'ai-msg-typing' : 
       'ai-msg-bot'
     );
-    div.textContent = text;
+
+    if (type === 'bot' && text) {
+      div.innerHTML = formatAIResponse(text);
+    } else {
+      div.textContent = text;
+    }
+
     chatMessages.appendChild(div);
     chatMessages.scrollTop = chatMessages.scrollHeight;
     return div;

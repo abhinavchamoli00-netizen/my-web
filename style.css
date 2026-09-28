@@ -625,6 +625,8 @@ section h2 {
   color: #e0e0e0;
   align-self: flex-start;
   border-bottom-left-radius: 4px;
+  line-height: 1.7;
+  max-width: 90%;
 }
 
 .ai-msg-user {
@@ -686,7 +688,41 @@ section h2 {
 }
 
 /* =========================================
-   14. RESPONSIVE / MOBILE
+   14. AI MESSAGE FORMATTING STYLES
+   ========================================= */
+.ai-msg-bot strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.ai-msg-bot em {
+  color: #e0e0e0;
+  font-style: italic;
+}
+
+.ai-heading {
+  color: #a29bfe;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin: 8px 0 5px 0;
+  letter-spacing: 0.2px;
+}
+
+.ai-bullet {
+  display: block;
+  padding-left: 4px;
+  margin: 4px 0;
+  line-height: 1.6;
+  color: #e0e0e0;
+}
+
+.ai-spacer {
+  height: 10px;
+  display: block;
+}
+
+/* =========================================
+   15. RESPONSIVE / MOBILE
    ========================================= */
 @media (max-width: 600px) {
   .movie-poster-large {
