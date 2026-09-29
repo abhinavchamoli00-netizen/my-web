@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Console</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0b0a13;
+      color: #fff;
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .lock-screen {
+      background: #141414;
+      padding: 35px 30px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 360px;
+      border: 1px solid rgba(108, 92, 231, 0.25);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+    .lock-screen h2 {
+      color: #a29bfe;
+      font-size: 1.2rem;
+      margin-bottom: 6px;
+    }
+    .lock-screen p {
+      color: #888;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+    }
+    .lock-screen input {
+      width: 100%;
+      padding: 12px 15px;
+      background: #1c1b22;
+      border: 1px solid rgba(108, 92, 231, 0.3);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      margin-bottom: 12px;
+      font-family: inherit;
+      text-align: center;
+      letter-spacing: 3px;
+    }
+    .lock-screen input:focus { border-color: #6c5ce7; }
+    .lock-screen button {
+      width: 100%;
+      padding: 12px;
+      background: #6c5ce7;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: 0.2s;
+    }
+    .lock-screen button:hover { background: #4e3ec9; }
+    .lock-screen .err {
+      color: #e74c3c;
+      font-size: 0.8rem;
+      margin-top: 10px;
+      min-height: 16px;
+    }
+    .panel {
+      display: none;
+      width: 100%;
+      max-width: 700px;
+    }
+    .panel.active { display: block; }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .panel-header h2 {
+      color: #a29bfe;
+      font-size: 1.3rem;
+    }
+    .panel-header .actions { display: flex; gap: 8px; }
+    .panel-header button {
+      background: #1c1b22;
+      color: #e0e0e0;
+      border: 1px solid rgba(108, 92, 231, 0.3);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: 0.2s;
+    }
+    .panel-header button:hover { background: #2a2935; }
+    .panel-header button.danger { color: #e74c3c; border-color: rgba(231, 76, 60, 0.4); }
+    .panel-header button.danger:hover { background: rgba(231, 76, 60, 0.15); }
+    .list { display: flex; flex-direction: column; gap: 10px; }
+    .c-card {
+      background: #141414;
+      border-radius: 12px;
+      padding: 14px 16px;
+      border: 1px solid rgba(108, 92, 231, 0.15);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .c-card .meta { flex: 1; }
+    .c-card .who {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .c-card .av {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6c5ce7, #7b4fbf);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .c-card .nm { font-weight: 600; font-size: 0.85rem; color: #fff; }
+    .c-card .tm { color: #666; font-size: 0.7rem; }
+    .c-card .msg {
+      color: #ccc;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+    .c-card .del {
+      background: rgba(231, 76, 60, 0.1);
+      color: #e74c3c;
+      border: 1px solid rgba(231, 76, 60, 0.3);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-family: inherit;
+      flex-shrink: 0;
+      transition: 0.2s;
+    }
+    .c-card .del:hover { background: #e74c3c; color: #fff; }
+    .empty {
+      color: #666;
+      text-align: center;
+      padding: 30px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="lock-screen" id="lockScreen">
+    <h2>🔒 Access Required</h2>
+    <p>Enter passcode to continue</p>
+    <input type="password" id="passInput" placeholder="••••" maxlength="12" />
+    <button id="unlockBtn">Unlock</button>
+    <div class="err" id="errMsg"></div>
+  </div>
+
+  <div class="panel" id="panel">
+    <div class="panel-header">
+      <h2>💬 Manage Comments</h2>
+      <div class="actions">
+        <button id="refreshBtn">Refresh</button>
+        <button id="clearBtn" class="danger">Clear All</button>
+        <button id="lockBtn">Lock</button>
+      </div>
+    </div>
+    <div class="list" id="list"></div>
+  </div>
+
+<script>
+(function() {
+  const lockScreen = document.getElementById('lockScreen');
+  const panel = document.getElementById('panel');
+  const passInput = document.getElementById('passInput');
+  const unlockBtn = document.getElementById('unlockBtn');
+  const errMsg = document.getElementById('errMsg');
+  const list = document.getElementById('list');
+  const refreshBtn = document.getElementById('refreshBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const lockBtn = document.getElementById('lockBtn');
+
+  let storedPass = sessionStorage.getItem('_adm') || '';
+
+  // Lock screen hide if session valid
+  if (storedPass) {
+    verifyAndShow(storedPass);
+  }
+
+  async function verifyAndShow(pass) {
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass, action: 'verify' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        sessionStorage.setItem('_adm', pass);
+        lockScreen.style.display = 'none';
+        panel.classList.add('active');
+        renderComments(data.comments || []);
+      } else {
+        sessionStorage.removeItem('_adm');
+      }
+    } catch (e) {}
+  }
+
+  unlockBtn.addEventListener('click', async () => {
+    const pass = passInput.value.trim();
+    if (!pass) return;
+    errMsg.textContent = 'Verifying...';
+    errMsg.style.color = '#888';
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass, action: 'verify' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        sessionStorage.setItem('_adm', pass);
+        errMsg.textContent = '';
+        lockScreen.style.display = 'none';
+        panel.classList.add('active');
+        renderComments(data.comments || []);
+      } else {
+        errMsg.textContent = 'Wrong passcode';
+        errMsg.style.color = '#e74c3c';
+        passInput.value = '';
+      }
+    } catch (e) {
+      errMsg.textContent = 'Connection error';
+      errMsg.style.color = '#e74c3c';
+    }
+  });
+
+  passInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') unlockBtn.click();
+  });
+
+  function timeAgo(ts) {
+    const d = Date.now() - ts;
+    const s = Math.floor(d / 1000);
+    const m = Math.floor(s / 60);
+    const h = Math.floor(m / 60);
+    const dd = Math.floor(h / 24);
+    if (s < 30) return 'Just now';
+    if (s < 60) return s + 's ago';
+    if (m < 60) return m + 'm ago';
+    if (h < 24) return h + 'h ago';
+    if (dd < 7) return dd + 'd ago';
+    return new Date(ts).toLocaleDateString('en-IN');
+  }
+
+  function renderComments(comments) {
+    list.innerHTML = '';
+    if (!comments || comments.length === 0) {
+      const e = document.createElement('div');
+      e.className = 'empty';
+      e.textContent = 'No comments to display.';
+      list.appendChild(e);
+      return;
+    }
+    comments.forEach(c => {
+      const card = document.createElement('div');
+      card.className = 'c-card';
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+
+      const who = document.createElement('div');
+      who.className = 'who';
+
+      const av = document.createElement('div');
+      av.className = 'av';
+      av.textContent = (c.name || 'A').charAt(0).toUpperCase();
+
+      const nm = document.createElement('span');
+      nm.className = 'nm';
+      nm.textContent = c.name || 'Anonymous';
+
+      const tm = document.createElement('span');
+      tm.className = 'tm';
+      tm.textContent = timeAgo(c.timestamp || Date.now());
+
+      who.appendChild(av);
+      who.appendChild(nm);
+      who.appendChild(tm);
+
+      const msg = document.createElement('div');
+      msg.className = 'msg';
+      msg.textContent = c.message;
+
+      meta.appendChild(who);
+      meta.appendChild(msg);
+
+      const del = document.createElement('button');
+      del.className = 'del';
+      del.textContent = 'Delete';
+      del.addEventListener('click', () => deleteComment(c.id));
+
+      card.appendChild(meta);
+      card.appendChild(del);
+      list.appendChild(card);
+    });
+  }
+
+  async function deleteComment(id) {
+    const pass = sessionStorage.getItem('_adm');
+    if (!pass) return;
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass, action: 'delete', commentId: id })
+      });
+      const data = await res.json();
+      if (data.success) renderComments(data.comments || []);
+    } catch (e) {}
+  }
+
+  refreshBtn.addEventListener('click', () => {
+    const pass = sessionStorage.getItem('_adm');
+    if (pass) verifyAndShow(pass);
+  });
+
+  clearBtn.addEventListener('click', async () => {
+    if (!confirm('Delete ALL comments? This cannot be undone.')) return;
+    const pass = sessionStorage.getItem('_adm');
+    if (!pass) return;
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass, action: 'clear' })
+      });
+      const data = await res.json();
+      if (data.success) renderComments([]);
+    } catch (e) {}
+  });
+
+  lockBtn.addEventListener('click', () => {
+    sessionStorage.removeItem('_adm');
+    location.reload();
+  });
+})();
+</script>
+</body>
+</html>
