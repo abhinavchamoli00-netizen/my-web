@@ -83,12 +83,14 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 8px;
     }
     .panel-header h2 {
       color: #a29bfe;
       font-size: 1.3rem;
     }
-    .panel-header .actions { display: flex; gap: 8px; }
+    .panel-header .actions { display: flex; gap: 8px; flex-wrap: wrap; }
     .panel-header button {
       background: #1c1b22;
       color: #e0e0e0;
@@ -104,11 +106,17 @@
     .panel-header button.danger { color: #e74c3c; border-color: rgba(231, 76, 60, 0.4); }
     .panel-header button.danger:hover { background: rgba(231, 76, 60, 0.15); }
     .list { display: flex; flex-direction: column; gap: 10px; }
+
     .c-card {
       background: #141414;
       border-radius: 12px;
       padding: 14px 16px;
       border: 1px solid rgba(108, 92, 231, 0.15);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .c-card .top {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
@@ -140,19 +148,88 @@
       line-height: 1.5;
       word-wrap: break-word;
     }
-    .c-card .del {
-      background: rgba(231, 76, 60, 0.1);
-      color: #e74c3c;
-      border: 1px solid rgba(231, 76, 60, 0.3);
+    .c-card .btns { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
+    .c-card .btn {
+      background: rgba(108, 92, 231, 0.1);
+      color: #a29bfe;
+      border: 1px solid rgba(108, 92, 231, 0.3);
       padding: 6px 10px;
       border-radius: 8px;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       cursor: pointer;
       font-family: inherit;
-      flex-shrink: 0;
       transition: 0.2s;
     }
-    .c-card .del:hover { background: #e74c3c; color: #fff; }
+    .c-card .btn:hover { background: #6c5ce7; color: #fff; }
+    .c-card .btn.del {
+      background: rgba(231, 76, 60, 0.1);
+      color: #e74c3c;
+      border-color: rgba(231, 76, 60, 0.3);
+    }
+    .c-card .btn.del:hover { background: #e74c3c; color: #fff; }
+
+    .existing-reply {
+      background: #1c1b22;
+      border-left: 3px solid #6c5ce7;
+      padding: 8px 12px;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.8rem;
+      color: #b8b8b8;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .existing-reply .txt { flex: 1; }
+    .existing-reply .lbl {
+      color: #a29bfe;
+      font-weight: 700;
+      font-size: 0.7rem;
+      display: block;
+      margin-bottom: 3px;
+      letter-spacing: 0.5px;
+    }
+    .existing-reply .rm {
+      background: none;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0;
+    }
+    .existing-reply .rm:hover { color: #e74c3c; }
+
+    .reply-box {
+      display: none;
+      gap: 6px;
+    }
+    .reply-box.active { display: flex; }
+    .reply-box input {
+      flex: 1;
+      padding: 8px 12px;
+      background: #0f0f18;
+      border: 1px solid rgba(108, 92, 231, 0.3);
+      border-radius: 8px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.82rem;
+      outline: none;
+      min-width: 0;
+    }
+    .reply-box input:focus { border-color: #6c5ce7; }
+    .reply-box button {
+      background: #6c5ce7;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .reply-box button:hover { background: #4e3ec9; }
+
     .empty {
       color: #666;
       text-align: center;
@@ -197,10 +274,7 @@
 
   let storedPass = sessionStorage.getItem('_adm') || '';
 
-  // Lock screen hide if session valid
-  if (storedPass) {
-    verifyAndShow(storedPass);
-  }
+  if (storedPass) verifyAndShow(storedPass);
 
   async function verifyAndShow(pass) {
     try {
@@ -277,9 +351,14 @@
       list.appendChild(e);
       return;
     }
+
     comments.forEach(c => {
       const card = document.createElement('div');
       card.className = 'c-card';
+
+      // Top: meta + action buttons
+      const top = document.createElement('div');
+      top.className = 'top';
 
       const meta = document.createElement('div');
       meta.className = 'meta';
@@ -310,13 +389,81 @@
       meta.appendChild(who);
       meta.appendChild(msg);
 
+      const btns = document.createElement('div');
+      btns.className = 'btns';
+
+      const replyBtn = document.createElement('button');
+      replyBtn.className = 'btn';
+      replyBtn.textContent = c.reply ? 'Edit Reply' : 'Reply';
+      replyBtn.addEventListener('click', () => {
+        replyBox.classList.toggle('active');
+        if (replyBox.classList.contains('active')) replyInput.focus();
+      });
+
       const del = document.createElement('button');
-      del.className = 'del';
+      del.className = 'btn del';
       del.textContent = 'Delete';
       del.addEventListener('click', () => deleteComment(c.id));
 
-      card.appendChild(meta);
-      card.appendChild(del);
+      btns.appendChild(replyBtn);
+      btns.appendChild(del);
+
+      top.appendChild(meta);
+      top.appendChild(btns);
+
+      // Existing reply preview
+      let existingReply = null;
+      if (c.reply) {
+        existingReply = document.createElement('div');
+        existingReply.className = 'existing-reply';
+        const txt = document.createElement('div');
+        txt.className = 'txt';
+        const lbl = document.createElement('span');
+        lbl.className = 'lbl';
+        lbl.textContent = '↳ YOUR REPLY';
+        txt.appendChild(lbl);
+        txt.appendChild(document.createTextNode(c.reply));
+
+        const rm = document.createElement('button');
+        rm.className = 'rm';
+        rm.textContent = '✕';
+        rm.title = 'Remove reply';
+        rm.addEventListener('click', () => removeReply(c.id));
+
+        existingReply.appendChild(txt);
+        existingReply.appendChild(rm);
+      }
+
+      // Reply input box
+      const replyBox = document.createElement('div');
+      replyBox.className = 'reply-box';
+
+      const replyInput = document.createElement('input');
+      replyInput.type = 'text';
+      replyInput.placeholder = 'Type your reply...';
+      replyInput.maxLength = 400;
+      if (c.reply) replyInput.value = c.reply;
+
+      const sendReply = document.createElement('button');
+      sendReply.textContent = c.reply ? 'Update' : 'Send';
+      sendReply.addEventListener('click', () => {
+        const txt = replyInput.value.trim();
+        if (!txt) return;
+        sendReply.disabled = true;
+        sendReply.textContent = 'Saving...';
+        sendReplyAction(c.id, txt);
+      });
+
+      replyInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') sendReply.click();
+      });
+
+      replyBox.appendChild(replyInput);
+      replyBox.appendChild(sendReply);
+
+      card.appendChild(top);
+      if (existingReply) card.appendChild(existingReply);
+      card.appendChild(replyBox);
       list.appendChild(card);
     });
   }
@@ -329,6 +476,35 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: pass, action: 'delete', commentId: id })
+      });
+      const data = await res.json();
+      if (data.success) renderComments(data.comments || []);
+    } catch (e) {}
+  }
+
+  async function removeReply(id) {
+    if (!confirm('Remove your reply?')) return;
+    const pass = sessionStorage.getItem('_adm');
+    if (!pass) return;
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass, action: 'unreply', commentId: id })
+      });
+      const data = await res.json();
+      if (data.success) renderComments(data.comments || []);
+    } catch (e) {}
+  }
+
+  async function sendReplyAction(id, text) {
+    const pass = sessionStorage.getItem('_adm');
+    if (!pass) return;
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass, action: 'reply', commentId: id, replyText: text })
       });
       const data = await res.json();
       if (data.success) renderComments(data.comments || []);

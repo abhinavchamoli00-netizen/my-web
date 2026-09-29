@@ -14,8 +14,8 @@ module.exports = async function handler(req, res) {
   const password = body.password || '';
   const action = body.action || '';
   const commentId = body.commentId || '';
+  const replyText = (body.replyText || '').trim();
 
-  // Server-side password check
   const ADMIN_PASS = process.env.ADMIN_PASSWORD || '9272';
   if (password !== ADMIN_PASS) {
     return res.status(401).json({ success: false, error: 'Invalid credentials' });
@@ -45,6 +45,39 @@ module.exports = async function handler(req, res) {
       const before = comments.length;
       comments = comments.filter(c => c.id !== commentId);
       if (comments.length === before) return res.status(404).json({ error: 'Not found' });
+
+      const saveRes = await fetch(baseUrl, {
+        method: 'PUT', headers, body: JSON.stringify(comments)
+      });
+      if (!saveRes.ok) return res.status(500).json({ error: 'Save failed' });
+      return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
+    }
+
+    // Reply to comment
+    if (action === 'reply') {
+      if (!replyText) return res.status(400).json({ error: 'Reply text required' });
+      if (replyText.length > 400) return res.status(400).json({ error: 'Reply too long' });
+
+      const idx = comments.findIndex(c => c.id === commentId);
+      if (idx === -1) return res.status(404).json({ error: 'Comment not found' });
+
+      comments[idx].reply = replyText;
+      comments[idx].replyTimestamp = Date.now();
+
+      const saveRes = await fetch(baseUrl, {
+        method: 'PUT', headers, body: JSON.stringify(comments)
+      });
+      if (!saveRes.ok) return res.status(500).json({ error: 'Save failed' });
+      return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
+    }
+
+    // Remove reply
+    if (action === 'unreply') {
+      const idx = comments.findIndex(c => c.id === commentId);
+      if (idx === -1) return res.status(404).json({ error: 'Comment not found' });
+
+      delete comments[idx].reply;
+      delete comments[idx].replyTimestamp;
 
       const saveRes = await fetch(baseUrl, {
         method: 'PUT', headers, body: JSON.stringify(comments)

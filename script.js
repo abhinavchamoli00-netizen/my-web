@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let isCommentSubmitting = false;
   let lastCommentsHash = '';
 
-  function renderComment(comment, prepend = false) {
+    function renderComment(comment, prepend = false) {
     const card = document.createElement('div');
     card.className = 'comment-card';
     
@@ -128,8 +128,29 @@ document.addEventListener('DOMContentLoaded', () => {
     card.appendChild(header);
     card.appendChild(text);
     
-    if (prepend) commentsList.insertBefore(card, commentsList.firstChild);
-    else commentsList.appendChild(card);
+    // Admin reply (if exists)
+    if (comment.reply) {
+      const replyBlock = document.createElement('div');
+      replyBlock.className = 'comment-reply';
+      
+      const replyLabel = document.createElement('span');
+      replyLabel.className = 'comment-reply-label';
+      replyLabel.textContent = '↳ Admin Reply';
+      
+      const replyText = document.createElement('p');
+      replyText.className = 'comment-reply-text';
+      replyText.textContent = comment.reply;
+      
+      replyBlock.appendChild(replyLabel);
+      replyBlock.appendChild(replyText);
+      card.appendChild(replyBlock);
+    }
+    
+    if (prepend) {
+      commentsList.insertBefore(card, commentsList.firstChild);
+    } else {
+      commentsList.appendChild(card);
+    }
     
     return card;
   }

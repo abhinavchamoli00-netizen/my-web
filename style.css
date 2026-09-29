@@ -819,3 +819,38 @@ section h2 {
   .ai-msg { max-width: 85%; }
   .ai-msg-media { max-width: 85%; }
 }
+/* =========================================
+   COMMENT REPLY (Admin Reply on Homepage)
+   ========================================= */
+.comment-reply {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: rgba(108, 92, 231, 0.08);
+  border-left: 3px solid #6c5ce7;
+  border-radius: 0 8px 8px 0;
+  animation: replyFadeIn 0.4s ease;
+}
+
+@keyframes replyFadeIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.comment-reply-label {
+  display: block;
+  color: #a29bfe;
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.comment-reply-text {
+  color: #ddd;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin: 0;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
