@@ -38,15 +38,12 @@ header h1 {
 
 header p { color: #6cb2eb; font-size: 1rem; }
 
-/* Admin title link - invisible trigger */
 .title-link {
   text-decoration: none;
   color: inherit;
   display: inline-block;
   cursor: pointer;
 }
-
-/* No hover effect to keep it hidden */
 
 footer {
   text-align: center;
@@ -408,6 +405,40 @@ section h2 {
 .comments-loading { color: #888; text-align: center; padding: 10px; font-style: italic; font-size: 0.8rem; }
 .comments-empty { color: #666; text-align: center; padding: 10px; font-style: italic; font-size: 0.8rem; }
 
+/* Comment Reply (Admin Reply on Homepage) */
+.comment-reply {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: rgba(108, 92, 231, 0.08);
+  border-left: 3px solid #6c5ce7;
+  border-radius: 0 8px 8px 0;
+  animation: replyFadeIn 0.4s ease;
+}
+
+@keyframes replyFadeIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.comment-reply-label {
+  display: block;
+  color: #a29bfe;
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.comment-reply-text {
+  color: #ddd;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin: 0;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
 /* =========================================
    13. CHAT BACKDROP
    ========================================= */
@@ -571,33 +602,6 @@ section h2 {
 .ai-msg-user { background-color: #8b7ae7; color: #ffffff; align-self: flex-end; border-bottom-right-radius: 4px; margin-left: auto; margin-right: 0; }
 .ai-msg-typing { background-color: #1c1b22; color: #888; align-self: flex-start; font-style: italic; margin-right: auto; }
 
-.ai-msg-media {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-width: 80%;
-  align-self: flex-end;
-  margin-left: auto;
-  margin-right: 0;
-  align-items: flex-end;
-}
-
-.ai-msg-media .ai-msg { max-width: 100%; width: fit-content; align-self: flex-end; }
-
-.ai-msg-image {
-  max-width: 140px;
-  max-height: 140px;
-  width: auto; height: auto;
-  object-fit: cover;
-  border-radius: 10px;
-  display: block;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-  align-self: flex-end;
-}
-
-.ai-msg-image:hover { transform: scale(1.05); }
-
 /* =========================================
    16. AI CHAT INPUT
    ========================================= */
@@ -653,7 +657,7 @@ section h2 {
 .ai-spacer { height: 10px; display: block; }
 
 /* =========================================
-   18. CHAT VOICE & IMAGE FEATURES
+   18. CHAT VOICE FEATURES
    ========================================= */
 .chat-action-btn {
   background-color: #1c1b22;
@@ -673,79 +677,6 @@ section h2 {
 .chat-action-btn.recording { background-color: #e74c3c; color: #fff; animation: micPulse 1s infinite; }
 @keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.6); } 50% { box-shadow: 0 0 0 8px rgba(231, 76, 60, 0); } }
 .chat-action-btn svg { display: block; }
-
-.image-preview { position: relative; padding: 10px; background-color: #0f0f18; border-top: 1px solid rgba(255, 255, 255, 0.08); }
-.image-preview img { max-width: 100%; max-height: 120px; border-radius: 10px; display: block; }
-
-.remove-img {
-  position: absolute;
-  top: 15px; right: 15px;
-  background: rgba(0, 0, 0, 0.7);
-  color: #fff;
-  border: none;
-  width: 26px; height: 26px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.analyze-btn {
-  position: relative;
-  background: #1c1b22;
-  color: #a29bfe;
-  border: 1px solid rgba(108, 92, 231, 0.5);
-  padding: 7px 16px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.25s ease;
-  font-family: inherit;
-  overflow: hidden;
-  z-index: 1;
-  align-self: flex-start;
-}
-
-.analyze-btn::before {
-  content: '';
-  position: absolute;
-  top: 0; left: -100%;
-  width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(162, 155, 254, 0.4), transparent);
-  animation: shimmerSweep 2.5s infinite;
-  z-index: 1;
-  pointer-events: none;
-}
-
-@keyframes shimmerSweep { 0% { left: -100%; } 50%, 100% { left: 100%; } }
-
-.analyze-btn::after {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: 20px;
-  padding: 1px;
-  background: linear-gradient(90deg, #6c5ce7, #a29bfe, #7b4fbf, #6c5ce7);
-  background-size: 300% 100%;
-  animation: borderRotate 3s linear infinite;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  z-index: 2;
-}
-
-@keyframes borderRotate { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
-.analyze-btn:hover { background: rgba(108, 92, 231, 0.15); color: #fff; transform: translateY(-2px); box-shadow: 0 4px 20px rgba(108, 92, 231, 0.5); }
-.analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.analyze-btn:disabled::before, .analyze-btn:disabled::after { animation: none !important; opacity: 0; }
-.analyze-btn.analyzed { opacity: 0 !important; transform: scale(0.8); pointer-events: none; transition: opacity 0.4s ease, transform 0.4s ease; }
 
 .msg-speak-btn {
   background: rgba(108, 92, 231, 0.15);
@@ -769,27 +700,6 @@ section h2 {
 
 .speak-word { transition: background-color 0.1s ease, color 0.1s ease; border-radius: 3px; padding: 0; display: inline; }
 .speak-word.speaking { background-color: #6c5ce7; color: #ffffff; border-radius: 4px; padding: 1px 3px; font-weight: 600; box-shadow: 0 0 10px rgba(108, 92, 231, 0.8); }
-
-.img-loading {
-  padding: 20px;
-  text-align: center;
-  color: #888;
-  font-style: italic;
-  background: #1c1b22;
-  border-radius: 10px;
-  margin-top: 8px;
-  position: relative;
-  overflow: hidden;
-}
-
-.img-loading::before {
-  content: '';
-  position: absolute;
-  top: 0; left: -100%;
-  width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(108, 92, 231, 0.2), transparent);
-  animation: shimmerSweep 2s infinite;
-}
 
 /* =========================================
    19. MOBILE KEYBOARD OPEN
@@ -815,42 +725,5 @@ section h2 {
   .chat-action-btn { width: 36px; height: 36px; }
   .chat-action-btn svg { width: 16px; height: 16px; }
   .ai-chat-input button[type="submit"] { padding: 0 12px; height: 36px; }
-  .ai-msg-image { max-width: 110px; max-height: 110px; }
   .ai-msg { max-width: 85%; }
-  .ai-msg-media { max-width: 85%; }
-}
-/* =========================================
-   COMMENT REPLY (Admin Reply on Homepage)
-   ========================================= */
-.comment-reply {
-  margin-top: 10px;
-  padding: 8px 12px;
-  background: rgba(108, 92, 231, 0.08);
-  border-left: 3px solid #6c5ce7;
-  border-radius: 0 8px 8px 0;
-  animation: replyFadeIn 0.4s ease;
-}
-
-@keyframes replyFadeIn {
-  from { opacity: 0; transform: translateX(-6px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-.comment-reply-label {
-  display: block;
-  color: #a29bfe;
-  font-weight: 700;
-  font-size: 0.7rem;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
-  text-transform: uppercase;
-}
-
-.comment-reply-text {
-  color: #ddd;
-  font-size: 0.82rem;
-  line-height: 1.5;
-  margin: 0;
-  word-wrap: break-word;
-  white-space: pre-wrap;
 }

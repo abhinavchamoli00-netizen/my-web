@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let isCommentSubmitting = false;
   let lastCommentsHash = '';
 
-    function renderComment(comment, prepend = false) {
+  function renderComment(comment, prepend = false) {
     const card = document.createElement('div');
     card.className = 'comment-card';
     
@@ -438,79 +438,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Image Upload
-  const imageBtn = document.getElementById('imageBtn');
-  const imageInput = document.getElementById('imageInput');
-  const imagePreview = document.getElementById('imagePreview');
-  const previewImg = document.getElementById('previewImg');
-  const removeImage = document.getElementById('removeImage');
-  let uploadedImageData = null;
-  let uploadedImageUrl = null;
-
-  function compressImage(dataUrl, maxSize = 900, quality = 0.75) {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let { width, height } = img;
-        if (width > height) {
-          if (width > maxSize) { height = (maxSize / width) * height; width = maxSize; }
-        } else {
-          if (height > maxSize) { width = (maxSize / height) * width; height = maxSize; }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', quality));
-      };
-      img.onerror = () => resolve(dataUrl);
-      img.src = dataUrl;
-    });
-  }
-
-  async function uploadImageToHost(dataUrl) {
-    try {
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
-      const formData = new FormData();
-      formData.append('reqtype', 'fileupload');
-      formData.append('fileToUpload', blob, 'nexus_img.jpg');
-      const uploadRes = await fetch('https://catbox.moe/user/api.php', {
-        method: 'POST',
-        body: formData
-      });
-      const url = await uploadRes.text();
-      if (url && url.trim().startsWith('https://')) return url.trim();
-      return null;
-    } catch (err) { return null; }
-  }
-
-  if (imageBtn && imageInput) {
-    imageBtn.addEventListener('click', () => imageInput.click());
-    imageInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 5 * 1024 * 1024) { alert('Max 5MB.'); return; }
-      const reader = new FileReader();
-      reader.onload = async (ev) => {
-        const compressed = await compressImage(ev.target.result, 900, 0.75);
-        uploadedImageData = compressed;
-        previewImg.src = compressed;
-        imagePreview.style.display = 'block';
-        uploadedImageUrl = await uploadImageToHost(compressed);
-      };
-      reader.readAsDataURL(file);
-    });
-    removeImage.addEventListener('click', () => {
-      uploadedImageData = null;
-      uploadedImageUrl = null;
-      imageInput.value = '';
-      imagePreview.style.display = 'none';
-      previewImg.src = '';
-    });
-  }
-
   // Text-to-Speech
   let currentlySpeaking = false;
   let currentSpeakBtn = null;
@@ -610,164 +537,53 @@ document.addEventListener('DOMContentLoaded', () => {
     speechSynthesis.speak(utterance);
   }
 
-  function finalizeAnalyzeButton(btn) {
-    if (!btn) return;
-    btn.classList.add('analyzed');
-    setTimeout(() => { if (btn.parentNode) btn.parentNode.removeChild(btn); }, 400);
-  }
-
-  // Image Request Detection
-  function isImageRequest(text) {
-    if (!text) return false;
-    const lower = text.toLowerCase();
-    const actionWords = /\b(generate|janrate|genrate|generte|genarate|creat|create|make|draw|paint|imagine|banao|bana|bna)\b/i;
-    const imageWords = /\b(image|imag|imge|iimage|ianges|img|pic|photo|picture|artwork|art|drawing|imagination)\b/i;
-    if (actionWords.test(lower) && imageWords.test(lower)) return true;
-    if (/\b(image|imag|imge|ianges)\s+(of|for|about|on|banao|bana|bna)\b/i.test(lower)) return true;
-    return false;
-  }
-
-  function extractImagePrompt(text) {
-    if (!text) return '';
-    let cleaned = text.replace(/^(bro|bhai|yaar|yrr|hey|hi|hello|hola|oi|oye|please|plz|ok|okay|so|now)\s+/gi, '');
-    cleaned = cleaned
-      .replace(/\b(generate|janrate|genrate|generte|genarate|creat|create|make|draw|paint|sketch|imagine|banao|bana|bna)\b/gi, '')
-      .replace(/\b(image|imag|imge|iimage|ianges|img|pic|photo|picture|artwork|art|drawing|imagination)\b/gi, '');
-    cleaned = cleaned.replace(/\s+/g, ' ').trim();
-    cleaned = cleaned.replace(/^(a|an|the|of|for|about|with)\s+/gi, '').trim();
-    return cleaned || text;
-  }
-
   // Chat Form Submit
   if (chatForm) {
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (isChatSending) return;
 
-      let message = chatInput.value.trim();
-      const currentImageData = uploadedImageData;
-      const currentImageUrl = uploadedImageUrl;
+      const message = chatInput.value.trim();
+      if (!message) return;
 
-      if (!message && !currentImageData) return;
-
-      if (message && isImageRequest(message)) {
-        const prompt = extractImagePrompt(message);
-        if (prompt) {
-          addChatMessage(message, 'user');
-          chatInput.value = '';
-          const loadingEl = document.createElement('div');
-          loadingEl.className = 'ai-msg ai-msg-bot';
-          loadingEl.innerHTML = '<div class="img-loading">🎨 Generating image... Please wait (10-15 sec)</div>';
-          chatMessages.appendChild(loadingEl);
-          chatMessages.scrollTop = chatMessages.scrollHeight;
-          const encodedPrompt = encodeURIComponent(prompt + ', high quality, detailed');
-          const imgUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true`;
-          setTimeout(() => {
-            loadingEl.remove();
-            const imgMsg = document.createElement('div');
-            imgMsg.className = 'ai-msg ai-msg-bot';
-            const img = document.createElement('img');
-            img.className = 'ai-msg-image';
-            img.src = imgUrl;
-            img.alt = prompt;
-            img.onclick = () => window.open(imgUrl, '_blank');
-            imgMsg.appendChild(img);
-            chatMessages.appendChild(imgMsg);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-          }, 3000);
-          return;
-        }
-      }
-
-      const mediaWrapper = document.createElement('div');
-      mediaWrapper.className = 'ai-msg-media';
-
-      if (currentImageData) {
-        const img = document.createElement('img');
-        img.className = 'ai-msg-image';
-        img.src = currentImageData;
-        img.onclick = () => window.open(currentImageData, '_blank');
-        mediaWrapper.appendChild(img);
-      }
-
-      if (message) {
-        const textBubble = document.createElement('div');
-        textBubble.className = 'ai-msg ai-msg-user';
-        textBubble.textContent = message;
-        mediaWrapper.appendChild(textBubble);
-      }
-
-      let analyzeBtnEl = null;
-      if (currentImageData) {
-        analyzeBtnEl = document.createElement('button');
-        analyzeBtnEl.className = 'analyze-btn';
-        analyzeBtnEl.innerHTML = '🔍 Analyze Image';
-        analyzeBtnEl.type = 'button';
-        analyzeBtnEl.addEventListener('click', (e) => {
-          e.stopPropagation();
-          analyzeBtnEl.disabled = true;
-          analyzeBtnEl.innerHTML = '⏳ Analyzing...';
-          sendToAI('Please analyze this image in detail.', currentImageUrl || currentImageData, analyzeBtnEl);
-        });
-        mediaWrapper.appendChild(analyzeBtnEl);
-      }
-
-      chatMessages.appendChild(mediaWrapper);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+      addChatMessage(message, 'user');
       chatInput.value = '';
 
-      const imageToSend = currentImageUrl || currentImageData;
-      if (currentImageData) {
-        uploadedImageData = null;
-        uploadedImageUrl = null;
-        imageInput.value = '';
-        imagePreview.style.display = 'none';
-        previewImg.src = '';
-      }
+      const typingEl = addChatMessage('Thinking...', 'typing');
 
-      if (message) {
-        await sendToAI(message, imageToSend, analyzeBtnEl);
+      isChatSending = true;
+      const sendBtn = document.getElementById('chatSend');
+      if (sendBtn) sendBtn.disabled = true;
+
+      try {
+        const payload = { message: message, history: chatHistory.slice(-10) };
+
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        typingEl.remove();
+
+        if (data.success) {
+          addChatMessage(data.reply, 'bot');
+          chatHistory.push({ role: 'user', text: message });
+          chatHistory.push({ role: 'model', text: data.reply });
+        } else if (data.error === 'limit_reached') {
+          addChatMessage(`🚫 **Nexus AI is taking a short break!**\n\nWe've reached our **daily limit**. Please come back later. 🙏`, 'bot');
+        } else {
+          addChatMessage('⚠️ Error: ' + (data.details || data.error || 'Unknown'), 'bot');
+        }
+      } catch (err) {
+        typingEl.remove();
+        addChatMessage('❌ Network error. Please try again.', 'bot');
+      } finally {
+        isChatSending = false;
+        if (sendBtn) sendBtn.disabled = false;
       }
     });
-  }
-
-  async function sendToAI(message, imageData, analyzeBtn) {
-    if (isChatSending) return;
-    const typingEl = addChatMessage('Thinking...', 'typing');
-    isChatSending = true;
-    const sendBtn = document.getElementById('chatSend');
-    if (sendBtn) sendBtn.disabled = true;
-
-    try {
-      const payload = { message: message || '', history: chatHistory.slice(-10) };
-      if (imageData) payload.image = imageData;
-
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json();
-      typingEl.remove();
-
-      if (data.success) {
-        addChatMessage(data.reply, 'bot');
-        chatHistory.push({ role: 'user', text: message || '(image)' });
-        chatHistory.push({ role: 'model', text: data.reply });
-      } else if (data.error === 'limit_reached') {
-        addChatMessage(`🚫 **Nexus AI is taking a short break!**\n\nWe've reached our **daily limit**. Please come back later. 🙏`, 'bot');
-      } else {
-        addChatMessage('⚠️ Error: ' + (data.details || data.error || 'Unknown'), 'bot');
-      }
-    } catch (err) {
-      typingEl.remove();
-      addChatMessage('❌ Network error. Please try again.', 'bot');
-    } finally {
-      isChatSending = false;
-      if (sendBtn) sendBtn.disabled = false;
-      if (analyzeBtn) finalizeAnalyzeButton(analyzeBtn);
-    }
   }
 
   function formatAIResponse(text) {
@@ -795,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (type === 'bot' && text) {
       div.innerHTML = formatAIResponse(text);
-      if (!text.includes('Thinking') && !text.includes('Welcome') && !text.includes('short break')) {
+      if (!text.includes('Thinking') && !text.includes('short break')) {
         const speakBtn = document.createElement('button');
         speakBtn.className = 'msg-speak-btn';
         speakBtn.innerHTML = '🔊 Listen';
