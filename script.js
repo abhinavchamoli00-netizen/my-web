@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (commentsSection) commentsSection.remove();
   }
 
+  // Visitor Tracking
   const hasTrackedVisit = sessionStorage.getItem('nexus_visit_tracked');
   if (!hasTrackedVisit) {
     sessionStorage.setItem('nexus_visit_tracked', 'true');
@@ -31,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }).catch(err => console.log('Visitor tracking skipped'));
   }
 
-  // 3. FEEDBACK FORM
+  // Feedback Form
   const feedbackForm = document.getElementById('feedbackForm');
   let isSubmitting = false;
 
@@ -49,8 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!message) { isSubmitting = false; return; }
 
       submitBtn.disabled = true;
-      submitBtn.style.pointerEvents = 'none';
-      submitBtn.style.opacity = '0.6';
       submitBtn.textContent = 'Sending...';
       statusEl.textContent = '';
 
@@ -75,8 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
       } finally {
         setTimeout(() => {
           submitBtn.disabled = false;
-          submitBtn.style.pointerEvents = 'auto';
-          submitBtn.style.opacity = '1';
           submitBtn.textContent = 'Send Message';
           isSubmitting = false;
         }, 3000);
@@ -84,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. LIVE COMMENTS
+  // Live Comments
   const commentName = document.getElementById('commentName');
   const commentMessage = document.getElementById('commentMessage');
   const commentSubmit = document.getElementById('commentSubmit');
@@ -131,11 +128,8 @@ document.addEventListener('DOMContentLoaded', () => {
     card.appendChild(header);
     card.appendChild(text);
     
-    if (prepend) {
-      commentsList.insertBefore(card, commentsList.firstChild);
-    } else {
-      commentsList.appendChild(card);
-    }
+    if (prepend) commentsList.insertBefore(card, commentsList.firstChild);
+    else commentsList.appendChild(card);
     
     return card;
   }
@@ -201,8 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       commentSubmit.disabled = true;
-      commentSubmit.style.pointerEvents = 'none';
-      commentSubmit.style.opacity = '0.6';
       commentSubmit.textContent = 'Posting...';
       commentStatus.textContent = '';
 
@@ -238,15 +230,13 @@ document.addEventListener('DOMContentLoaded', () => {
         commentStatus.style.color = '#e74c3c';
       } finally {
         commentSubmit.disabled = false;
-        commentSubmit.style.pointerEvents = 'auto';
-        commentSubmit.style.opacity = '1';
         commentSubmit.textContent = 'Post Comment';
         isCommentSubmitting = false;
       }
     });
   }
 
-  // 5. AI CHAT WIDGET
+  // AI Chat Widget
   const chatFab = document.getElementById('chatFab');
   const chatWidget = document.getElementById('chatWidget');
   const chatBackdrop = document.getElementById('chatBackdrop');
@@ -282,7 +272,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Back button handler — closes chat if it's open
   window.addEventListener('popstate', () => {
     if (chatWidget.classList.contains('active')) {
       chatHistoryState = false;
@@ -293,7 +282,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (chatFab) {
     chatFab.addEventListener('click', () => {
       if (isClosingChat) return;
-      
       const isOpening = !chatWidget.classList.contains('active');
       chatWidget.classList.toggle('active');
       
@@ -318,16 +306,11 @@ document.addEventListener('DOMContentLoaded', () => {
     chatBackdrop.addEventListener('click', () => {
       if (isClosingChat) return;
       isClosingChat = true;
-      
-      // Close chat IMMEDIATELY
       closeChatFully();
-      
-      // Then remove history entry
       if (chatHistoryState) {
         chatHistoryState = false;
         history.back();
       }
-      
       setTimeout(() => { isClosingChat = false; }, 400);
     });
   }
@@ -336,30 +319,21 @@ document.addEventListener('DOMContentLoaded', () => {
     chatClose.addEventListener('click', (e) => {
       e.stopPropagation();
       e.preventDefault();
-      
-      // Prevent double-click race
       if (isClosingChat) return;
       isClosingChat = true;
-      
-      // Close chat IMMEDIATELY (this was the fix)
       closeChatFully();
-      
-      // Then remove the history entry in background
       if (chatHistoryState) {
         chatHistoryState = false;
         history.back();
       }
-      
       setTimeout(() => { isClosingChat = false; }, 400);
     });
   }
 
   function adjustChatForKeyboard() {
     if (!chatWidget || !chatWidget.classList.contains('active')) return;
-
     const vv = window.visualViewport;
     if (!vv) return;
-
     const viewportHeight = vv.height;
     const viewportTop = vv.offsetTop || 0;
     const windowHeight = window.innerHeight;
@@ -377,10 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
       chatWidget.style.bottom = '0';
       chatWidget.classList.remove('keyboard-open');
     }
-
-    setTimeout(() => {
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }, 150);
+    setTimeout(() => { chatMessages.scrollTop = chatMessages.scrollHeight; }, 150);
   }
 
   if (window.visualViewport) {
@@ -397,12 +368,9 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(adjustChatForKeyboard, 300);
     });
   }
-
   window.addEventListener('resize', adjustChatForKeyboard);
 
-  // =========================================
-  // 🎤 VOICE INPUT
-  // =========================================
+  // Voice Input
   const voiceBtn = document.getElementById('voiceBtn');
   let recognition = null;
   let isRecording = false;
@@ -419,7 +387,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (voiceBtn) voiceBtn.classList.add('recording');
       chatInput.placeholder = '🎤 Listening...';
     };
-
     recognition.onresult = (event) => {
       let transcript = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -427,13 +394,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       chatInput.value = transcript;
     };
-
     recognition.onerror = () => {
       isRecording = false;
       if (voiceBtn) voiceBtn.classList.remove('recording');
       chatInput.placeholder = 'Type your message...';
     };
-
     recognition.onend = () => {
       isRecording = false;
       if (voiceBtn) voiceBtn.classList.remove('recording');
@@ -444,20 +409,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if (voiceBtn) {
     voiceBtn.addEventListener('click', () => {
       if (!recognition) {
-        alert('Voice input not supported in this browser. Try Chrome.');
+        alert('Voice input not supported. Try Chrome.');
         return;
       }
-      if (isRecording) {
-        recognition.stop();
-      } else {
-        recognition.start();
-      }
+      if (isRecording) recognition.stop();
+      else recognition.start();
     });
   }
 
-  // =========================================
-  // 📎 IMAGE UPLOAD
-  // =========================================
+  // Image Upload
   const imageBtn = document.getElementById('imageBtn');
   const imageInput = document.getElementById('imageInput');
   const imagePreview = document.getElementById('imagePreview');
@@ -472,19 +432,11 @@ document.addEventListener('DOMContentLoaded', () => {
       img.onload = () => {
         const canvas = document.createElement('canvas');
         let { width, height } = img;
-        
         if (width > height) {
-          if (width > maxSize) {
-            height = (maxSize / width) * height;
-            width = maxSize;
-          }
+          if (width > maxSize) { height = (maxSize / width) * height; width = maxSize; }
         } else {
-          if (height > maxSize) {
-            width = (maxSize / height) * width;
-            height = maxSize;
-          }
+          if (height > maxSize) { width = (maxSize / height) * width; height = maxSize; }
         }
-        
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
@@ -500,52 +452,35 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const res = await fetch(dataUrl);
       const blob = await res.blob();
-      
       const formData = new FormData();
       formData.append('reqtype', 'fileupload');
       formData.append('fileToUpload', blob, 'nexus_img.jpg');
-      
       const uploadRes = await fetch('https://catbox.moe/user/api.php', {
         method: 'POST',
         body: formData
       });
-      
       const url = await uploadRes.text();
-      
-      if (url && url.trim().startsWith('https://')) {
-        return url.trim();
-      }
+      if (url && url.trim().startsWith('https://')) return url.trim();
       return null;
-    } catch (err) {
-      console.log('Image host upload failed:', err);
-      return null;
-    }
+    } catch (err) { return null; }
   }
 
   if (imageBtn && imageInput) {
     imageBtn.addEventListener('click', () => imageInput.click());
-
     imageInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image too large. Max 5MB.');
-        return;
-      }
-      
+      if (file.size > 5 * 1024 * 1024) { alert('Max 5MB.'); return; }
       const reader = new FileReader();
       reader.onload = async (ev) => {
         const compressed = await compressImage(ev.target.result, 900, 0.75);
         uploadedImageData = compressed;
         previewImg.src = compressed;
         imagePreview.style.display = 'block';
-        
         uploadedImageUrl = await uploadImageToHost(compressed);
-        console.log('Image URL:', uploadedImageUrl || 'Upload failed - using base64');
       };
       reader.readAsDataURL(file);
     });
-
     removeImage.addEventListener('click', () => {
       uploadedImageData = null;
       uploadedImageUrl = null;
@@ -555,21 +490,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // =========================================
-  // 🔊 TEXT-TO-SPEECH WITH PERFECT SYNC
-  // =========================================
+  // Text-to-Speech
   let currentlySpeaking = false;
   let currentSpeakBtn = null;
   let currentMessageEl = null;
 
   function stopSpeaking() {
-    if ('speechSynthesis' in window) {
-      speechSynthesis.cancel();
-    }
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
     if (currentMessageEl) {
-      currentMessageEl.querySelectorAll('.speak-word.speaking').forEach(el => {
-        el.classList.remove('speaking');
-      });
+      currentMessageEl.querySelectorAll('.speak-word.speaking').forEach(el => el.classList.remove('speaking'));
     }
     if (currentSpeakBtn) {
       currentSpeakBtn.innerHTML = '🔊 Listen';
@@ -588,7 +517,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       delete rootEl.dataset.speechWrapped;
     }
-
     const textNodes = [];
     const walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT);
     let node;
@@ -597,159 +525,99 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!node.textContent) continue;
       textNodes.push(node);
     }
-
     let cleanText = '';
     const posMap = [];
-
     textNodes.forEach(textNode => {
       const text = textNode.textContent;
       const fragment = document.createDocumentFragment();
       const parts = text.split(/(\s+)/);
-
       parts.forEach(part => {
         if (!part) return;
-
         if (/^\s+$/.test(part)) {
           fragment.appendChild(document.createTextNode(part));
           cleanText += part;
         } else {
           const cleanWord = part.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').replace(/[*#_`~]/g, '');
-
-          if (!cleanWord) {
-            fragment.appendChild(document.createTextNode(part));
-            return;
-          }
-
+          if (!cleanWord) { fragment.appendChild(document.createTextNode(part)); return; }
           const span = document.createElement('span');
           span.className = 'speak-word';
           span.textContent = part;
-
           const start = cleanText.length;
           cleanText += cleanWord;
           const end = cleanText.length;
-
           posMap.push({ charStart: start, charEnd: end, span });
           fragment.appendChild(span);
         }
       });
-
       textNode.parentNode.replaceChild(fragment, textNode);
     });
-
     rootEl.dataset.speechWrapped = 'true';
     return { cleanText, posMap };
   }
 
   function speakWithHighlight(messageDiv, speakBtn, text, lang = 'en-IN') {
     if (!('speechSynthesis' in window)) return;
-
-    if (currentlySpeaking && currentSpeakBtn === speakBtn) {
-      stopSpeaking();
-      return;
-    }
-
+    if (currentlySpeaking && currentSpeakBtn === speakBtn) { stopSpeaking(); return; }
     stopSpeaking();
     speechSynthesis.cancel();
-
     const { cleanText, posMap } = prepareForTTS(messageDiv);
-
-    if (!cleanText.trim()) {
-      stopSpeaking();
-      return;
-    }
-
+    if (!cleanText.trim()) { stopSpeaking(); return; }
     currentMessageEl = messageDiv;
     currentSpeakBtn = speakBtn;
     currentlySpeaking = true;
-
     speakBtn.innerHTML = '⏹ Stop';
     speakBtn.classList.add('speaking-active');
-
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = lang;
     utterance.rate = 1;
     utterance.pitch = 1;
-
     utterance.onboundary = (e) => {
       if (!currentlySpeaking) return;
-      
       const charIndex = e.charIndex;
-      
       let match = null;
       for (const p of posMap) {
-        if (charIndex >= p.charStart && charIndex < p.charEnd) {
-          match = p;
-          break;
-        }
+        if (charIndex >= p.charStart && charIndex < p.charEnd) { match = p; break; }
       }
-      
       if (match && match.span) {
-        posMap.forEach(p => {
-          if (p.span) p.span.classList.remove('speaking');
-        });
+        posMap.forEach(p => { if (p.span) p.span.classList.remove('speaking'); });
         match.span.classList.add('speaking');
-        
-        try {
-          match.span.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        } catch (err) {}
+        try { match.span.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (err) {}
       }
     };
-
-    utterance.onend = () => {
-      stopSpeaking();
-    };
-
-    utterance.onerror = () => {
-      stopSpeaking();
-    };
-
+    utterance.onend = () => { stopSpeaking(); };
+    utterance.onerror = () => { stopSpeaking(); };
     speechSynthesis.speak(utterance);
   }
 
   function finalizeAnalyzeButton(btn) {
     if (!btn) return;
     btn.classList.add('analyzed');
-    setTimeout(() => {
-      if (btn.parentNode) btn.parentNode.removeChild(btn);
-    }, 400);
+    setTimeout(() => { if (btn.parentNode) btn.parentNode.removeChild(btn); }, 400);
   }
 
-  // =========================================
-  // 🖼️ IMAGE GENERATION DETECTION
-  // =========================================
+  // Image Request Detection
   function isImageRequest(text) {
     if (!text) return false;
     const lower = text.toLowerCase();
-    
     const actionWords = /\b(generate|janrate|genrate|generte|genarate|creat|create|make|draw|paint|imagine|banao|bana|bna)\b/i;
     const imageWords = /\b(image|imag|imge|iimage|ianges|img|pic|photo|picture|artwork|art|drawing|imagination)\b/i;
-    
     if (actionWords.test(lower) && imageWords.test(lower)) return true;
-    
     if (/\b(image|imag|imge|ianges)\s+(of|for|about|on|banao|bana|bna)\b/i.test(lower)) return true;
-    
     return false;
   }
 
   function extractImagePrompt(text) {
     if (!text) return '';
-    
-    let cleaned = text
-      .replace(/^(bro|bhai|yaar|yrr|hey|hi|hello|hola|oi|oye|please|plz|ok|okay|so|now)\s+/gi, '');
-    
+    let cleaned = text.replace(/^(bro|bhai|yaar|yrr|hey|hi|hello|hola|oi|oye|please|plz|ok|okay|so|now)\s+/gi, '');
     cleaned = cleaned
       .replace(/\b(generate|janrate|genrate|generte|genarate|creat|create|make|draw|paint|sketch|imagine|banao|bana|bna)\b/gi, '')
       .replace(/\b(image|imag|imge|iimage|ianges|img|pic|photo|picture|artwork|art|drawing|imagination)\b/gi, '');
-    
     cleaned = cleaned.replace(/\s+/g, ' ').trim();
     cleaned = cleaned.replace(/^(a|an|the|of|for|about|with)\s+/gi, '').trim();
-    
     return cleaned || text;
   }
 
-  // =========================================
-  // CHAT FORM SUBMIT
-  // =========================================
+  // Chat Form Submit
   if (chatForm) {
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -761,22 +629,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!message && !currentImageData) return;
 
-      // 🖼️ Image generation
       if (message && isImageRequest(message)) {
         const prompt = extractImagePrompt(message);
         if (prompt) {
           addChatMessage(message, 'user');
           chatInput.value = '';
-          
           const loadingEl = document.createElement('div');
           loadingEl.className = 'ai-msg ai-msg-bot';
           loadingEl.innerHTML = '<div class="img-loading">🎨 Generating image... Please wait (10-15 sec)</div>';
           chatMessages.appendChild(loadingEl);
           chatMessages.scrollTop = chatMessages.scrollHeight;
-
           const encodedPrompt = encodeURIComponent(prompt + ', high quality, detailed');
           const imgUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true`;
-
           setTimeout(() => {
             loadingEl.remove();
             const imgMsg = document.createElement('div');
@@ -790,12 +654,10 @@ document.addEventListener('DOMContentLoaded', () => {
             chatMessages.appendChild(imgMsg);
             chatMessages.scrollTop = chatMessages.scrollHeight;
           }, 3000);
-
           return;
         }
       }
 
-      // 🔥 User message with image
       const mediaWrapper = document.createElement('div');
       mediaWrapper.className = 'ai-msg-media';
 
@@ -824,23 +686,16 @@ document.addEventListener('DOMContentLoaded', () => {
           e.stopPropagation();
           analyzeBtnEl.disabled = true;
           analyzeBtnEl.innerHTML = '⏳ Analyzing...';
-          
-          sendToAI(
-            'Please analyze this image in detail. Tell me what you see.',
-            currentImageUrl || currentImageData,
-            analyzeBtnEl
-          );
+          sendToAI('Please analyze this image in detail.', currentImageUrl || currentImageData, analyzeBtnEl);
         });
         mediaWrapper.appendChild(analyzeBtnEl);
       }
 
       chatMessages.appendChild(mediaWrapper);
       chatMessages.scrollTop = chatMessages.scrollHeight;
-
       chatInput.value = '';
 
       const imageToSend = currentImageUrl || currentImageData;
-      
       if (currentImageData) {
         uploadedImageData = null;
         uploadedImageUrl = null;
@@ -851,26 +706,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (message) {
         await sendToAI(message, imageToSend, analyzeBtnEl);
-      } else {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
       }
     });
   }
 
   async function sendToAI(message, imageData, analyzeBtn) {
     if (isChatSending) return;
-    
     const typingEl = addChatMessage('Thinking...', 'typing');
     isChatSending = true;
     const sendBtn = document.getElementById('chatSend');
     if (sendBtn) sendBtn.disabled = true;
 
     try {
-      const payload = { 
-        message: message || '',
-        history: chatHistory.slice(-10)
-      };
-      
+      const payload = { message: message || '', history: chatHistory.slice(-10) };
       if (imageData) payload.image = imageData;
 
       const res = await fetch('/api/chat', {
@@ -887,12 +735,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chatHistory.push({ role: 'user', text: message || '(image)' });
         chatHistory.push({ role: 'model', text: data.reply });
       } else if (data.error === 'limit_reached') {
-        addChatMessage(
-          `🚫 **Nexus AI is taking a short break!**\n\n` +
-          `We've reached our **daily limit**. Please come back in a few hours.\n\n` +
-          `Thanks for your patience! 🙏`,
-          'bot'
-        );
+        addChatMessage(`🚫 **Nexus AI is taking a short break!**\n\nWe've reached our **daily limit**. Please come back later. 🙏`, 'bot');
       } else {
         addChatMessage('⚠️ Error: ' + (data.details || data.error || 'Unknown'), 'bot');
       }
@@ -902,29 +745,22 @@ document.addEventListener('DOMContentLoaded', () => {
     } finally {
       isChatSending = false;
       if (sendBtn) sendBtn.disabled = false;
-      
       if (analyzeBtn) finalizeAnalyzeButton(analyzeBtn);
     }
   }
 
   function formatAIResponse(text) {
-    let html = text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-
+    let html = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
     html = html.replace(/^#{1,4}\s*(.+)$/gm, '<div class="ai-heading">$1</div>');
     html = html.replace(/^(\d+)\.\s+(.+)$/gm, '<div class="ai-bullet">$1. $2</div>');
     html = html.replace(/^[•\-]\s+(.+)$/gm, '<div class="ai-bullet">• $1</div>');
     html = html.replace(/\n/g, '<br>');
-
     html = html.replace(/<br>(<div class="ai-heading">)/g, '$1');
     html = html.replace(/<br>(<div class="ai-bullet">)/g, '$1');
     html = html.replace(/(<\/div>)<br>/g, '$1');
     html = html.replace(/(<br>){2,}/g, '<div class="ai-spacer"></div>');
-
     return html;
   }
 
@@ -938,7 +774,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (type === 'bot' && text) {
       div.innerHTML = formatAIResponse(text);
-      
       if (!text.includes('Thinking') && !text.includes('Welcome') && !text.includes('short break')) {
         const speakBtn = document.createElement('button');
         speakBtn.className = 'msg-speak-btn';

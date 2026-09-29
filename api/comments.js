@@ -5,8 +5,9 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const apiKey = process.env.JSONBIN_KEY;
-  const binId = process.env.JSONBIN_ID;
+  // Support both naming conventions
+  const apiKey = process.env.JSONBIN_API_KEY || process.env.JSONBIN_KEY;
+  const binId = process.env.JSONBIN_BIN_ID || process.env.JSONBIN_ID;
 
   if (!apiKey || !binId) {
     return res.status(500).json({ 
@@ -86,7 +87,6 @@ module.exports = async function handler(req, res) {
       comments.push(newComment);
       if (comments.length > 100) comments = comments.slice(-100);
 
-      // Save as plain array (not wrapped in object)
       const saveRes = await fetch(baseUrl, {
         method: 'PUT',
         headers,
