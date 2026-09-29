@@ -38,6 +38,16 @@ header h1 {
 
 header p { color: #6cb2eb; font-size: 1rem; }
 
+/* Admin title link - invisible trigger */
+.title-link {
+  text-decoration: none;
+  color: inherit;
+  display: inline-block;
+  cursor: pointer;
+}
+
+/* No hover effect to keep it hidden */
+
 footer {
   text-align: center;
   padding: 40px 20px 20px 20px;
@@ -808,18 +818,4 @@ section h2 {
   .ai-msg-image { max-width: 110px; max-height: 110px; }
   .ai-msg { max-width: 85%; }
   .ai-msg-media { max-width: 85%; }
-}
-/* =========================================
-   ADMIN BELL LINK (Invisible)
-   ========================================= */
-.update-banner .bell-link {
-  text-decoration: none;
-  color: inherit;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-  display: inline-block;
-}
-
-.update-banner .bell-link:hover {
-  transform: scale(1.15);
 }
