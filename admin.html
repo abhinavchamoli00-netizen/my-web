@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Console</title>
+  <title>Admin Control Panel</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -22,20 +22,30 @@
       padding: 35px 30px;
       border-radius: 16px;
       width: 100%;
-      max-width: 360px;
+      max-width: 380px;
       border: 1px solid rgba(108, 92, 231, 0.25);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       text-align: center;
     }
+    .lock-screen .brand {
+      color: #7b4fbf;
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 4px;
+      margin-bottom: 4px;
+    }
     .lock-screen h2 {
       color: #a29bfe;
-      font-size: 1.2rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 1px;
       margin-bottom: 6px;
+      text-transform: uppercase;
     }
     .lock-screen p {
       color: #888;
-      font-size: 0.85rem;
-      margin-bottom: 20px;
+      font-size: 0.82rem;
+      margin-bottom: 22px;
     }
     .lock-screen input {
       width: 100%;
@@ -44,12 +54,12 @@
       border: 1px solid rgba(108, 92, 231, 0.3);
       border-radius: 10px;
       color: #fff;
-      font-size: 0.95rem;
+      font-size: 1rem;
       outline: none;
       margin-bottom: 12px;
       font-family: inherit;
       text-align: center;
-      letter-spacing: 3px;
+      letter-spacing: 4px;
     }
     .lock-screen input:focus { border-color: #6c5ce7; }
     .lock-screen button {
@@ -64,6 +74,7 @@
       cursor: pointer;
       font-family: inherit;
       transition: 0.2s;
+      letter-spacing: 1px;
     }
     .lock-screen button:hover { background: #4e3ec9; }
     .lock-screen .err {
@@ -241,7 +252,8 @@
 <body>
 
   <div class="lock-screen" id="lockScreen">
-    <h2>🔒 Access Required</h2>
+    <div class="brand">NEXUS</div>
+    <h2>Admin Control Panel</h2>
     <p>Enter passcode to continue</p>
     <input type="password" id="passInput" placeholder="••••" maxlength="12" />
     <button id="unlockBtn">Unlock</button>
@@ -356,7 +368,6 @@
       const card = document.createElement('div');
       card.className = 'c-card';
 
-      // Top: meta + action buttons
       const top = document.createElement('div');
       top.className = 'top';
 
@@ -411,7 +422,6 @@
       top.appendChild(meta);
       top.appendChild(btns);
 
-      // Existing reply preview
       let existingReply = null;
       if (c.reply) {
         existingReply = document.createElement('div');
@@ -434,7 +444,6 @@
         existingReply.appendChild(rm);
       }
 
-      // Reply input box
       const replyBox = document.createElement('div');
       replyBox.className = 'reply-box';
 
