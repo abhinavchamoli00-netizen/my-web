@@ -57,15 +57,83 @@ footer .watermark strong { color: #a29bfe; }
 footer .contact { color: #666; font-size: 0.85rem; }
 
 /* =========================================
-   3. UPDATE BANNER
+   3. POSTS / UPDATES SECTION
    ========================================= */
-.update-banner {
-  text-align: left;
-  padding: 12px 220px 12px 20px;
-  background-color: rgba(108, 178, 235, 0.1);
-  border-bottom: 1px solid rgba(108, 178, 235, 0.2);
-  color: #6cb2eb;
-  font-size: 0.9rem;
+.posts-section {
+  max-width: 520px;
+  margin: 20px auto;
+  padding: 20px 22px;
+  background-color: #141414;
+  border-radius: 16px;
+  border: 1px solid rgba(108, 92, 231, 0.15);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+.posts-title {
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+}
+
+.posts-subtitle {
+  color: #888;
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+}
+
+.posts-year {
+  color: #a29bfe;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  padding-left: 4px;
+  letter-spacing: 1px;
+}
+
+.posts-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.post-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.post-item:last-child {
+  border-bottom: none;
+}
+
+.post-item:hover {
+  background: rgba(108, 92, 231, 0.08);
+  padding-left: 12px;
+  border-radius: 6px;
+}
+
+.post-date {
+  color: #888;
+  font-size: 0.8rem;
+  font-weight: 500;
+  min-width: 65px;
+}
+
+.post-name {
+  color: #ddd;
+  font-size: 0.88rem;
+  text-align: right;
+  flex: 1;
+}
+
+.post-item:hover .post-name {
+  color: #a29bfe;
 }
 
 /* =========================================
@@ -717,7 +785,19 @@ section h2 {
   .poster-card { width: 100%; }
   header h1 { font-size: 1.8rem; }
   .movie-detail h1 { font-size: 2rem; }
-  .update-banner { padding-right: 150px; font-size: 0.8rem; }
+    .posts-section {
+    margin: 15px 12px;
+    padding: 16px 18px;
+  }
+
+  .posts-title {
+    font-size: 1.2rem;
+  }
+
+  .posts-subtitle {
+    font-size: 0.8rem;
+    margin-bottom: 16px;
+  }
   .ai-chat-launcher { top: 65px; right: 10px; padding: 5px 12px 5px 5px; gap: 6px; }
   .ai-launcher-icon { width: 26px; height: 26px; }
   .ai-launcher-icon svg { width: 18px; height: 18px; }
