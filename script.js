@@ -1,11 +1,21 @@
 // =========================================
-// NEXUS - Main Script
+// NEXUS - Main Script (SPA-style, URL never changes)
 // =========================================
 
-document.addEventListener('DOMContentLoaded', () => {
+// Track current page (since URL never changes)
+let __currentPage = (function() {
+  const p = window.location.pathname;
+  const file = p.split('/').pop();
+  return file || 'index.html';
+})();
 
-  const path = window.location.pathname;
-  const isHomePage = path.endsWith('/') || path.endsWith('index.html') || path === '';
+// =========================================
+// PAGE INITIALIZER (re-runs after every navigation)
+// =========================================
+function initNexusPage() {
+
+  const isHomePage = __currentPage === 'index.html' || __currentPage === '' || __currentPage === '/';
+  const path = '/' + __currentPage;
 
   if (!isHomePage) {
     const feedbackSection = document.querySelector('.feedback-section');
@@ -15,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // DEVICE INFO (model + platform)
+  // DEVICE INFO
   // =========================================
   async function getDeviceInfo() {
     let model = '';
@@ -34,9 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (/Android/i.test(ua)) {
           const m = ua.match(/Android\s([\d.]+)/);
           platform = m ? 'Android ' + m[1].split('.')[0] : 'Android';
-        } else if (/iPhone|iPad|iPod/i.test(ua)) {
-          platform = 'iOS';
-        } else if (/Windows/i.test(ua)) platform = 'Windows';
+        } else if (/iPhone|iPad|iPod/i.test(ua)) platform = 'iOS';
+        else if (/Windows/i.test(ua)) platform = 'Windows';
         else if (/Mac OS X/i.test(ua)) platform = 'macOS';
         else if (/Linux/i.test(ua)) platform = 'Linux';
       }
@@ -45,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================
-  // VISITOR TRACKING
+  // VISITOR TRACKING (once per session)
   // =========================================
   const hasTrackedVisit = sessionStorage.getItem('nexus_visit_tracked');
   if (!hasTrackedVisit) {
@@ -53,7 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
     (async () => {
       const { model, platform } = await getDeviceInfo();
       const referrer = document.referrer || 'Direct';
-      const page = path.split('/').pop() || 'index.html';
       const device = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
       const browser = navigator.userAgent.includes('Chrome') ? 'Chrome' :
                       navigator.userAgent.includes('Firefox') ? 'Firefox' :
@@ -62,13 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
       fetch('/api/visitor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ referrer, page, device, browser, model, platform })
-      }).catch(err => console.log('Visitor tracking skipped'));
+        body: JSON.stringify({ referrer, page: __currentPage, device, browser, model, platform })
+      }).catch(() => {});
     })();
   }
 
   // =========================================
-  // POSTS TOGGLE (Collapsible)
+  // POSTS TOGGLE
   // =========================================
   const postsToggle = document.getElementById('postsToggle');
   const postsContent = document.getElementById('postsContent');
@@ -207,7 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       commentsList.appendChild(card);
     }
-
     return card;
   }
 
@@ -253,7 +260,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (commentsList) {
     loadComments();
-    setInterval(loadComments, 15000);
+    if (window.__nexusCommentTimer) clearInterval(window.__nexusCommentTimer);
+    window.__nexusCommentTimer = setInterval(loadComments, 15000);
   }
 
   if (commentSubmit) {
@@ -281,22 +289,17 @@ document.addEventListener('DOMContentLoaded', () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, message })
         });
-
         const data = await res.json();
 
         if (data.success && data.comment) {
           commentStatus.textContent = '✅ Posted!';
           commentStatus.style.color = '#2ecc71';
-
           commentName.value = '';
           commentMessage.value = '';
-
           const emptyEl = commentsList.querySelector('.comments-empty');
           if (emptyEl) emptyEl.remove();
-
           renderComment(data.comment, true);
           lastCommentsHash = '';
-
           setTimeout(() => { commentStatus.textContent = ''; }, 3000);
         } else {
           commentStatus.textContent = '❌ ' + (data.details || data.error || 'Something went wrong.');
@@ -330,6 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let isClosingChat = false;
 
   function closeChatFully() {
+    if (!chatWidget) return;
     chatWidget.classList.remove('active');
     chatWidget.classList.remove('keyboard-open');
     chatWidget.style.height = '';
@@ -352,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.addEventListener('popstate', () => {
-    if (chatWidget.classList.contains('active')) {
+    if (chatWidget && chatWidget.classList.contains('active')) {
       chatHistoryState = false;
       closeChatFully();
     }
@@ -430,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
       chatWidget.style.bottom = '0';
       chatWidget.classList.remove('keyboard-open');
     }
-    setTimeout(() => { chatMessages.scrollTop = chatMessages.scrollHeight; }, 150);
+    setTimeout(() => { if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight; }, 150);
   }
 
   if (window.visualViewport) {
@@ -449,9 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   window.addEventListener('resize', adjustChatForKeyboard);
 
-  // =========================================
   // VOICE INPUT
-  // =========================================
   const voiceBtn = document.getElementById('voiceBtn');
   let recognition = null;
   let isRecording = false;
@@ -466,24 +468,24 @@ document.addEventListener('DOMContentLoaded', () => {
     recognition.onstart = () => {
       isRecording = true;
       if (voiceBtn) voiceBtn.classList.add('recording');
-      chatInput.placeholder = '🎤 Listening...';
+      if (chatInput) chatInput.placeholder = '🎤 Listening...';
     };
     recognition.onresult = (event) => {
       let transcript = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         transcript += event.results[i][0].transcript;
       }
-      chatInput.value = transcript;
+      if (chatInput) chatInput.value = transcript;
     };
     recognition.onerror = () => {
       isRecording = false;
       if (voiceBtn) voiceBtn.classList.remove('recording');
-      chatInput.placeholder = 'Type your message...';
+      if (chatInput) chatInput.placeholder = 'Type your message...';
     };
     recognition.onend = () => {
       isRecording = false;
       if (voiceBtn) voiceBtn.classList.remove('recording');
-      chatInput.placeholder = 'Type your message...';
+      if (chatInput) chatInput.placeholder = 'Type your message...';
     };
   }
 
@@ -498,9 +500,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // =========================================
   // TEXT-TO-SPEECH
-  // =========================================
   let currentlySpeaking = false;
   let currentSpeakBtn = null;
   let currentMessageEl = null;
@@ -599,9 +599,7 @@ document.addEventListener('DOMContentLoaded', () => {
     speechSynthesis.speak(utterance);
   }
 
-  // =========================================
   // CHAT FORM SUBMIT
-  // =========================================
   if (chatForm) {
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -620,7 +618,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (sendBtn) sendBtn.disabled = true;
 
       try {
-        // Get device model to send with chat
         const { model } = await getDeviceInfo();
         const payload = { message: message, history: chatHistory.slice(-10), deviceModel: model };
 
@@ -698,4 +695,94 @@ document.addEventListener('DOMContentLoaded', () => {
     return div;
   }
 
-});
+} // end initNexusPage
+
+// =========================================
+// SPA NAVIGATION (URL never changes)
+// =========================================
+async function loadNexusPage(url, pushHistory) {
+  try {
+    const res = await fetch(url, { cache: 'no-cache' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const html = await res.text();
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+
+    // Update title
+    if (doc.title) document.title = doc.title;
+
+    // Strip script tags (we don't want to re-execute script.js)
+    const newBody = doc.body.cloneNode(true);
+    newBody.querySelectorAll('script').forEach(s => s.remove());
+
+    // Swap content
+    document.body.innerHTML = newBody.innerHTML;
+
+    // Update current page tracker
+    __currentPage = url.split('/').pop() || 'index.html';
+
+    // Re-initialize page logic
+    initNexusPage();
+
+    // Scroll to top
+    window.scrollTo(0, 0);
+
+    // Add history entry (URL won't visually change)
+    if (pushHistory) {
+      history.pushState({ nexusPage: url }, '', window.location.pathname);
+    }
+  } catch (err) {
+    // Fallback: normal navigation
+    window.location.href = url;
+  }
+}
+
+// =========================================
+// CLICK INTERCEPTOR (setup once)
+// =========================================
+(function setupSpaNavigation() {
+  if (window.__nexusSpaReady) return;
+  window.__nexusSpaReady = true;
+
+  document.addEventListener('click', function(e) {
+    const link = e.target.closest('a');
+    if (!link) return;
+
+    const href = link.getAttribute('href');
+    if (!href) return;
+
+    // Skip external, hash, mailto, tel
+    if (/^(https?:|mailto:|tel:|\/\/)/i.test(href)) return;
+    if (href.startsWith('#')) return;
+
+    // Skip explicit new-tab links (like admin.html from index)
+    if (link.target === '_blank') return;
+
+    // Skip if modifier keys (ctrl/cmd click → open new tab)
+    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+
+    // Skip right-click etc.
+    if (e.button !== 0) return;
+
+    e.preventDefault();
+    loadNexusPage(href, true);
+  });
+
+  // Handle browser back/forward
+  window.addEventListener('popstate', function(e) {
+    if (e.state && e.state.nexusPage) {
+      loadNexusPage(e.state.nexusPage, false);
+    }
+  });
+
+  // Replace initial state so back button has a base
+  history.replaceState({ nexusPage: __currentPage }, '', window.location.pathname);
+})();
+
+// =========================================
+// BOOTSTRAP
+// =========================================
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initNexusPage);
+} else {
+  initNexusPage();
+}
