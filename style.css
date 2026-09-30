@@ -1008,3 +1008,100 @@ html.theme-amoled .ai-msg-bot { background-color: #0a0a0a; }
 html.theme-amoled .ai-chat-input { background-color: #000000; }
 html.theme-amoled .ai-chat-input input[type="text"] { background-color: #0a0a0a; }
 html.theme-amoled footer { border-top-color: rgba(255,255,255,0.05); }
+/* =========================================
+   24. CONTENT WARNING BOX (Movie Detail Pages)
+   ========================================= */
+.content-warning {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: rgba(231, 76, 60, 0.08);
+  border: 1px solid rgba(231, 76, 60, 0.35);
+  border-left: 4px solid #e74c3c;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 20px 0 24px 0;
+  clear: both;
+}
+
+.content-warning .cw-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.content-warning .cw-body {
+  flex: 1;
+}
+
+.content-warning .cw-body strong {
+  display: block;
+  color: #e74c3c;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+
+.content-warning .cw-body p {
+  color: #ccc;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.content-warning .cw-body p strong {
+  display: inline;
+  color: #ff7b7b;
+  margin: 0;
+  font-size: inherit;
+}
+
+.content-warning .cw-body em {
+  color: #e0e0e0;
+  font-style: italic;
+}
+
+/* Day theme */
+html.theme-day .content-warning {
+  background: rgba(231, 76, 60, 0.06);
+  border-color: rgba(231, 76, 60, 0.3);
+}
+html.theme-day .content-warning .cw-body p { color: #444; }
+html.theme-day .content-warning .cw-body p strong { color: #c0392b; }
+html.theme-day .content-warning .cw-body em { color: #333; }
+
+/* Amoled theme */
+html.theme-amoled .content-warning {
+  background: rgba(231, 76, 60, 0.1);
+}
+
+@media (max-width: 600px) {
+  .content-warning { padding: 12px 14px; gap: 10px; }
+  .content-warning .cw-icon { font-size: 1.2rem; }
+  .content-warning .cw-body strong { font-size: 0.9rem; }
+  .content-warning .cw-body p { font-size: 0.82rem; }
+}
+/* =========================================
+   25. POSTER WARNING BADGE (18+)
+   ========================================= */
+.poster-card {
+  position: relative;
+}
+
+.poster-warning-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(231, 76, 60, 0.92);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  font-family: 'Space Grotesk', sans-serif;
+  pointer-events: none;
+}
