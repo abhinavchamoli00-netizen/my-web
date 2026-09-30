@@ -19,27 +19,128 @@ function isHomePage() {
 }
 
 // =========================================
-// FIXED FAB CONTAINER (survives SPA swaps)
+// FLOATING BUTTONS (always fixed, inline styles)
 // =========================================
-function ensureFabContainer() {
-  let c = document.getElementById('nexusFabContainer');
-  if (c) return c;
-  c = document.createElement('div');
-  c.id = 'nexusFabContainer';
-  c.style.cssText = [
-    'position: fixed',
-    'top: 20px',
-    'left: 20px',
-    'z-index: 999999',
-    'display: flex',
-    'gap: 10px',
-    'align-items: center',
-    'pointer-events: none',
-    'will-change: transform'
-  ].join(';');
-  document.body.appendChild(c);
-  return c;
+function ensureFloatingButtons() {
+  // --- THEME TOGGLE (home only) ---
+  let tBtn = document.getElementById('nexusThemeToggle');
+  if (!tBtn) {
+    tBtn = document.createElement('button');
+    tBtn.id = 'nexusThemeToggle';
+    tBtn.type = 'button';
+    tBtn.style.cssText = [
+      'position: fixed',
+      'top: 20px',
+      'left: 20px',
+      'width: 42px',
+      'height: 42px',
+      'border-radius: 50%',
+      'background: rgba(108, 92, 231, 0.5)',
+      'color: #fff',
+      'border: 1px solid rgba(108, 92, 231, 0.7)',
+      'font-size: 1.2rem',
+      'cursor: pointer',
+      'z-index: 2147483647',
+      'padding: 0',
+      'line-height: 1',
+      'box-shadow: 0 4px 14px rgba(0,0,0,0.4)',
+      'font-family: "Space Grotesk", sans-serif',
+      'align-items: center',
+      'justify-content: center',
+      'user-select: none'
+    ].join(';');
+    document.body.appendChild(tBtn);
+  }
+
+  // --- BACK BUTTON ---
+  let bBtn = document.getElementById('nexusBackBtn');
+  if (!bBtn) {
+    bBtn = document.createElement('button');
+    bBtn.id = 'nexusBackBtn';
+    bBtn.type = 'button';
+    bBtn.innerHTML = '←';
+    bBtn.setAttribute('aria-label', 'Go back');
+    bBtn.style.cssText = [
+      'position: fixed',
+      'top: 20px',
+      'left: 72px',
+      'width: 42px',
+      'height: 42px',
+      'border-radius: 50%',
+      'background: rgba(108, 92, 231, 0.5)',
+      'color: #fff',
+      'border: 1px solid rgba(108, 92, 231, 0.7)',
+      'font-size: 1.35rem',
+      'font-weight: 700',
+      'cursor: pointer',
+      'z-index: 2147483647',
+      'padding: 0',
+      'line-height: 1',
+      'box-shadow: 0 4px 14px rgba(0,0,0,0.4)',
+      'font-family: "Space Grotesk", sans-serif',
+      'align-items: center',
+      'justify-content: center',
+      'user-select: none'
+    ].join(';');
+    document.body.appendChild(bBtn);
+  }
+
+  // --- VISIBILITY ---
+  const home = isHomePage();
+  tBtn.style.display = home ? 'flex' : 'none';
+  bBtn.style.display = home ? 'none' : 'flex';
 }
+
+// --- THEME LOGIC (attached to button) ---
+(function setupThemeClick() {
+  if (window.__nexusThemeClickReady) return;
+  window.__nexusThemeClickReady = true;
+
+  const THEMES = ['dark', 'day', 'amoled'];
+  const ICONS = { dark: '🌙', day: '☀️', amoled: '⬛' };
+  let theme = localStorage.getItem('nexus_theme') || 'dark';
+  if (!THEMES.includes(theme)) theme = 'dark';
+
+  function applyTheme(t) {
+    document.documentElement.classList.remove('theme-dark', 'theme-day', 'theme-amoled');
+    document.documentElement.classList.add('theme-' + t);
+    const b = document.getElementById('nexusThemeToggle');
+    if (b) b.textContent = ICONS[t];
+  }
+
+  // Apply on load
+  applyTheme(theme);
+
+  // Delegated click (works even after SPA replaces DOM)
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('#nexusThemeToggle');
+    if (!target) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const idx = THEMES.indexOf(theme);
+    theme = THEMES[(idx + 1) % THEMES.length];
+    localStorage.setItem('nexus_theme', theme);
+    applyTheme(theme);
+  }, true);
+})();
+
+// --- BACK LOGIC (attached to button) ---
+(function setupBackClick() {
+  if (window.__nexusBackClickReady) return;
+  window.__nexusBackClickReady = true;
+
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('#nexusBackBtn');
+    if (!target) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = 'index.html';
+    }
+  }, true);
+})();
 
 // =========================================
 // PAGE INITIALIZER
@@ -55,9 +156,7 @@ function initNexusPage() {
     if (commentsSection) commentsSection.remove();
   }
 
-  ensureFabContainer();
-  updateThemeToggleVisibility();
-  updateBackButtonVisibility();
+  ensureFloatingButtons();
 
   async function getDeviceInfo() {
     let model = '';
@@ -705,124 +804,10 @@ function initNexusPage() {
 }
 
 // =========================================
-// THEME TOGGLE (inside FAB container)
-// =========================================
-function updateThemeToggleVisibility() {
-  const btn = document.getElementById('nexusThemeToggle');
-  if (!btn) return;
-  btn.style.display = isHomePage() ? 'flex' : 'none';
-}
-
-(function setupThemeToggle() {
-  if (document.getElementById('nexusThemeToggle')) return;
-
-  const THEMES = ['dark', 'day', 'amoled'];
-  const ICONS = { dark: '🌙', day: '☀️', amoled: '⬛' };
-  let theme = localStorage.getItem('nexus_theme') || 'dark';
-  if (!THEMES.includes(theme)) theme = 'dark';
-
-  function applyTheme(t) {
-    document.documentElement.classList.remove('theme-dark', 'theme-day', 'theme-amoled');
-    document.documentElement.classList.add('theme-' + t);
-    const btn = document.getElementById('nexusThemeToggle');
-    if (btn) {
-      btn.textContent = ICONS[t];
-      btn.title = 'Theme: ' + t.charAt(0).toUpperCase() + t.slice(1);
-    }
-  }
-
-  const btn = document.createElement('button');
-  btn.id = 'nexusThemeToggle';
-  btn.type = 'button';
-  btn.style.cssText = [
-    'width: 42px',
-    'height: 42px',
-    'border-radius: 50%',
-    'background: rgba(108, 92, 231, 0.35)',
-    'border: 1px solid rgba(108, 92, 231, 0.6)',
-    'color: #fff',
-    'font-size: 1.2rem',
-    'cursor: pointer',
-    'display: flex',
-    'align-items: center',
-    'justify-content: center',
-    'font-family: Space Grotesk, sans-serif',
-    'padding: 0',
-    'line-height: 1',
-    'user-select: none',
-    'pointer-events: auto',
-    'box-shadow: 0 4px 14px rgba(0,0,0,0.35)'
-  ].join(';');
-  btn.addEventListener('click', () => {
-    const idx = THEMES.indexOf(theme);
-    theme = THEMES[(idx + 1) % THEMES.length];
-    localStorage.setItem('nexus_theme', theme);
-    applyTheme(theme);
-  });
-
-  ensureFabContainer().appendChild(btn);
-  applyTheme(theme);
-  updateThemeToggleVisibility();
-})();
-
-// =========================================
-// BACK BUTTON (inside FAB container)
-// =========================================
-function updateBackButtonVisibility() {
-  const btn = document.getElementById('nexusBackBtn');
-  if (!btn) return;
-  btn.style.display = isHomePage() ? 'none' : 'flex';
-}
-
-(function setupBackButton() {
-  if (document.getElementById('nexusBackBtn')) return;
-
-  const btn = document.createElement('button');
-  btn.id = 'nexusBackBtn';
-  btn.type = 'button';
-  btn.innerHTML = '←';
-  btn.title = 'Go back';
-  btn.setAttribute('aria-label', 'Go back');
-  btn.style.cssText = [
-    'width: 42px',
-    'height: 42px',
-    'border-radius: 50%',
-    'background: rgba(108, 92, 231, 0.35)',
-    'border: 1px solid rgba(108, 92, 231, 0.6)',
-    'color: #fff',
-    'font-size: 1.35rem',
-    'font-weight: 700',
-    'cursor: pointer',
-    'display: flex',
-    'align-items: center',
-    'justify-content: center',
-    'font-family: Space Grotesk, sans-serif',
-    'padding: 0',
-    'line-height: 1',
-    'user-select: none',
-    'pointer-events: auto',
-    'box-shadow: 0 4px 14px rgba(0,0,0,0.35)'
-  ].join(';');
-  btn.addEventListener('click', () => {
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      window.location.href = 'index.html';
-    }
-  });
-
-  ensureFabContainer().appendChild(btn);
-  updateBackButtonVisibility();
-})();
-
-// =========================================
 // SPA NAVIGATION
 // =========================================
 async function loadNexusPage(url, pushHistory) {
   try {
-    // 🔒 Save FAB container before swap
-    const fab = document.getElementById('nexusFabContainer');
-
     const res = await fetch(url, { cache: 'no-cache' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const html = await res.text();
@@ -843,11 +828,6 @@ async function loadNexusPage(url, pushHistory) {
     const newBody = doc.body.cloneNode(true);
     newBody.querySelectorAll('script').forEach(s => s.remove());
     document.body.innerHTML = newBody.innerHTML;
-
-    // 🔒 Re-append FAB container after swap
-    if (fab && !document.getElementById('nexusFabContainer')) {
-      document.body.appendChild(fab);
-    }
 
     allScripts.forEach(oldScript => {
       if (oldScript.src) return;
