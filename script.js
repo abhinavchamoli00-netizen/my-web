@@ -632,4 +632,18 @@ document.addEventListener('DOMContentLoaded', () => {
     return div;
   }
 
-});
+  // POSTS TOGGLE (Collapsible)
+  const postsToggle = document.getElementById('postsToggle');
+  const postsContent = document.getElementById('postsContent');
+  if (postsToggle && postsContent) {
+    postsToggle.addEventListener('click', () => {
+      const isExpanded = postsContent.classList.toggle('expanded');
+      postsToggle.classList.toggle('active', isExpanded);
+      const textSpan = postsToggle.querySelector('.posts-toggle-text');
+      if (textSpan) {
+        textSpan.textContent = isExpanded
+          ? 'Click here to hide 2026 updates'
+          : 'Click here to see 2026 updates';
+      }
+    });
+  }});
