@@ -1150,3 +1150,50 @@ html.theme-day .nexus-back-btn {
 @media (max-width: 600px) {
   .nexus-back-btn { top: 12px; left: 12px; width: 36px; height: 36px; font-size: 1.15rem; }
 }
+/* =========================================
+   27. POSTER RATING BADGE (IMDb / Steam / etc.)
+   ========================================= */
+.poster-card {
+  position: relative;
+}
+
+.poster-rating-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(0, 0, 0, 0.78);
+  color: #ffd93b;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  font-family: 'Space Grotesk', sans-serif;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.poster-rating-badge .rating-source {
+  color: #a29bfe;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-right: 2px;
+}
+
+/* Day theme tweak */
+html.theme-day .poster-rating-badge {
+  background: rgba(255, 255, 255, 0.95);
+  color: #c47f00;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+html.theme-day .poster-rating-badge .rating-source { color: #6c5ce7; }
+
+/* Amoled */
+html.theme-amoled .poster-rating-badge { background: rgba(0, 0, 0, 0.9); }
