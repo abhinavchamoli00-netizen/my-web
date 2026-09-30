@@ -19,6 +19,29 @@ function isHomePage() {
 }
 
 // =========================================
+// FIXED FAB CONTAINER (survives SPA swaps)
+// =========================================
+function ensureFabContainer() {
+  let c = document.getElementById('nexusFabContainer');
+  if (c) return c;
+  c = document.createElement('div');
+  c.id = 'nexusFabContainer';
+  c.style.cssText = [
+    'position: fixed',
+    'top: 20px',
+    'left: 20px',
+    'z-index: 999999',
+    'display: flex',
+    'gap: 10px',
+    'align-items: center',
+    'pointer-events: none',
+    'will-change: transform'
+  ].join(';');
+  document.body.appendChild(c);
+  return c;
+}
+
+// =========================================
 // PAGE INITIALIZER
 // =========================================
 function initNexusPage() {
@@ -32,6 +55,7 @@ function initNexusPage() {
     if (commentsSection) commentsSection.remove();
   }
 
+  ensureFabContainer();
   updateThemeToggleVisibility();
   updateBackButtonVisibility();
 
@@ -681,7 +705,7 @@ function initNexusPage() {
 }
 
 // =========================================
-// THEME TOGGLE (inline styles — bulletproof)
+// THEME TOGGLE (inside FAB container)
 // =========================================
 function updateThemeToggleVisibility() {
   const btn = document.getElementById('nexusThemeToggle');
@@ -710,31 +734,25 @@ function updateThemeToggleVisibility() {
   const btn = document.createElement('button');
   btn.id = 'nexusThemeToggle';
   btn.type = 'button';
-  // 🔒 Inline styles — always work, no CSS dependency
-  btn.style.cssText = `
-    position: fixed !important;
-    top: 20px !important;
-    left: 20px !important;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: rgba(108, 92, 231, 0.35);
-    border: 1px solid rgba(108, 92, 231, 0.6);
-    color: #fff;
-    font-size: 1.2rem;
-    cursor: pointer;
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    font-family: 'Space Grotesk', sans-serif;
-    padding: 0;
-    line-height: 1;
-    user-select: none;
-    transition: transform 0.2s ease;
-  `;
+  btn.style.cssText = [
+    'width: 42px',
+    'height: 42px',
+    'border-radius: 50%',
+    'background: rgba(108, 92, 231, 0.35)',
+    'border: 1px solid rgba(108, 92, 231, 0.6)',
+    'color: #fff',
+    'font-size: 1.2rem',
+    'cursor: pointer',
+    'display: flex',
+    'align-items: center',
+    'justify-content: center',
+    'font-family: Space Grotesk, sans-serif',
+    'padding: 0',
+    'line-height: 1',
+    'user-select: none',
+    'pointer-events: auto',
+    'box-shadow: 0 4px 14px rgba(0,0,0,0.35)'
+  ].join(';');
   btn.addEventListener('click', () => {
     const idx = THEMES.indexOf(theme);
     theme = THEMES[(idx + 1) % THEMES.length];
@@ -742,13 +760,13 @@ function updateThemeToggleVisibility() {
     applyTheme(theme);
   });
 
-  document.documentElement.appendChild(btn);
+  ensureFabContainer().appendChild(btn);
   applyTheme(theme);
   updateThemeToggleVisibility();
 })();
 
 // =========================================
-// BACK BUTTON (inline styles — bulletproof)
+// BACK BUTTON (inside FAB container)
 // =========================================
 function updateBackButtonVisibility() {
   const btn = document.getElementById('nexusBackBtn');
@@ -765,32 +783,26 @@ function updateBackButtonVisibility() {
   btn.innerHTML = '←';
   btn.title = 'Go back';
   btn.setAttribute('aria-label', 'Go back');
-  // 🔒 Inline styles — always work, no CSS dependency
-  btn.style.cssText = `
-    position: fixed !important;
-    top: 20px !important;
-    left: 20px !important;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: rgba(108, 92, 231, 0.35);
-    border: 1px solid rgba(108, 92, 231, 0.6);
-    color: #fff;
-    font-size: 1.35rem;
-    font-weight: 700;
-    cursor: pointer;
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    font-family: 'Space Grotesk', sans-serif;
-    padding: 0;
-    line-height: 1;
-    user-select: none;
-    transition: transform 0.2s ease;
-  `;
+  btn.style.cssText = [
+    'width: 42px',
+    'height: 42px',
+    'border-radius: 50%',
+    'background: rgba(108, 92, 231, 0.35)',
+    'border: 1px solid rgba(108, 92, 231, 0.6)',
+    'color: #fff',
+    'font-size: 1.35rem',
+    'font-weight: 700',
+    'cursor: pointer',
+    'display: flex',
+    'align-items: center',
+    'justify-content: center',
+    'font-family: Space Grotesk, sans-serif',
+    'padding: 0',
+    'line-height: 1',
+    'user-select: none',
+    'pointer-events: auto',
+    'box-shadow: 0 4px 14px rgba(0,0,0,0.35)'
+  ].join(';');
   btn.addEventListener('click', () => {
     if (window.history.length > 1) {
       window.history.back();
@@ -799,7 +811,7 @@ function updateBackButtonVisibility() {
     }
   });
 
-  document.documentElement.appendChild(btn);
+  ensureFabContainer().appendChild(btn);
   updateBackButtonVisibility();
 })();
 
@@ -808,6 +820,9 @@ function updateBackButtonVisibility() {
 // =========================================
 async function loadNexusPage(url, pushHistory) {
   try {
+    // 🔒 Save FAB container before swap
+    const fab = document.getElementById('nexusFabContainer');
+
     const res = await fetch(url, { cache: 'no-cache' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const html = await res.text();
@@ -828,6 +843,11 @@ async function loadNexusPage(url, pushHistory) {
     const newBody = doc.body.cloneNode(true);
     newBody.querySelectorAll('script').forEach(s => s.remove());
     document.body.innerHTML = newBody.innerHTML;
+
+    // 🔒 Re-append FAB container after swap
+    if (fab && !document.getElementById('nexusFabContainer')) {
+      document.body.appendChild(fab);
+    }
 
     allScripts.forEach(oldScript => {
       if (oldScript.src) return;
