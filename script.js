@@ -710,12 +710,22 @@ async function loadNexusPage(url, pushHistory) {
     // Update title
     if (doc.title) document.title = doc.title;
 
-    // Strip script tags (we don't want to re-execute script.js)
+    // Grab scripts BEFORE stripping (so we can re-execute inline ones)
+    const allScripts = Array.from(doc.body.querySelectorAll('script'));
+
     const newBody = doc.body.cloneNode(true);
     newBody.querySelectorAll('script').forEach(s => s.remove());
 
     // Swap content
     document.body.innerHTML = newBody.innerHTML;
+
+    // Re-execute ONLY inline scripts (no src) — skip script.js to avoid loop
+    allScripts.forEach(oldScript => {
+      if (oldScript.src) return;
+      const newScript = document.createElement('script');
+      newScript.textContent = oldScript.textContent;
+      document.body.appendChild(newScript);
+    });
 
     // Update current page tracker
     __currentPage = url.split('/').pop() || 'index.html';
@@ -723,15 +733,12 @@ async function loadNexusPage(url, pushHistory) {
     // Re-initialize page logic
     initNexusPage();
 
-    // Scroll to top
     window.scrollTo(0, 0);
 
-    // Add history entry (URL won't visually change)
     if (pushHistory) {
       history.pushState({ nexusPage: url }, '', window.location.pathname);
     }
   } catch (err) {
-    // Fallback: normal navigation
     window.location.href = url;
   }
 }
@@ -754,7 +761,7 @@ async function loadNexusPage(url, pushHistory) {
     if (/^(https?:|mailto:|tel:|\/\/)/i.test(href)) return;
     if (href.startsWith('#')) return;
 
-    // Skip explicit new-tab links (like admin.html from index)
+    // Skip explicit new-tab links
     if (link.target === '_blank') return;
 
     // Skip if modifier keys (ctrl/cmd click → open new tab)
