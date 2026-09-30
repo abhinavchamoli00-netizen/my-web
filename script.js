@@ -785,3 +785,40 @@ if (document.readyState === 'loading') {
 } else {
   initNexusPage();
 }
+// =========================================
+// THEME TOGGLE (Dark / Day / Amoled)
+// =========================================
+(function setupThemeToggle() {
+  if (document.getElementById('nexusThemeToggle')) return;
+
+  const THEMES = ['dark', 'day', 'amoled'];
+  const ICONS = { dark: '🌙', day: '☀️', amoled: '⬛' };
+  let theme = localStorage.getItem('nexus_theme') || 'dark';
+  if (!THEMES.includes(theme)) theme = 'dark';
+
+  function applyTheme(t) {
+    document.documentElement.classList.remove('theme-dark', 'theme-day', 'theme-amoled');
+    document.documentElement.classList.add('theme-' + t);
+    const btn = document.getElementById('nexusThemeToggle');
+    if (btn) {
+      btn.textContent = ICONS[t];
+      btn.title = 'Theme: ' + t.charAt(0).toUpperCase() + t.slice(1) + ' (click to change)';
+      btn.setAttribute('aria-label', btn.title);
+    }
+  }
+
+  const btn = document.createElement('button');
+  btn.id = 'nexusThemeToggle';
+  btn.className = 'nexus-theme-toggle';
+  btn.type = 'button';
+  btn.addEventListener('click', () => {
+    const idx = THEMES.indexOf(theme);
+    theme = THEMES[(idx + 1) % THEMES.length];
+    localStorage.setItem('nexus_theme', theme);
+    applyTheme(theme);
+  });
+
+  // Append to <html> so it survives SPA body swaps
+  document.documentElement.appendChild(btn);
+  applyTheme(theme);
+})();

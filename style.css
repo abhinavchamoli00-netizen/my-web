@@ -856,3 +856,155 @@ section h2 {
   from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+/* =========================================
+   21. THEME TOGGLE BUTTON
+   ========================================= */
+.nexus-theme-toggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(108, 92, 231, 0.25);
+  border: 1px solid rgba(108, 92, 231, 0.45);
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 9996;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-family: 'Space Grotesk', sans-serif;
+  padding: 0;
+  line-height: 1;
+  user-select: none;
+}
+.nexus-theme-toggle:hover {
+  background: rgba(108, 92, 231, 0.5);
+  transform: scale(1.1);
+  box-shadow: 0 6px 18px rgba(108, 92, 231, 0.5);
+}
+.nexus-theme-toggle:active { transform: scale(0.95); }
+
+@media (max-width: 600px) {
+  .nexus-theme-toggle { top: 12px; left: 12px; width: 36px; height: 36px; font-size: 1rem; }
+}
+
+/* =========================================
+   22. DAY (LIGHT) THEME
+   ========================================= */
+html.theme-day body {
+  background-color: #f4f4f8;
+  color: #1a1a1a;
+}
+html.theme-day header h1 { color: #6c5ce7; }
+html.theme-day header p { color: #3b82f6; }
+
+html.theme-day .posts-section {
+  background-color: #ffffff;
+  border-color: rgba(108, 92, 231, 0.25);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+html.theme-day .posts-title { color: #1a1a1a; }
+html.theme-day .posts-subtitle { color: #666; }
+html.theme-day .posts-year { color: #6c5ce7; }
+html.theme-day .post-item { border-bottom-color: rgba(0, 0, 0, 0.06); }
+html.theme-day .post-item:hover { background: rgba(108, 92, 231, 0.08); }
+html.theme-day .post-date { color: #777; }
+html.theme-day .post-name { color: #333; }
+html.theme-day .post-item:hover .post-name { color: #6c5ce7; }
+
+html.theme-day .posts-toggle {
+  background: rgba(108, 92, 231, 0.08);
+  color: #6c5ce7;
+  border-color: rgba(108, 92, 231, 0.35);
+}
+html.theme-day .posts-toggle:hover { background: rgba(108, 92, 231, 0.18); color: #4e3ec9; }
+
+html.theme-day .card {
+  background-color: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+html.theme-day .card h3,
+html.theme-day .card.locked h3 { color: #6c5ce7 !important; }
+html.theme-day .card p { color: #555; }
+
+html.theme-day section:not(.categories) { background-color: #ffffff; }
+html.theme-day section h2 { color: #6c5ce7 !important; }
+html.theme-day .poster-card { background-color: #ffffff; border-color: rgba(0,0,0,0.08); }
+html.theme-day .poster-card p { color: #1a1a1a; }
+html.theme-day .movie-detail h1 { color: #1a1a1a; }
+html.theme-day .movie-info p { color: #444; }
+html.theme-day .movie-info strong { color: #1a1a1a; }
+
+html.theme-day .feedback-section,
+html.theme-day .comments-section {
+  background-color: #ffffff;
+  border-color: rgba(108, 92, 231, 0.25);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+html.theme-day .feedback-section h3,
+html.theme-day .comments-title { color: #6c5ce7; }
+html.theme-day .feedback-section > p { color: #666; }
+
+html.theme-day .feedback-section input,
+html.theme-day .feedback-section textarea,
+html.theme-day .comment-input-box input,
+html.theme-day .comment-input-box textarea {
+  background-color: #f5f5f8;
+  color: #1a1a1a;
+  border-color: rgba(108, 92, 231, 0.3);
+}
+html.theme-day .comment-input-box { background-color: #f5f5f8; border-color: rgba(108,92,231,0.2); }
+html.theme-day .comment-card { background-color: #f5f5f8; border-color: rgba(108,92,231,0.18); }
+html.theme-day .comment-name { color: #1a1a1a; }
+html.theme-day .comment-text { color: #444; }
+html.theme-day .comment-time { color: #888; }
+html.theme-day .comment-reply { background: rgba(108, 92, 231, 0.1); }
+html.theme-day .comment-reply-text { color: #333; }
+
+html.theme-day footer { border-top-color: rgba(0, 0, 0, 0.08); }
+html.theme-day footer .watermark { color: #777; }
+html.theme-day footer .contact { color: #999; }
+
+html.theme-day .ai-chat-widget { background-color: #f4f4f8; }
+html.theme-day .ai-chat-title { color: #333; }
+html.theme-day .ai-chat-toggle { color: #333; background: rgba(0,0,0,0.06); }
+html.theme-day .ai-chat-toggle:hover { background: rgba(0,0,0,0.15); }
+html.theme-day .ai-msg-bot { background-color: #ffffff; color: #333; }
+html.theme-day .ai-msg-bot strong { color: #1a1a1a; }
+html.theme-day .ai-chat-input { background-color: #ebebf0; border-top-color: rgba(0,0,0,0.08); }
+html.theme-day .ai-chat-input input[type="text"] { background-color: #ffffff; color: #1a1a1a; }
+html.theme-day .chat-action-btn { background-color: #ffffff; color: #6c5ce7; }
+html.theme-day .msg-speak-btn { background: rgba(108,92,231,0.12); }
+
+html.theme-day .nexus-theme-toggle {
+  background: rgba(108, 92, 231, 0.15);
+  color: #6c5ce7;
+  border-color: rgba(108, 92, 231, 0.4);
+}
+
+/* =========================================
+   23. AMOLED (PURE BLACK) THEME
+   ========================================= */
+html.theme-amoled body { background-color: #000000; }
+html.theme-amoled .posts-section { background-color: #0a0a0a; border-color: rgba(108, 92, 231, 0.2); }
+html.theme-amoled .card { background-color: #0a0a0a; }
+html.theme-amoled section:not(.categories) { background-color: #050505; }
+html.theme-amoled .poster-card { background-color: #0a0a0a; }
+html.theme-amoled .feedback-section,
+html.theme-amoled .comments-section { background-color: #0a0a0a; }
+html.theme-amoled .comment-input-box { background-color: #0a0a0a; }
+html.theme-amoled .comment-input-box input,
+html.theme-amoled .comment-input-box textarea { background-color: #000000; }
+html.theme-amoled .comment-card { background-color: #0a0a0a; }
+html.theme-amoled .ai-chat-widget { background-color: #000000; }
+html.theme-amoled .ai-msg-bot { background-color: #0a0a0a; }
+html.theme-amoled .ai-chat-input { background-color: #000000; }
+html.theme-amoled .ai-chat-input input[type="text"] { background-color: #0a0a0a; }
+html.theme-amoled footer { border-top-color: rgba(255,255,255,0.05); }
