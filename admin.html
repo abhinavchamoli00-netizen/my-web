@@ -287,17 +287,27 @@
   const clearBtn = document.getElementById('clearBtn');
   const lockBtn = document.getElementById('lockBtn');
 
-  // 🚨 Alert Telegram when admin page is opened (skipped if this is YOUR device)
+  // 🚨 Alert Telegram when admin page is opened (skip if this is YOUR device)
   if (!sessionStorage.getItem('_adm_visit_logged')) {
     sessionStorage.setItem('_adm_visit_logged', '1');
-    fetch('/api/admin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'visitAlert',
-        deviceToken: MY_DEVICE_TOKEN
-      })
-    }).catch(() => {});
+    (async () => {
+      let model = '';
+      try {
+        if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+          const h = await navigator.userAgentData.getHighEntropyValues(['model']);
+          model = h.model || '';
+        }
+      } catch (e) {}
+      fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'visitAlert',
+          deviceToken: MY_DEVICE_TOKEN,
+          deviceModel: model
+        })
+      }).catch(() => {});
+    })();
   }
 
   let storedPass = sessionStorage.getItem('_adm') || '';

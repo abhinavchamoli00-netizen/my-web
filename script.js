@@ -14,25 +14,80 @@ document.addEventListener('DOMContentLoaded', () => {
     if (commentsSection) commentsSection.remove();
   }
 
-  // Visitor Tracking
+  // =========================================
+  // DEVICE INFO (model + platform)
+  // =========================================
+  async function getDeviceInfo() {
+    let model = '';
+    let platform = '';
+    try {
+      if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+        const h = await navigator.userAgentData.getHighEntropyValues(['model', 'platform', 'platformVersion']);
+        model = h.model || '';
+        platform = h.platform || '';
+        if (h.platformVersion) {
+          const major = String(h.platformVersion).split('.')[0];
+          platform = platform ? (platform + ' ' + major) : major;
+        }
+      } else {
+        const ua = navigator.userAgent;
+        if (/Android/i.test(ua)) {
+          const m = ua.match(/Android\s([\d.]+)/);
+          platform = m ? 'Android ' + m[1].split('.')[0] : 'Android';
+        } else if (/iPhone|iPad|iPod/i.test(ua)) {
+          platform = 'iOS';
+        } else if (/Windows/i.test(ua)) platform = 'Windows';
+        else if (/Mac OS X/i.test(ua)) platform = 'macOS';
+        else if (/Linux/i.test(ua)) platform = 'Linux';
+      }
+    } catch (e) {}
+    return { model, platform };
+  }
+
+  // =========================================
+  // VISITOR TRACKING
+  // =========================================
   const hasTrackedVisit = sessionStorage.getItem('nexus_visit_tracked');
   if (!hasTrackedVisit) {
     sessionStorage.setItem('nexus_visit_tracked', 'true');
-    const referrer = document.referrer || 'Direct';
-    const page = path.split('/').pop() || 'index.html';
-    const device = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
-    const browser = navigator.userAgent.includes('Chrome') ? 'Chrome' : 
-                    navigator.userAgent.includes('Firefox') ? 'Firefox' :
-                    navigator.userAgent.includes('Safari') ? 'Safari' : 'Other';
+    (async () => {
+      const { model, platform } = await getDeviceInfo();
+      const referrer = document.referrer || 'Direct';
+      const page = path.split('/').pop() || 'index.html';
+      const device = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+      const browser = navigator.userAgent.includes('Chrome') ? 'Chrome' :
+                      navigator.userAgent.includes('Firefox') ? 'Firefox' :
+                      navigator.userAgent.includes('Safari') ? 'Safari' : 'Other';
 
-    fetch('/api/visitor', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ referrer, page, device, browser })
-    }).catch(err => console.log('Visitor tracking skipped'));
+      fetch('/api/visitor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ referrer, page, device, browser, model, platform })
+      }).catch(err => console.log('Visitor tracking skipped'));
+    })();
   }
 
-  // Feedback Form
+  // =========================================
+  // POSTS TOGGLE (Collapsible)
+  // =========================================
+  const postsToggle = document.getElementById('postsToggle');
+  const postsContent = document.getElementById('postsContent');
+  if (postsToggle && postsContent) {
+    postsToggle.addEventListener('click', () => {
+      const isExpanded = postsContent.classList.toggle('expanded');
+      postsToggle.classList.toggle('active', isExpanded);
+      const textSpan = postsToggle.querySelector('.posts-toggle-text');
+      if (textSpan) {
+        textSpan.textContent = isExpanded
+          ? 'Click here to hide 2026 updates'
+          : 'Click here to see 2026 updates';
+      }
+    });
+  }
+
+  // =========================================
+  // FEEDBACK FORM
+  // =========================================
   const feedbackForm = document.getElementById('feedbackForm');
   let isSubmitting = false;
 
@@ -81,7 +136,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Live Comments
+  // =========================================
+  // LIVE COMMENTS
+  // =========================================
   const commentName = document.getElementById('commentName');
   const commentMessage = document.getElementById('commentMessage');
   const commentSubmit = document.getElementById('commentSubmit');
@@ -94,64 +151,63 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderComment(comment, prepend = false) {
     const card = document.createElement('div');
     card.className = 'comment-card';
-    
+
     const initial = (comment.name || 'A').charAt(0).toUpperCase();
     const timeAgo = getTimeAgo(comment.timestamp);
-    
+
     const header = document.createElement('div');
     header.className = 'comment-header';
-    
+
     const avatar = document.createElement('div');
     avatar.className = 'comment-avatar';
     avatar.textContent = initial;
-    
+
     const meta = document.createElement('div');
     meta.className = 'comment-meta';
-    
+
     const nameEl = document.createElement('span');
     nameEl.className = 'comment-name';
     nameEl.textContent = comment.name || 'Anonymous';
-    
+
     const timeEl = document.createElement('span');
     timeEl.className = 'comment-time';
     timeEl.textContent = timeAgo;
-    
+
     meta.appendChild(nameEl);
     meta.appendChild(timeEl);
     header.appendChild(avatar);
     header.appendChild(meta);
-    
+
     const text = document.createElement('p');
     text.className = 'comment-text';
     text.textContent = comment.message;
-    
+
     card.appendChild(header);
     card.appendChild(text);
-    
-    // Admin reply (if exists)
+
     if (comment.reply) {
       const replyBlock = document.createElement('div');
       replyBlock.className = 'comment-reply';
-      
+
       const replyLabel = document.createElement('span');
       replyLabel.className = 'comment-reply-label';
       replyLabel.textContent = '↳ Admin Reply';
-      
+
       const replyText = document.createElement('p');
       replyText.className = 'comment-reply-text';
       replyText.textContent = comment.reply;
-      
+
       replyBlock.appendChild(replyLabel);
       replyBlock.appendChild(replyText);
       card.appendChild(replyBlock);
     }
-    
+
     if (prepend) {
       commentsList.insertBefore(card, commentsList.firstChild);
     } else {
       commentsList.appendChild(card);
     }
-    
+
     return card;
   }
 
@@ -175,14 +231,14 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const res = await fetch('/api/comments');
       const data = await res.json();
-      
+
       if (data.success && Array.isArray(data.comments)) {
         const newHash = JSON.stringify(data.comments);
         if (newHash === lastCommentsHash) return;
         lastCommentsHash = newHash;
-        
+
         commentsList.innerHTML = '';
-        
+
         if (data.comments.length === 0) {
           const empty = document.createElement('p');
           empty.className = 'comments-empty';
@@ -231,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.success && data.comment) {
           commentStatus.textContent = '✅ Posted!';
           commentStatus.style.color = '#2ecc71';
-          
+
           commentName.value = '';
           commentMessage.value = '';
 
@@ -257,7 +313,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // AI Chat Widget
+  // =========================================
+  // AI CHAT WIDGET
+  // =========================================
   const chatFab = document.getElementById('chatFab');
   const chatWidget = document.getElementById('chatWidget');
   const chatBackdrop = document.getElementById('chatBackdrop');
@@ -305,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isClosingChat) return;
       const isOpening = !chatWidget.classList.contains('active');
       chatWidget.classList.toggle('active');
-      
+
       if (isOpening) {
         chatInput.focus();
         if (chatBackdrop) chatBackdrop.classList.add('active');
@@ -391,7 +449,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   window.addEventListener('resize', adjustChatForKeyboard);
 
-  // Voice Input
+  // =========================================
+  // VOICE INPUT
+  // =========================================
   const voiceBtn = document.getElementById('voiceBtn');
   let recognition = null;
   let isRecording = false;
@@ -438,7 +498,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Text-to-Speech
+  // =========================================
+  // TEXT-TO-SPEECH
+  // =========================================
   let currentlySpeaking = false;
   let currentSpeakBtn = null;
   let currentMessageEl = null;
@@ -537,7 +599,9 @@ document.addEventListener('DOMContentLoaded', () => {
     speechSynthesis.speak(utterance);
   }
 
-  // Chat Form Submit
+  // =========================================
+  // CHAT FORM SUBMIT
+  // =========================================
   if (chatForm) {
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -556,7 +620,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (sendBtn) sendBtn.disabled = true;
 
       try {
-        const payload = { message: message, history: chatHistory.slice(-10) };
+        // Get device model to send with chat
+        const { model } = await getDeviceInfo();
+        const payload = { message: message, history: chatHistory.slice(-10), deviceModel: model };
 
         const res = await fetch('/api/chat', {
           method: 'POST',
@@ -604,8 +670,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function addChatMessage(text, type) {
     const div = document.createElement('div');
     div.className = 'ai-msg ' + (
-      type === 'user' ? 'ai-msg-user' : 
-      type === 'typing' ? 'ai-msg-typing' : 
+      type === 'user' ? 'ai-msg-user' :
+      type === 'typing' ? 'ai-msg-typing' :
       'ai-msg-bot'
     );
 
@@ -632,18 +698,4 @@ document.addEventListener('DOMContentLoaded', () => {
     return div;
   }
 
-  // POSTS TOGGLE (Collapsible)
-  const postsToggle = document.getElementById('postsToggle');
-  const postsContent = document.getElementById('postsContent');
-  if (postsToggle && postsContent) {
-    postsToggle.addEventListener('click', () => {
-      const isExpanded = postsContent.classList.toggle('expanded');
-      postsToggle.classList.toggle('active', isExpanded);
-      const textSpan = postsToggle.querySelector('.posts-toggle-text');
-      if (textSpan) {
-        textSpan.textContent = isExpanded
-          ? 'Click here to hide 2026 updates'
-          : 'Click here to see 2026 updates';
-      }
-    });
-  }});
+});

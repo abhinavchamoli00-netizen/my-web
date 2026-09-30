@@ -16,17 +16,43 @@ module.exports = async function handler(req, res) {
   const commentId = body.commentId || '';
   const replyText = (body.replyText || '').trim();
   const deviceToken = body.deviceToken || '';
+  const deviceModel = body.deviceModel || '';
 
   const ADMIN_PASS = process.env.ADMIN_PASSWORD || '9272';
   const TRUSTED_TOKEN = process.env.MY_DEVICE_TOKEN || '';
   const isTrusted = !!(TRUSTED_TOKEN && deviceToken === TRUSTED_TOKEN);
+
+  // helper: build device string
+  const buildDeviceStr = (ua, model) => {
+    let device = 'Desktop';
+    if (/Mobi|Android|iPhone|iPod/i.test(ua)) device = 'Mobile';
+    else if (/Tablet|iPad/i.test(ua)) device = 'Tablet';
+    let browser = 'Other';
+    if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Chrome';
+    else if (ua.includes('Firefox')) browser = 'Firefox';
+    else if (ua.includes('Safari')) browser = 'Safari';
+    else if (ua.includes('Edg')) browser = 'Edge';
+    return model ? `${device} • ${model}` : `${device} (${browser})`;
+  };
+
+  // helper: geo lookup
+  const lookupLocation = async (ip) => {
+    try {
+      if (!ip || ip === 'Unknown') return 'Unknown';
+      const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=status,city,regionName,countryCode`);
+      const geoData = await geoRes.json();
+      if (geoData.status === 'success') {
+        return `${geoData.city}, ${geoData.regionName}, ${geoData.countryCode}`;
+      }
+    } catch (e) {}
+    return 'Unknown';
+  };
 
   // =========================================
   // SPECIAL ACTION: visitAlert (no password needed)
   // =========================================
   if (action === 'visitAlert') {
     if (isTrusted) {
-      // Your own device — skip alert
       return res.status(200).json({ success: true, skipped: true });
     }
 
@@ -36,26 +62,9 @@ module.exports = async function handler(req, res) {
       if (botToken && chatId) {
         const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'Unknown';
         const ua = req.headers['user-agent'] || '';
-        let device = 'Desktop';
-        if (/Mobi|Android|iPhone|iPod/i.test(ua)) device = 'Mobile';
-        else if (/Tablet|iPad/i.test(ua)) device = 'Tablet';
-        let browser = 'Other';
-        if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Chrome';
-        else if (ua.includes('Firefox')) browser = 'Firefox';
-        else if (ua.includes('Safari')) browser = 'Safari';
-        else if (ua.includes('Edg')) browser = 'Edge';
-        let location = 'Unknown';
-        try {
-          if (ip !== 'Unknown') {
-            const geoRes = await fetch(`http://ip-api.com/json/${ip}`);
-            const geoData = await geoRes.json();
-            if (geoData.city && geoData.countryCode) {
-              location = `${geoData.city}, ${geoData.countryCode}`;
-            }
-          }
-        } catch (e) {}
+        const location = await lookupLocation(ip);
         const time = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-        const text = `🚨 *Admin Panel Opened*\n\nSomeone (not you) opened the admin page!\n\n🌍 Location: ${location}\n💻 Device: ${device} (${browser})\n🔗 IP: ${ip}\n🕐 Time: ${time}`;
+        const text = `🚨 *Admin Panel Opened*\n\nSomeone (not you) opened the admin page!\n\n🌍 Location: ${location}\n💻 Device: ${buildDeviceStr(ua, deviceModel)}\n🌐 IP: \`${ip}\`\n🕐 Time: ${time}`;
         fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -76,9 +85,10 @@ module.exports = async function handler(req, res) {
       if (botToken && chatId) {
         const ip2 = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'Unknown';
         const ua2 = req.headers['user-agent'] || '';
+        const location2 = await lookupLocation(ip2);
         const time2 = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
         const safeTried = String(password).replace(/[*_`\[\]]/g, '').substring(0, 20);
-        const text2 = `⚠️ *Wrong Admin Password Attempt*\n\n🔗 IP: ${ip2}\n💻 Device: ${ua2.substring(0, 80)}\n🔑 Tried: \`${safeTried}\`\n🕐 Time: ${time2}`;
+        const text2 = `⚠️ *Wrong Admin Password Attempt*\n\n🌍 Location: ${location2}\n💻 Device: ${buildDeviceStr(ua2, deviceModel)}\n🌐 IP: \`${ip2}\`\n🔑 Tried: \`${safeTried}\`\n🕐 Time: ${time2}`;
         fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
