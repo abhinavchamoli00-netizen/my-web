@@ -1140,8 +1140,6 @@ html.theme-amoled .content-warning {
 }
 .nexus-back-btn:active { transform: scale(0.95); }
 
-/* Shift theme toggle to the right so both fit */
-html .nexus-theme-toggle { left: 72px !important; }
 
 html.theme-day .nexus-back-btn {
   background: rgba(108, 92, 231, 0.15);
@@ -1151,5 +1149,4 @@ html.theme-day .nexus-back-btn {
 
 @media (max-width: 600px) {
   .nexus-back-btn { top: 12px; left: 12px; width: 36px; height: 36px; font-size: 1.15rem; }
-  html .nexus-theme-toggle { left: 58px !important; }
 }

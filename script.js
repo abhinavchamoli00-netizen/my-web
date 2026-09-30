@@ -804,9 +804,8 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initNexusPage);
 } else {
   initNexusPage();
-}
 // =========================================
-// THEME TOGGLE (Dark / Day / Amoled)
+// THEME TOGGLE (Dark / Day / Amoled) — Home page only
 // =========================================
 (function setupThemeToggle() {
   if (document.getElementById('nexusThemeToggle')) return;
@@ -838,9 +837,19 @@ if (document.readyState === 'loading') {
     applyTheme(theme);
   });
 
-  // Append to <html> so it survives SPA body swaps
   document.documentElement.appendChild(btn);
   applyTheme(theme);
+
+  // ✅ Show only on home page
+  function updateVisibility() {
+    const p = __currentPage;
+    const isHome = p === 'index.html' || p === '' || p === '/';
+    btn.style.display = isHome ? 'flex' : 'none';
+  }
+  updateVisibility();
+
+  const observer = new MutationObserver(() => updateVisibility());
+  observer.observe(document.body, { childList: true });
 })();
 // =========================================
 // BACK BUTTON (Top-left, all pages except home)
