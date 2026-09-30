@@ -15,18 +15,29 @@ document.querySelectorAll('head style, head link[rel="stylesheet"]').forEach(el 
 });
 
 // =========================================
+// HELPERS
+// =========================================
+function isHomePage() {
+  const p = __currentPage;
+  return p === 'index.html' || p === '' || p === '/';
+}
+
+// =========================================
 // PAGE INITIALIZER (re-runs after every navigation)
 // =========================================
 function initNexusPage() {
 
-  const isHomePage = __currentPage === 'index.html' || __currentPage === '' || __currentPage === '/';
+  const home = isHomePage();
 
-  if (!isHomePage) {
+  if (!home) {
     const feedbackSection = document.querySelector('.feedback-section');
     if (feedbackSection) feedbackSection.remove();
     const commentsSection = document.querySelector('.comments-section');
     if (commentsSection) commentsSection.remove();
   }
+
+  // Update theme toggle visibility on every page change
+  updateThemeToggleVisibility();
 
   // DEVICE INFO
   async function getDeviceInfo() {
@@ -109,7 +120,6 @@ function initNexusPage() {
       nameEl.textContent = (d <= now) ? 'Updated' : 'Soon';
     });
   })();
-
 
   // FEEDBACK FORM
   const feedbackForm = document.getElementById('feedbackForm');
@@ -710,6 +720,82 @@ function initNexusPage() {
 } // end initNexusPage
 
 // =========================================
+// THEME TOGGLE (Dark / Day / Amoled) — Home page only
+// =========================================
+function updateThemeToggleVisibility() {
+  const btn = document.getElementById('nexusThemeToggle');
+  if (!btn) return;
+  btn.style.display = isHomePage() ? 'flex' : 'none';
+}
+
+(function setupThemeToggle() {
+  if (document.getElementById('nexusThemeToggle')) return;
+
+  const THEMES = ['dark', 'day', 'amoled'];
+  const ICONS = { dark: '🌙', day: '☀️', amoled: '⬛' };
+  let theme = localStorage.getItem('nexus_theme') || 'dark';
+  if (!THEMES.includes(theme)) theme = 'dark';
+
+  function applyTheme(t) {
+    document.documentElement.classList.remove('theme-dark', 'theme-day', 'theme-amoled');
+    document.documentElement.classList.add('theme-' + t);
+    const btn = document.getElementById('nexusThemeToggle');
+    if (btn) {
+      btn.textContent = ICONS[t];
+      btn.title = 'Theme: ' + t.charAt(0).toUpperCase() + t.slice(1) + ' (click to change)';
+      btn.setAttribute('aria-label', btn.title);
+    }
+  }
+
+  const btn = document.createElement('button');
+  btn.id = 'nexusThemeToggle';
+  btn.className = 'nexus-theme-toggle';
+  btn.type = 'button';
+  btn.addEventListener('click', () => {
+    const idx = THEMES.indexOf(theme);
+    theme = THEMES[(idx + 1) % THEMES.length];
+    localStorage.setItem('nexus_theme', theme);
+    applyTheme(theme);
+  });
+
+  document.documentElement.appendChild(btn);
+  applyTheme(theme);
+  updateThemeToggleVisibility();
+})();
+
+// =========================================
+// BACK BUTTON (Top-left, all pages except home)
+// =========================================
+function updateBackButtonVisibility() {
+  const btn = document.getElementById('nexusBackBtn');
+  if (!btn) return;
+  btn.style.display = isHomePage() ? 'none' : 'flex';
+}
+
+(function setupBackButton() {
+  if (document.getElementById('nexusBackBtn')) return;
+
+  const btn = document.createElement('button');
+  btn.id = 'nexusBackBtn';
+  btn.className = 'nexus-back-btn';
+  btn.type = 'button';
+  btn.innerHTML = '←';
+  btn.title = 'Go back';
+  btn.setAttribute('aria-label', 'Go back');
+
+  btn.addEventListener('click', () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = 'index.html';
+    }
+  });
+
+  document.documentElement.appendChild(btn);
+  updateBackButtonVisibility();
+})();
+
+// =========================================
 // SPA NAVIGATION (URL never changes)
 // =========================================
 async function loadNexusPage(url, pushHistory) {
@@ -721,10 +807,10 @@ async function loadNexusPage(url, pushHistory) {
 
     if (doc.title) document.title = doc.title;
 
-    // ✅ FIX: Remove previously SPA-added styles
+    // Remove previously SPA-added styles
     document.querySelectorAll('head [data-nexus-spa]').forEach(el => el.remove());
 
-    // ✅ FIX: Add new page's styles (skip base ones already present)
+    // Add new page's styles (skip base ones already present)
     doc.querySelectorAll('head style, head link[rel="stylesheet"]').forEach(el => {
       const outer = el.outerHTML;
       if (__baseStyles.has(outer)) return;
@@ -804,87 +890,4 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initNexusPage);
 } else {
   initNexusPage();
-// =========================================
-// THEME TOGGLE (Dark / Day / Amoled) — Home page only
-// =========================================
-(function setupThemeToggle() {
-  if (document.getElementById('nexusThemeToggle')) return;
-
-  const THEMES = ['dark', 'day', 'amoled'];
-  const ICONS = { dark: '🌙', day: '☀️', amoled: '⬛' };
-  let theme = localStorage.getItem('nexus_theme') || 'dark';
-  if (!THEMES.includes(theme)) theme = 'dark';
-
-  function applyTheme(t) {
-    document.documentElement.classList.remove('theme-dark', 'theme-day', 'theme-amoled');
-    document.documentElement.classList.add('theme-' + t);
-    const btn = document.getElementById('nexusThemeToggle');
-    if (btn) {
-      btn.textContent = ICONS[t];
-      btn.title = 'Theme: ' + t.charAt(0).toUpperCase() + t.slice(1) + ' (click to change)';
-      btn.setAttribute('aria-label', btn.title);
-    }
-  }
-
-  const btn = document.createElement('button');
-  btn.id = 'nexusThemeToggle';
-  btn.className = 'nexus-theme-toggle';
-  btn.type = 'button';
-  btn.addEventListener('click', () => {
-    const idx = THEMES.indexOf(theme);
-    theme = THEMES[(idx + 1) % THEMES.length];
-    localStorage.setItem('nexus_theme', theme);
-    applyTheme(theme);
-  });
-
-  document.documentElement.appendChild(btn);
-  applyTheme(theme);
-
-  // ✅ Show only on home page
-  function updateVisibility() {
-    const p = __currentPage;
-    const isHome = p === 'index.html' || p === '' || p === '/';
-    btn.style.display = isHome ? 'flex' : 'none';
-  }
-  updateVisibility();
-
-  const observer = new MutationObserver(() => updateVisibility());
-  observer.observe(document.body, { childList: true });
-})();
-// =========================================
-// BACK BUTTON (Top-left, all pages except home)
-// =========================================
-(function setupBackButton() {
-  if (document.getElementById('nexusBackBtn')) return;
-
-  const btn = document.createElement('button');
-  btn.id = 'nexusBackBtn';
-  btn.className = 'nexus-back-btn';
-  btn.type = 'button';
-  btn.innerHTML = '←';
-  btn.title = 'Go back';
-  btn.setAttribute('aria-label', 'Go back');
-
-  btn.addEventListener('click', () => {
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      // Fallback: no history → go home
-      window.location.href = 'index.html';
-    }
-  });
-
-  document.documentElement.appendChild(btn);
-
-  function updateVisibility() {
-    const p = __currentPage;
-    const isHome = p === 'index.html' || p === '' || p === '/';
-    btn.style.display = isHome ? 'none' : 'flex';
-  }
-
-  updateVisibility();
-
-  // Re-check whenever body content changes (SPA navigation)
-  const observer = new MutationObserver(() => updateVisibility());
-  observer.observe(document.body, { childList: true });
-})();
+}
