@@ -8,22 +8,18 @@ let __currentPage = (function() {
   return file || 'index.html';
 })();
 
-// Capture "base" styles present on initial page load
 const __baseStyles = new Set();
 document.querySelectorAll('head style, head link[rel="stylesheet"]').forEach(el => {
   __baseStyles.add(el.outerHTML);
 });
 
-// =========================================
-// HELPERS
-// =========================================
 function isHomePage() {
   const p = __currentPage;
   return p === 'index.html' || p === '' || p === '/';
 }
 
 // =========================================
-// PAGE INITIALIZER (re-runs after every navigation)
+// PAGE INITIALIZER
 // =========================================
 function initNexusPage() {
 
@@ -36,10 +32,9 @@ function initNexusPage() {
     if (commentsSection) commentsSection.remove();
   }
 
-  // Update theme toggle visibility on every page change
   updateThemeToggleVisibility();
+  updateBackButtonVisibility();
 
-  // DEVICE INFO
   async function getDeviceInfo() {
     let model = '';
     let platform = '';
@@ -66,7 +61,6 @@ function initNexusPage() {
     return { model, platform };
   }
 
-  // VISITOR TRACKING (once per session)
   const hasTrackedVisit = sessionStorage.getItem('nexus_visit_tracked');
   if (!hasTrackedVisit) {
     sessionStorage.setItem('nexus_visit_tracked', 'true');
@@ -102,7 +96,7 @@ function initNexusPage() {
     });
   }
 
-  // POSTS STATUS (Updated / Soon based on date)
+  // POSTS STATUS
   (function updatePostStatus() {
     const items = document.querySelectorAll('.post-item[data-date]');
     if (!items.length) return;
@@ -183,28 +177,22 @@ function initNexusPage() {
   function renderComment(comment, prepend = false) {
     const card = document.createElement('div');
     card.className = 'comment-card';
-
     const initial = (comment.name || 'A').charAt(0).toUpperCase();
     const timeAgo = getTimeAgo(comment.timestamp);
 
     const header = document.createElement('div');
     header.className = 'comment-header';
-
     const avatar = document.createElement('div');
     avatar.className = 'comment-avatar';
     avatar.textContent = initial;
-
     const meta = document.createElement('div');
     meta.className = 'comment-meta';
-
     const nameEl = document.createElement('span');
     nameEl.className = 'comment-name';
     nameEl.textContent = comment.name || 'Anonymous';
-
     const timeEl = document.createElement('span');
     timeEl.className = 'comment-time';
     timeEl.textContent = timeAgo;
-
     meta.appendChild(nameEl);
     meta.appendChild(timeEl);
     header.appendChild(avatar);
@@ -213,22 +201,18 @@ function initNexusPage() {
     const text = document.createElement('p');
     text.className = 'comment-text';
     text.textContent = comment.message;
-
     card.appendChild(header);
     card.appendChild(text);
 
     if (comment.reply) {
       const replyBlock = document.createElement('div');
       replyBlock.className = 'comment-reply';
-
       const replyLabel = document.createElement('span');
       replyLabel.className = 'comment-reply-label';
       replyLabel.textContent = '↳ Admin Reply';
-
       const replyText = document.createElement('p');
       replyText.className = 'comment-reply-text';
       replyText.textContent = comment.reply;
-
       replyBlock.appendChild(replyLabel);
       replyBlock.appendChild(replyText);
       card.appendChild(replyBlock);
@@ -248,7 +232,6 @@ function initNexusPage() {
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
-
     if (seconds < 30) return 'Just now';
     if (seconds < 60) return seconds + 's ago';
     if (minutes < 60) return minutes + 'm ago';
@@ -262,14 +245,11 @@ function initNexusPage() {
     try {
       const res = await fetch('/api/comments');
       const data = await res.json();
-
       if (data.success && Array.isArray(data.comments)) {
         const newHash = JSON.stringify(data.comments);
         if (newHash === lastCommentsHash) return;
         lastCommentsHash = newHash;
-
         commentsList.innerHTML = '';
-
         if (data.comments.length === 0) {
           const empty = document.createElement('p');
           empty.className = 'comments-empty';
@@ -292,21 +272,17 @@ function initNexusPage() {
     commentSubmit.addEventListener('click', async () => {
       if (isCommentSubmitting) return;
       isCommentSubmitting = true;
-
       const name = (commentName.value || '').trim() || 'Anonymous';
       const message = (commentMessage.value || '').trim();
-
       if (!message) {
         commentStatus.textContent = '❌ Please write something before posting.';
         commentStatus.style.color = '#e74c3c';
         isCommentSubmitting = false;
         return;
       }
-
       commentSubmit.disabled = true;
       commentSubmit.textContent = 'Posting...';
       commentStatus.textContent = '';
-
       try {
         const res = await fetch('/api/comments', {
           method: 'POST',
@@ -314,7 +290,6 @@ function initNexusPage() {
           body: JSON.stringify({ name, message })
         });
         const data = await res.json();
-
         if (data.success && data.comment) {
           commentStatus.textContent = '✅ Posted!';
           commentStatus.style.color = '#2ecc71';
@@ -340,7 +315,7 @@ function initNexusPage() {
     });
   }
 
-  // AI CHAT WIDGET
+  // AI CHAT
   const chatFab = document.getElementById('chatFab');
   const chatWidget = document.getElementById('chatWidget');
   const chatBackdrop = document.getElementById('chatBackdrop');
@@ -389,7 +364,6 @@ function initNexusPage() {
       if (isClosingChat) return;
       const isOpening = !chatWidget.classList.contains('active');
       chatWidget.classList.toggle('active');
-
       if (isOpening) {
         chatInput.focus();
         if (chatBackdrop) chatBackdrop.classList.add('active');
@@ -444,7 +418,6 @@ function initNexusPage() {
     const windowHeight = window.innerHeight;
     const keyboardHeight = windowHeight - viewportHeight;
     const isKeyboardOpen = keyboardHeight > 100;
-
     if (isKeyboardOpen) {
       chatWidget.style.height = viewportHeight + 'px';
       chatWidget.style.top = viewportTop + 'px';
@@ -486,7 +459,6 @@ function initNexusPage() {
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.lang = 'en-IN';
-
     recognition.onstart = () => {
       isRecording = true;
       if (voiceBtn) voiceBtn.classList.add('recording');
@@ -522,7 +494,7 @@ function initNexusPage() {
     });
   }
 
-  // TEXT-TO-SPEECH
+  // TTS
   let currentlySpeaking = false;
   let currentSpeakBtn = null;
   let currentMessageEl = null;
@@ -621,37 +593,28 @@ function initNexusPage() {
     speechSynthesis.speak(utterance);
   }
 
-  // CHAT FORM SUBMIT
   if (chatForm) {
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (isChatSending) return;
-
       const message = chatInput.value.trim();
       if (!message) return;
-
       addChatMessage(message, 'user');
       chatInput.value = '';
-
       const typingEl = addChatMessage('Thinking...', 'typing');
-
       isChatSending = true;
       const sendBtn = document.getElementById('chatSend');
       if (sendBtn) sendBtn.disabled = true;
-
       try {
         const { model } = await getDeviceInfo();
         const payload = { message: message, history: chatHistory.slice(-10), deviceModel: model };
-
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-
         const data = await res.json();
         typingEl.remove();
-
         if (data.success) {
           addChatMessage(data.reply, 'bot');
           chatHistory.push({ role: 'user', text: message });
@@ -693,7 +656,6 @@ function initNexusPage() {
       type === 'typing' ? 'ai-msg-typing' :
       'ai-msg-bot'
     );
-
     if (type === 'bot' && text) {
       div.innerHTML = formatAIResponse(text);
       if (!text.includes('Thinking') && !text.includes('short break')) {
@@ -711,16 +673,15 @@ function initNexusPage() {
     } else {
       div.textContent = text;
     }
-
     chatMessages.appendChild(div);
     chatMessages.scrollTop = chatMessages.scrollHeight;
     return div;
   }
 
-} // end initNexusPage
+}
 
 // =========================================
-// THEME TOGGLE (Dark / Day / Amoled) — Home page only
+// THEME TOGGLE (inline styles — bulletproof)
 // =========================================
 function updateThemeToggleVisibility() {
   const btn = document.getElementById('nexusThemeToggle');
@@ -742,15 +703,38 @@ function updateThemeToggleVisibility() {
     const btn = document.getElementById('nexusThemeToggle');
     if (btn) {
       btn.textContent = ICONS[t];
-      btn.title = 'Theme: ' + t.charAt(0).toUpperCase() + t.slice(1) + ' (click to change)';
-      btn.setAttribute('aria-label', btn.title);
+      btn.title = 'Theme: ' + t.charAt(0).toUpperCase() + t.slice(1);
     }
   }
 
   const btn = document.createElement('button');
   btn.id = 'nexusThemeToggle';
-  btn.className = 'nexus-theme-toggle';
   btn.type = 'button';
+  // 🔒 Inline styles — always work, no CSS dependency
+  btn.style.cssText = `
+    position: fixed !important;
+    top: 20px !important;
+    left: 20px !important;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(108, 92, 231, 0.35);
+    border: 1px solid rgba(108, 92, 231, 0.6);
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-family: 'Space Grotesk', sans-serif;
+    padding: 0;
+    line-height: 1;
+    user-select: none;
+    transition: transform 0.2s ease;
+  `;
   btn.addEventListener('click', () => {
     const idx = THEMES.indexOf(theme);
     theme = THEMES[(idx + 1) % THEMES.length];
@@ -764,7 +748,7 @@ function updateThemeToggleVisibility() {
 })();
 
 // =========================================
-// BACK BUTTON (Top-left, all pages except home)
+// BACK BUTTON (inline styles — bulletproof)
 // =========================================
 function updateBackButtonVisibility() {
   const btn = document.getElementById('nexusBackBtn');
@@ -777,12 +761,36 @@ function updateBackButtonVisibility() {
 
   const btn = document.createElement('button');
   btn.id = 'nexusBackBtn';
-  btn.className = 'nexus-back-btn';
   btn.type = 'button';
   btn.innerHTML = '←';
   btn.title = 'Go back';
   btn.setAttribute('aria-label', 'Go back');
-
+  // 🔒 Inline styles — always work, no CSS dependency
+  btn.style.cssText = `
+    position: fixed !important;
+    top: 20px !important;
+    left: 20px !important;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(108, 92, 231, 0.35);
+    border: 1px solid rgba(108, 92, 231, 0.6);
+    color: #fff;
+    font-size: 1.35rem;
+    font-weight: 700;
+    cursor: pointer;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-family: 'Space Grotesk', sans-serif;
+    padding: 0;
+    line-height: 1;
+    user-select: none;
+    transition: transform 0.2s ease;
+  `;
   btn.addEventListener('click', () => {
     if (window.history.length > 1) {
       window.history.back();
@@ -796,7 +804,7 @@ function updateBackButtonVisibility() {
 })();
 
 // =========================================
-// SPA NAVIGATION (URL never changes)
+// SPA NAVIGATION
 // =========================================
 async function loadNexusPage(url, pushHistory) {
   try {
@@ -807,10 +815,7 @@ async function loadNexusPage(url, pushHistory) {
 
     if (doc.title) document.title = doc.title;
 
-    // Remove previously SPA-added styles
     document.querySelectorAll('head [data-nexus-spa]').forEach(el => el.remove());
-
-    // Add new page's styles (skip base ones already present)
     doc.querySelectorAll('head style, head link[rel="stylesheet"]').forEach(el => {
       const outer = el.outerHTML;
       if (__baseStyles.has(outer)) return;
@@ -819,16 +824,11 @@ async function loadNexusPage(url, pushHistory) {
       document.head.appendChild(newEl);
     });
 
-    // Grab scripts BEFORE stripping (to re-execute inline ones)
     const allScripts = Array.from(doc.body.querySelectorAll('script'));
-
     const newBody = doc.body.cloneNode(true);
     newBody.querySelectorAll('script').forEach(s => s.remove());
-
-    // Swap body content
     document.body.innerHTML = newBody.innerHTML;
 
-    // Re-execute inline scripts only (skip script.js to avoid loop)
     allScripts.forEach(oldScript => {
       if (oldScript.src) return;
       const newScript = document.createElement('script');
@@ -837,9 +837,7 @@ async function loadNexusPage(url, pushHistory) {
     });
 
     __currentPage = url.split('/').pop() || 'index.html';
-
     initNexusPage();
-
     window.scrollTo(0, 0);
 
     if (pushHistory) {
@@ -850,9 +848,6 @@ async function loadNexusPage(url, pushHistory) {
   }
 }
 
-// =========================================
-// CLICK INTERCEPTOR (setup once)
-// =========================================
 (function setupSpaNavigation() {
   if (window.__nexusSpaReady) return;
   window.__nexusSpaReady = true;
@@ -860,16 +855,13 @@ async function loadNexusPage(url, pushHistory) {
   document.addEventListener('click', function(e) {
     const link = e.target.closest('a');
     if (!link) return;
-
     const href = link.getAttribute('href');
     if (!href) return;
-
     if (/^(https?:|mailto:|tel:|\/\/)/i.test(href)) return;
     if (href.startsWith('#')) return;
     if (link.target === '_blank') return;
     if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
     if (e.button !== 0) return;
-
     e.preventDefault();
     loadNexusPage(href, true);
   });
@@ -883,9 +875,6 @@ async function loadNexusPage(url, pushHistory) {
   history.replaceState({ nexusPage: __currentPage }, '', window.location.pathname);
 })();
 
-// =========================================
-// BOOTSTRAP
-// =========================================
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initNexusPage);
 } else {
