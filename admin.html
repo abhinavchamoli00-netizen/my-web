@@ -284,6 +284,25 @@
   const clearBtn = document.getElementById('clearBtn');
   const lockBtn = document.getElementById('lockBtn');
 
+  // 🚨 Alert Telegram when someone opens admin page (once per session)
+  if (!sessionStorage.getItem('_adm_visit_logged')) {
+    sessionStorage.setItem('_adm_visit_logged', '1');
+    const device = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+    const browser = navigator.userAgent.includes('Chrome') ? 'Chrome' :
+                    navigator.userAgent.includes('Firefox') ? 'Firefox' :
+                    navigator.userAgent.includes('Safari') ? 'Safari' : 'Other';
+    fetch('/api/visitor', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        referrer: document.referrer || 'Direct',
+        page: '🚨 ADMIN PANEL',
+        device: device,
+        browser: browser
+      })
+    }).catch(() => {});
+  }
+
   let storedPass = sessionStorage.getItem('_adm') || '';
 
   if (storedPass) verifyAndShow(storedPass);

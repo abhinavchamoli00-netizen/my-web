@@ -1,11 +1,10 @@
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', 'https://nexus-project-alpha8.vercel.app');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // Support both naming conventions
   const apiKey = process.env.JSONBIN_API_KEY || process.env.JSONBIN_KEY;
   const binId = process.env.JSONBIN_BIN_ID || process.env.JSONBIN_ID;
 
@@ -49,6 +48,22 @@ module.exports = async function handler(req, res) {
   // POST: Add new comment
   // =====================
   if (req.method === 'POST') {
+    // ✅ SECURITY FIX: Rate limit — 5 comments per 5 minutes per IP
+    if (!global._cmtRate) global._cmtRate = new Map();
+    const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
+    const now = Date.now();
+    const WINDOW = 5 * 60 * 1000;
+    const MAX = 5;
+    const rec = global._cmtRate.get(ip);
+    if (!rec || now - rec.start > WINDOW) {
+      global._cmtRate.set(ip, { start: now, count: 1 });
+    } else {
+      if (rec.count >= MAX) {
+        return res.status(429).json({ error: 'Too many comments. Please wait a bit.' });
+      }
+      rec.count++;
+    }
+
     let body = req.body;
     if (typeof body === 'string') {
       try { body = JSON.parse(body); } catch (e) { body = {}; }
@@ -61,7 +76,15 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    name = name.trim() || 'Anonymous';
+    // ✅ SECURITY FIX: Length limits
+    if (typeof message !== 'string' || message.length > 300) {
+      return res.status(413).json({ error: 'Message too long (max 300 chars)' });
+    }
+    if (name && (typeof name !== 'string' || name.length > 30)) {
+      return res.status(413).json({ error: 'Name too long (max 30 chars)' });
+    }
+
+    name = (name || '').trim() || 'Anonymous';
     if (name.length > 30) name = name.substring(0, 30);
     let cleanMessage = message.trim();
     if (cleanMessage.length > 300) cleanMessage = cleanMessage.substring(0, 300);

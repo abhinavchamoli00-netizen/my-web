@@ -37,8 +37,10 @@ async function logQuestionToTelegram(question, req) {
       if (page === '') page = 'index.html';
     }
 
+    // ✅ SECURITY FIX: Escape special Telegram markdown chars
+    const safeQuestion = (question || '').replace(/[*_`\[\]]/g, '').substring(0, 500);
     const time = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-    const text = `💬 *New Question*\n\n🌍 Location: ${location}\n💻 Device: ${device} (${browser})\n📄 Page: ${page}\n🕐 Time: ${time}\n\n❓ *Question:*\n${question}`;
+    const text = `💬 *New Question*\n\n🌍 Location: ${location}\n💻 Device: ${device} (${browser})\n📄 Page: ${page}\n🕐 Time: ${time}\n\n❓ *Question:*\n${safeQuestion}`;
 
     await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
@@ -53,7 +55,6 @@ async function logQuestionToTelegram(question, req) {
 // =====================
 async function analyzeImageWithPollinations(imageBase64, userQuestion) {
   try {
-    // Pollinations accepts OpenAI-style vision format
     const response = await fetch('https://text.pollinations.ai/openai', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -65,7 +66,7 @@ async function analyzeImageWithPollinations(imageBase64, userQuestion) {
             content: [
               { 
                 type: 'text', 
-                text: userQuestion || 'Describe this image in detail. What do you see? Identify any people, objects, text, and describe the scene.' 
+                text: userQuestion || 'Describe this image in detail. What do you see?' 
               },
               { 
                 type: 'image_url', 
@@ -89,7 +90,6 @@ async function analyzeImageWithPollinations(imageBase64, userQuestion) {
       return { success: true, reply: data.choices[0].message.content };
     }
     
-    // Some responses come as plain text
     if (typeof data === 'string') {
       return { success: true, reply: data };
     }
@@ -100,14 +100,35 @@ async function analyzeImageWithPollinations(imageBase64, userQuestion) {
   }
 }
 
+// ✅ SECURITY FIX: Simple in-memory rate limiter (per warm instance)
+function checkRateLimit(ip) {
+  if (!global._chatRate) global._chatRate = new Map();
+  const now = Date.now();
+  const WINDOW = 60 * 1000; // 1 minute
+  const MAX = 10;
+  const rec = global._chatRate.get(ip);
+  if (!rec || now - rec.start > WINDOW) {
+    global._chatRate.set(ip, { start: now, count: 1 });
+    return true;
+  }
+  if (rec.count >= MAX) return false;
+  rec.count++;
+  return true;
+}
 
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', 'https://nexus-project-alpha8.vercel.app');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  // Rate limit
+  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
+  if (!checkRateLimit(ip)) {
+    return res.status(429).json({ error: 'Too many requests. Please slow down.' });
+  }
 
   let body = req.body;
   if (typeof body === 'string') {
@@ -122,10 +143,21 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Message or image required' });
   }
 
+  // ✅ SECURITY FIX: Size limits
+  if (typeof message !== 'string' || message.length > 2000) {
+    return res.status(413).json({ error: 'Message too long (max 2000 chars)' });
+  }
+  if (image && typeof image === 'string' && image.length > 5_000_000) {
+    return res.status(413).json({ error: 'Image too large (max ~3.5MB)' });
+  }
+  if (!Array.isArray(history) || history.length > 20) {
+    return res.status(413).json({ error: 'History too long' });
+  }
+
   logQuestionToTelegram(message || '(image sent)', req);
 
   // =====================
-  // 🔥 IMAGE PATH: Use Pollinations vision
+  // IMAGE PATH
   // =====================
   if (image) {
     const result = await analyzeImageWithPollinations(
@@ -137,16 +169,15 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, reply: result.reply.trim(), source: 'pollinations' });
     }
 
-    // Fallback if Pollinations fails
     return res.status(200).json({ 
       success: true, 
-      reply: `⚠️ **Image analysis is having trouble right now.**\n\nHere's what you can do:\n\n• **Describe the image** in text (people, colors, objects, text)\n• Then I'll answer your question about it\n\nSorry for the inconvenience! 🙏`,
+      reply: `⚠️ **Image analysis is having trouble right now.**\n\nPlease try again later. 🙏`,
       source: 'fallback'
     });
   }
 
   // =====================
-  // TEXT PATH: Use Groq
+  // TEXT PATH: Groq
   // =====================
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
@@ -184,9 +215,10 @@ Always be respectful and warm.`;
   ];
 
   for (const item of history) {
+    if (!item || !item.text) continue;
     messages.push({
       role: item.role === 'user' ? 'user' : 'assistant',
-      content: item.text
+      content: String(item.text).substring(0, 2000)
     });
   }
 

@@ -17,6 +17,27 @@ module.exports = async function handler(req, res) {
   const replyText = (body.replyText || '').trim();
 
   const ADMIN_PASS = process.env.ADMIN_PASSWORD || '9272';
+
+  // 🚨 Alert Telegram on wrong password attempt
+  if (password && password !== ADMIN_PASS) {
+    try {
+      const botToken = process.env.TELEGRAM_BOT_TOKEN;
+      const chatId = process.env.TELEGRAM_CHAT_ID;
+      if (botToken && chatId) {
+        const ip2 = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'Unknown';
+        const ua2 = req.headers['user-agent'] || '';
+        const time2 = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+        const safeTried = String(password).replace(/[*_`\[\]]/g, '').substring(0, 20);
+        const text2 = `⚠️ *Wrong Admin Password Attempt*\n\n🔗 IP: ${ip2}\n💻 Device: ${ua2.substring(0, 80)}\n🔑 Tried: \`${safeTried}\`\n🕐 Time: ${time2}`;
+        fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, text: text2, parse_mode: 'Markdown' })
+        }).catch(() => {});
+      }
+    } catch (e) {}
+  }
+
   if (password !== ADMIN_PASS) {
     return res.status(401).json({ success: false, error: 'Invalid credentials' });
   }
@@ -86,7 +107,7 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // Clear all
+    // Clear all comments
     if (action === 'clear') {
       const saveRes = await fetch(baseUrl, {
         method: 'PUT', headers, body: JSON.stringify([])
