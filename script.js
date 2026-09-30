@@ -2,12 +2,17 @@
 // NEXUS - Main Script (SPA-style, URL never changes)
 // =========================================
 
-// Track current page (since URL never changes)
 let __currentPage = (function() {
   const p = window.location.pathname;
   const file = p.split('/').pop();
   return file || 'index.html';
 })();
+
+// Capture "base" styles present on initial page load
+const __baseStyles = new Set();
+document.querySelectorAll('head style, head link[rel="stylesheet"]').forEach(el => {
+  __baseStyles.add(el.outerHTML);
+});
 
 // =========================================
 // PAGE INITIALIZER (re-runs after every navigation)
@@ -15,7 +20,6 @@ let __currentPage = (function() {
 function initNexusPage() {
 
   const isHomePage = __currentPage === 'index.html' || __currentPage === '' || __currentPage === '/';
-  const path = '/' + __currentPage;
 
   if (!isHomePage) {
     const feedbackSection = document.querySelector('.feedback-section');
@@ -24,9 +28,7 @@ function initNexusPage() {
     if (commentsSection) commentsSection.remove();
   }
 
-  // =========================================
   // DEVICE INFO
-  // =========================================
   async function getDeviceInfo() {
     let model = '';
     let platform = '';
@@ -53,9 +55,7 @@ function initNexusPage() {
     return { model, platform };
   }
 
-  // =========================================
   // VISITOR TRACKING (once per session)
-  // =========================================
   const hasTrackedVisit = sessionStorage.getItem('nexus_visit_tracked');
   if (!hasTrackedVisit) {
     sessionStorage.setItem('nexus_visit_tracked', 'true');
@@ -75,9 +75,7 @@ function initNexusPage() {
     })();
   }
 
-  // =========================================
   // POSTS TOGGLE
-  // =========================================
   const postsToggle = document.getElementById('postsToggle');
   const postsContent = document.getElementById('postsContent');
   if (postsToggle && postsContent) {
@@ -93,9 +91,7 @@ function initNexusPage() {
     });
   }
 
-  // =========================================
   // FEEDBACK FORM
-  // =========================================
   const feedbackForm = document.getElementById('feedbackForm');
   let isSubmitting = false;
 
@@ -144,9 +140,7 @@ function initNexusPage() {
     });
   }
 
-  // =========================================
   // LIVE COMMENTS
-  // =========================================
   const commentName = document.getElementById('commentName');
   const commentMessage = document.getElementById('commentMessage');
   const commentSubmit = document.getElementById('commentSubmit');
@@ -316,9 +310,7 @@ function initNexusPage() {
     });
   }
 
-  // =========================================
   // AI CHAT WIDGET
-  // =========================================
   const chatFab = document.getElementById('chatFab');
   const chatWidget = document.getElementById('chatWidget');
   const chatBackdrop = document.getElementById('chatBackdrop');
@@ -707,19 +699,30 @@ async function loadNexusPage(url, pushHistory) {
     const html = await res.text();
     const doc = new DOMParser().parseFromString(html, 'text/html');
 
-    // Update title
     if (doc.title) document.title = doc.title;
 
-    // Grab scripts BEFORE stripping (so we can re-execute inline ones)
+    // ✅ FIX: Remove previously SPA-added styles
+    document.querySelectorAll('head [data-nexus-spa]').forEach(el => el.remove());
+
+    // ✅ FIX: Add new page's styles (skip base ones already present)
+    doc.querySelectorAll('head style, head link[rel="stylesheet"]').forEach(el => {
+      const outer = el.outerHTML;
+      if (__baseStyles.has(outer)) return;
+      const newEl = el.cloneNode(true);
+      newEl.setAttribute('data-nexus-spa', '1');
+      document.head.appendChild(newEl);
+    });
+
+    // Grab scripts BEFORE stripping (to re-execute inline ones)
     const allScripts = Array.from(doc.body.querySelectorAll('script'));
 
     const newBody = doc.body.cloneNode(true);
     newBody.querySelectorAll('script').forEach(s => s.remove());
 
-    // Swap content
+    // Swap body content
     document.body.innerHTML = newBody.innerHTML;
 
-    // Re-execute ONLY inline scripts (no src) — skip script.js to avoid loop
+    // Re-execute inline scripts only (skip script.js to avoid loop)
     allScripts.forEach(oldScript => {
       if (oldScript.src) return;
       const newScript = document.createElement('script');
@@ -727,10 +730,8 @@ async function loadNexusPage(url, pushHistory) {
       document.body.appendChild(newScript);
     });
 
-    // Update current page tracker
     __currentPage = url.split('/').pop() || 'index.html';
 
-    // Re-initialize page logic
     initNexusPage();
 
     window.scrollTo(0, 0);
@@ -757,31 +758,22 @@ async function loadNexusPage(url, pushHistory) {
     const href = link.getAttribute('href');
     if (!href) return;
 
-    // Skip external, hash, mailto, tel
     if (/^(https?:|mailto:|tel:|\/\/)/i.test(href)) return;
     if (href.startsWith('#')) return;
-
-    // Skip explicit new-tab links
     if (link.target === '_blank') return;
-
-    // Skip if modifier keys (ctrl/cmd click → open new tab)
     if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
-
-    // Skip right-click etc.
     if (e.button !== 0) return;
 
     e.preventDefault();
     loadNexusPage(href, true);
   });
 
-  // Handle browser back/forward
   window.addEventListener('popstate', function(e) {
     if (e.state && e.state.nexusPage) {
       loadNexusPage(e.state.nexusPage, false);
     }
   });
 
-  // Replace initial state so back button has a base
   history.replaceState({ nexusPage: __currentPage }, '', window.location.pathname);
 })();
 
