@@ -842,3 +842,40 @@ if (document.readyState === 'loading') {
   document.documentElement.appendChild(btn);
   applyTheme(theme);
 })();
+// =========================================
+// BACK BUTTON (Top-left, all pages except home)
+// =========================================
+(function setupBackButton() {
+  if (document.getElementById('nexusBackBtn')) return;
+
+  const btn = document.createElement('button');
+  btn.id = 'nexusBackBtn';
+  btn.className = 'nexus-back-btn';
+  btn.type = 'button';
+  btn.innerHTML = '←';
+  btn.title = 'Go back';
+  btn.setAttribute('aria-label', 'Go back');
+
+  btn.addEventListener('click', () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      // Fallback: no history → go home
+      window.location.href = 'index.html';
+    }
+  });
+
+  document.documentElement.appendChild(btn);
+
+  function updateVisibility() {
+    const p = __currentPage;
+    const isHome = p === 'index.html' || p === '' || p === '/';
+    btn.style.display = isHome ? 'none' : 'flex';
+  }
+
+  updateVisibility();
+
+  // Re-check whenever body content changes (SPA navigation)
+  const observer = new MutationObserver(() => updateVisibility());
+  observer.observe(document.body, { childList: true });
+})();

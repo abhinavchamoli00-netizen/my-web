@@ -1105,3 +1105,51 @@ html.theme-amoled .content-warning {
   font-family: 'Space Grotesk', sans-serif;
   pointer-events: none;
 }
+/* =========================================
+   26. BACK BUTTON (Top-Left Corner)
+   ========================================= */
+.nexus-back-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(108, 92, 231, 0.25);
+  border: 1px solid rgba(108, 92, 231, 0.45);
+  color: #fff;
+  font-size: 1.35rem;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 9996;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-family: 'Space Grotesk', sans-serif;
+  padding: 0;
+  line-height: 1;
+  user-select: none;
+}
+.nexus-back-btn:hover {
+  background: rgba(108, 92, 231, 0.5);
+  transform: scale(1.1);
+  box-shadow: 0 6px 18px rgba(108, 92, 231, 0.5);
+}
+.nexus-back-btn:active { transform: scale(0.95); }
+
+/* Shift theme toggle to the right so both fit */
+html .nexus-theme-toggle { left: 72px !important; }
+
+html.theme-day .nexus-back-btn {
+  background: rgba(108, 92, 231, 0.15);
+  color: #6c5ce7;
+  border-color: rgba(108, 92, 231, 0.4);
+}
+
+@media (max-width: 600px) {
+  .nexus-back-btn { top: 12px; left: 12px; width: 36px; height: 36px; font-size: 1.15rem; }
+  html .nexus-theme-toggle { left: 58px !important; }
+}
