@@ -91,6 +91,26 @@ function initNexusPage() {
     });
   }
 
+  // POSTS STATUS (Updated / Soon based on date)
+  (function updatePostStatus() {
+    const items = document.querySelectorAll('.post-item[data-date]');
+    if (!items.length) return;
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    items.forEach(item => {
+      const ds = item.getAttribute('data-date');
+      if (!ds) return;
+      const parts = ds.split('-').map(Number);
+      if (parts.length !== 3) return;
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      d.setHours(0, 0, 0, 0);
+      const nameEl = item.querySelector('.post-name');
+      if (!nameEl) return;
+      nameEl.textContent = (d <= now) ? 'Updated' : 'Soon';
+    });
+  })();
+
+
   // FEEDBACK FORM
   const feedbackForm = document.getElementById('feedbackForm');
   let isSubmitting = false;
