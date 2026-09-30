@@ -15,11 +15,61 @@ module.exports = async function handler(req, res) {
   const action = body.action || '';
   const commentId = body.commentId || '';
   const replyText = (body.replyText || '').trim();
+  const deviceToken = body.deviceToken || '';
 
   const ADMIN_PASS = process.env.ADMIN_PASSWORD || '9272';
+  const TRUSTED_TOKEN = process.env.MY_DEVICE_TOKEN || '';
+  const isTrusted = !!(TRUSTED_TOKEN && deviceToken === TRUSTED_TOKEN);
 
-  // 🚨 Alert Telegram on wrong password attempt
-  if (password && password !== ADMIN_PASS) {
+  // =========================================
+  // SPECIAL ACTION: visitAlert (no password needed)
+  // =========================================
+  if (action === 'visitAlert') {
+    if (isTrusted) {
+      // Your own device — skip alert
+      return res.status(200).json({ success: true, skipped: true });
+    }
+
+    try {
+      const botToken = process.env.TELEGRAM_BOT_TOKEN;
+      const chatId = process.env.TELEGRAM_CHAT_ID;
+      if (botToken && chatId) {
+        const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'Unknown';
+        const ua = req.headers['user-agent'] || '';
+        let device = 'Desktop';
+        if (/Mobi|Android|iPhone|iPod/i.test(ua)) device = 'Mobile';
+        else if (/Tablet|iPad/i.test(ua)) device = 'Tablet';
+        let browser = 'Other';
+        if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Chrome';
+        else if (ua.includes('Firefox')) browser = 'Firefox';
+        else if (ua.includes('Safari')) browser = 'Safari';
+        else if (ua.includes('Edg')) browser = 'Edge';
+        let location = 'Unknown';
+        try {
+          if (ip !== 'Unknown') {
+            const geoRes = await fetch(`http://ip-api.com/json/${ip}`);
+            const geoData = await geoRes.json();
+            if (geoData.city && geoData.countryCode) {
+              location = `${geoData.city}, ${geoData.countryCode}`;
+            }
+          }
+        } catch (e) {}
+        const time = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+        const text = `🚨 *Admin Panel Opened*\n\nSomeone (not you) opened the admin page!\n\n🌍 Location: ${location}\n💻 Device: ${device} (${browser})\n🔗 IP: ${ip}\n🕐 Time: ${time}`;
+        fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: 'Markdown' })
+        }).catch(() => {});
+      }
+    } catch (e) {}
+    return res.status(200).json({ success: true });
+  }
+
+  // =========================================
+  // WRONG PASSWORD ALERT (skip if trusted device)
+  // =========================================
+  if (password && password !== ADMIN_PASS && !isTrusted) {
     try {
       const botToken = process.env.TELEGRAM_BOT_TOKEN;
       const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -56,12 +106,10 @@ module.exports = async function handler(req, res) {
     if (readData.record && Array.isArray(readData.record)) comments = readData.record;
     else if (readData.record && readData.record.comments) comments = readData.record.comments;
 
-    // Verify only
     if (action === 'verify') {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // Delete single comment
     if (action === 'delete') {
       const before = comments.length;
       comments = comments.filter(c => c.id !== commentId);
@@ -74,7 +122,6 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // Reply to comment
     if (action === 'reply') {
       if (!replyText) return res.status(400).json({ error: 'Reply text required' });
       if (replyText.length > 400) return res.status(400).json({ error: 'Reply too long' });
@@ -92,7 +139,6 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // Remove reply
     if (action === 'unreply') {
       const idx = comments.findIndex(c => c.id === commentId);
       if (idx === -1) return res.status(404).json({ error: 'Comment not found' });
@@ -107,7 +153,6 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // Clear all comments
     if (action === 'clear') {
       const saveRes = await fetch(baseUrl, {
         method: 'PUT', headers, body: JSON.stringify([])
