@@ -1236,3 +1236,69 @@ html.theme-day .poster-rating-badge {
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
 html.theme-day .poster-rating-badge .rating-source { color: #6c5ce7; }
+/* =========================================
+   28. MOVIE WATCH BOX (Telegram Redirect)
+   ========================================= */
+.movie-watch-box {
+  max-width: 500px;
+  margin: 30px auto 10px auto;
+  padding: 22px 20px;
+  background: rgba(108, 92, 231, 0.08);
+  border: 1px solid rgba(108, 92, 231, 0.3);
+  border-radius: 14px;
+  text-align: center;
+  clear: both;
+}
+
+.watch-note {
+  color: #a29bfe;
+  font-size: 0.9rem;
+  margin-bottom: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.watch-now-btn {
+  display: block;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #6c5ce7, #7b4fbf);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 10px;
+  transition: 0.3s ease;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.watch-now-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(108, 92, 231, 0.5);
+}
+
+.join-channel-btn {
+  display: block;
+  padding: 12px 20px;
+  background: rgba(108, 92, 231, 0.15);
+  color: #a29bfe;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 1px solid rgba(108, 92, 231, 0.4);
+  transition: 0.3s ease;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.join-channel-btn:hover {
+  background: rgba(108, 92, 231, 0.3);
+  color: #fff;
+}
+
+html.theme-day .movie-watch-box {
+  background: rgba(108, 92, 231, 0.06);
+  border-color: rgba(108, 92, 231, 0.25);
+}
+html.theme-day .watch-note { color: #6c5ce7; }
+html.theme-day .join-channel-btn { color: #6c5ce7; }
