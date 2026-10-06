@@ -1,5 +1,5 @@
 ﻿/* =========================================
-   1. BASE / GLOBAL STYLES
+   1. BASE / GLOBAL
    ========================================= */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -22,7 +22,6 @@ a { text-decoration: none; color: inherit; }
 header { text-align: center; padding: 30px 20px 20px 20px; }
 header h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: 2px; color: #7b4fbf; margin-bottom: 5px; }
 header p { color: #6cb2eb; font-size: 1rem; }
-
 .title-link { text-decoration: none; color: inherit; display: inline-block; cursor: pointer; }
 
 footer {
@@ -36,7 +35,7 @@ footer .watermark strong { color: #a29bfe; }
 footer .contact { color: #666; font-size: 0.85rem; }
 
 /* =========================================
-   3. POSTS / UPDATES SECTION
+   3. POSTS SECTION
    ========================================= */
 .posts-section {
   max-width: 520px; margin: 20px auto; padding: 20px 22px;
@@ -44,36 +43,34 @@ footer .contact { color: #666; font-size: 0.85rem; }
   border: 1px solid rgba(108, 92, 231, 0.15);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
 }
-.posts-title { color: #ffffff; font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.5px; }
+.posts-title { color: #ffffff; font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
 .posts-subtitle { color: #888; font-size: 0.85rem; margin-bottom: 14px; }
-.posts-year { color: #a29bfe; font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; padding-left: 4px; letter-spacing: 1px; }
+.posts-year { color: #a29bfe; font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; padding-left: 4px; }
 .posts-list { display: flex; flex-direction: column; }
 .post-item {
   display: flex; justify-content: space-between; align-items: center;
   padding: 10px 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  text-decoration: none; color: inherit; transition: all 0.2s ease;
+  transition: all 0.2s ease;
 }
 .post-item:last-child { border-bottom: none; }
 .post-item:hover { background: rgba(108, 92, 231, 0.08); padding-left: 12px; border-radius: 6px; }
-.post-date { color: #888; font-size: 0.8rem; font-weight: 500; min-width: 65px; }
+.post-date { color: #888; font-size: 0.8rem; min-width: 65px; }
 .post-name { color: #ddd; font-size: 0.88rem; text-align: right; flex: 1; }
-.post-item:hover .post-name { color: #a29bfe; }
 .posts-toggle {
   display: flex; justify-content: space-between; align-items: center;
   width: 100%; padding: 12px 16px;
   background: rgba(108, 92, 231, 0.1); border: 1px solid rgba(108, 92, 231, 0.3);
   border-radius: 10px; color: #a29bfe;
   font-family: 'Space Grotesk', sans-serif; font-size: 0.88rem; font-weight: 600;
-  cursor: pointer; text-align: left; outline: none;
+  cursor: pointer; text-align: left;
 }
-.posts-toggle:hover { background: rgba(108, 92, 231, 0.2); border-color: #6c5ce7; color: #fff; }
-.posts-toggle-arrow { font-size: 0.7rem; color: #6c5ce7; transition: transform 0.3s ease; margin-left: 10px; }
-.posts-toggle.active .posts-toggle-arrow { transform: rotate(180deg); color: #a29bfe; }
+.posts-toggle-arrow { font-size: 0.7rem; color: #6c5ce7; transition: transform 0.3s ease; }
+.posts-toggle.active .posts-toggle-arrow { transform: rotate(180deg); }
 .posts-content { display: none; margin-top: 16px; }
 .posts-content.expanded { display: block; }
 
 /* =========================================
-   4. INDEX PAGE (Categories)
+   4. CATEGORIES
    ========================================= */
 .categories {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -89,10 +86,6 @@ footer .contact { color: #666; font-size: 0.85rem; }
 .card .icon { font-size: 2rem; margin-bottom: 10px; }
 .card h3, .card.locked h3 { font-size: 1.2rem; margin-bottom: 8px; color: #a29bfe !important; }
 .card p { font-size: 0.9rem; color: #aaa; }
-
-/* =========================================
-   5. LOCKED CARDS & SOON BADGE
-   ========================================= */
 .card.locked { cursor: not-allowed; }
 .card.locked .card-content { filter: blur(1px) !important; opacity: 0.7 !important; }
 .soon-badge, span.soon-badge {
@@ -104,7 +97,7 @@ footer .contact { color: #666; font-size: 0.85rem; }
 }
 
 /* =========================================
-   6. SECTION WRAPPER
+   5. SECTION WRAPPER
    ========================================= */
 section:not(.categories) {
   background-color: #101018; border-radius: 24px;
@@ -118,7 +111,7 @@ section h2 {
 }
 
 /* =========================================
-   7. NOTICE BOX
+   6. NOTICE BOX
    ========================================= */
 .notice-box {
   background-color: rgba(255, 159, 67, 0.08);
@@ -127,11 +120,11 @@ section h2 {
   border-radius: 12px; padding: 16px 20px; margin-bottom: 25px;
 }
 .notice-box h4 { color: #ff9f43; font-size: 1rem; margin-bottom: 8px; }
-.notice-box p { color: #ccc; font-size: 0.9rem; line-height: 1.5; margin: 0; }
+.notice-box p { color: #ccc; font-size: 0.9rem; margin: 0; }
 .notice-box strong { color: #fff; }
 
 /* =========================================
-   8. STREAMING SITES
+   7. STREAMING SITES
    ========================================= */
 .streaming-sites-section {
   margin-bottom: 30px; padding: 20px;
@@ -147,12 +140,12 @@ section h2 {
   background-color: #1c1b22; color: #6cb2eb;
   padding: 8px 16px; border-radius: 20px; font-size: 0.85rem;
   border: 1px solid rgba(108, 92, 231, 0.3);
-  transition: 0.3s ease; display: inline-block;
+  transition: 0.3s; display: inline-block;
 }
 .stream-link:hover { background-color: #6c5ce7; color: #fff; }
 
 /* =========================================
-   9. POSTERS GRID
+   8. POSTERS GRID
    ========================================= */
 .card-container {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -169,18 +162,15 @@ section h2 {
 .poster-card img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; display: block; }
 .poster-card p { text-align: center; padding: 10px 5px; font-size: 0.9rem; color: #e0e0e0; margin: 0; }
 .poster-link { text-decoration: none; color: inherit; display: block; }
-
 .poster-rating-badge {
   position: absolute; top: 8px; left: 8px;
   background: rgba(0, 0, 0, 0.85); color: #ffd93b;
   font-size: 0.7rem; font-weight: 700; padding: 4px 8px;
   border-radius: 6px; z-index: 5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  pointer-events: none; display: inline-flex; align-items: center; gap: 3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); pointer-events: none;
+  display: inline-flex; align-items: center; gap: 3px;
 }
-.poster-rating-badge .rating-source {
-  color: #a29bfe; font-size: 0.62rem; font-weight: 700; margin-right: 2px;
-}
+.poster-rating-badge .rating-source { color: #a29bfe; font-size: 0.62rem; font-weight: 700; margin-right: 2px; }
 .poster-warning-badge, .restricted-badge {
   position: absolute; top: 8px; right: 8px;
   background: rgba(231, 76, 60, 0.95); color: #fff;
@@ -190,25 +180,23 @@ section h2 {
 }
 
 /* =========================================
-   10. MOVIE DETAIL
+   9. MOVIE DETAIL
    ========================================= */
 .movie-detail { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
-.movie-detail h1 { font-size: 2.5rem; color: #ffffff; margin-bottom: 10px; }
+.movie-detail h1 { font-size: 2.5rem; color: #fff; margin-bottom: 10px; }
 .movie-poster-large {
   width: 100%; max-width: 300px; border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   float: left; margin-right: 30px; margin-bottom: 20px;
 }
-.movie-info p { font-size: 1.1rem; line-height: 1.6; color: #ccc; margin-bottom: 10px; }
-.movie-info strong { color: #ffffff; }
+.movie-info p { font-size: 1.1rem; color: #ccc; margin-bottom: 10px; }
+.movie-info strong { color: #fff; }
 .back-btn {
   display: inline-block; margin-top: 30px; padding: 10px 20px;
   background-color: #6c5ce7; color: #fff;
   border-radius: 8px; font-weight: 600; transition: 0.3s;
 }
 .back-btn:hover { background-color: #4e3ec9; }
-
-/* Content Warning */
 .content-warning {
   display: flex; gap: 12px; align-items: flex-start;
   background: rgba(231, 76, 60, 0.08);
@@ -222,34 +210,32 @@ section h2 {
 .content-warning .cw-body strong { display: block; color: #e74c3c; font-size: 0.95rem; margin-bottom: 6px; }
 .content-warning .cw-body p { color: #ccc; font-size: 0.85rem; line-height: 1.55; margin: 0; }
 .content-warning .cw-body p strong { display: inline; color: #ff7b7b; margin: 0; font-size: inherit; }
-.content-warning .cw-body em { color: #e0e0e0; }
 .content-warning.strong { background: rgba(231, 76, 60, 0.12); border-color: rgba(231, 76, 60, 0.55); border-left-width: 5px; }
 .content-warning.strong .cw-body strong { color: #ff4444; font-size: 1rem; }
 
 /* =========================================
-   11. FEEDBACK FORM
+   10. FEEDBACK FORM
    ========================================= */
 .feedback-section {
   text-align: center; margin: 30px auto; padding: 25px 20px;
   background-color: #141414; border-radius: 20px;
   max-width: 500px; width: 90%;
   border: 1px solid rgba(108, 92, 231, 0.2);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 .feedback-section h3 { color: #a29bfe; margin-bottom: 8px; font-size: 1.2rem; }
 .feedback-section > p { color: #aaa; margin-bottom: 18px; font-size: 0.9rem; }
 .feedback-section input, .feedback-section textarea {
   width: 100%; padding: 12px 15px; margin-bottom: 12px;
   background-color: #1c1b22; border: 1px solid rgba(108, 92, 231, 0.3);
-  border-radius: 10px; color: #ffffff;
+  border-radius: 10px; color: #fff;
   font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem;
-  outline: none; transition: 0.3s ease;
+  outline: none;
 }
 .feedback-section input:focus, .feedback-section textarea:focus { border-color: #6c5ce7; }
 .feedback-section textarea { resize: vertical; min-height: 100px; }
 .feedback-section button {
   width: 100%; padding: 12px 24px; background-color: #6c5ce7;
-  color: #ffffff; border: none; border-radius: 10px;
+  color: #fff; border: none; border-radius: 10px;
   font-weight: 600; font-size: 1rem; cursor: pointer;
   font-family: 'Space Grotesk', sans-serif;
 }
@@ -258,14 +244,13 @@ section h2 {
 #feedbackStatus { margin-top: 12px; font-size: 0.9rem; min-height: 20px; }
 
 /* =========================================
-   12. COMMENTS
+   11. COMMENTS
    ========================================= */
 .comments-section {
   text-align: center; margin: 20px auto; padding: 16px 14px;
   background-color: #141414; border-radius: 16px;
   max-width: 480px; width: 92%;
   border: 1px solid rgba(108, 92, 231, 0.2);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 .comments-title { color: #a29bfe; margin-bottom: 12px; font-size: 1rem; font-weight: 600; }
 .comment-input-box {
@@ -275,15 +260,14 @@ section h2 {
 .comment-input-box input, .comment-input-box textarea {
   width: 100%; padding: 9px 12px; margin-bottom: 8px;
   background-color: #0f0f18; border: 1px solid rgba(108, 92, 231, 0.25);
-  border-radius: 8px; color: #ffffff;
+  border-radius: 8px; color: #fff;
   font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem;
-  outline: none; transition: 0.2s ease;
+  outline: none;
 }
-.comment-input-box input:focus, .comment-input-box textarea:focus { border-color: #6c5ce7; }
 .comment-input-box textarea { resize: vertical; min-height: 50px; max-height: 100px; }
 .comment-input-box button {
   width: 100%; padding: 9px 18px; background-color: #6c5ce7;
-  color: #ffffff; border: none; border-radius: 8px;
+  color: #fff; border: none; border-radius: 8px;
   font-weight: 600; font-size: 0.85rem; cursor: pointer;
   font-family: 'Space Grotesk', sans-serif;
 }
@@ -307,8 +291,8 @@ section h2 {
   color: #fff; font-weight: 700; font-size: 0.75rem;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.comment-meta { display: flex; flex-direction: row; align-items: center; gap: 6px; }
-.comment-name { color: #ffffff; font-weight: 600; font-size: 0.78rem; }
+.comment-meta { display: flex; align-items: center; gap: 6px; }
+.comment-name { color: #fff; font-weight: 600; font-size: 0.78rem; }
 .comment-time { color: #666; font-size: 0.68rem; }
 .comment-text { color: #ccc; font-size: 0.82rem; line-height: 1.5; margin: 0; word-wrap: break-word; }
 .comments-loading, .comments-empty { color: #888; text-align: center; padding: 10px; font-style: italic; font-size: 0.8rem; }
@@ -317,21 +301,17 @@ section h2 {
   background: rgba(108, 92, 231, 0.08);
   border-left: 3px solid #6c5ce7; border-radius: 0 8px 8px 0;
 }
-.comment-reply-label {
-  display: block; color: #a29bfe; font-weight: 700; font-size: 0.7rem;
-  margin-bottom: 4px; text-transform: uppercase;
-}
+.comment-reply-label { display: block; color: #a29bfe; font-weight: 700; font-size: 0.7rem; margin-bottom: 4px; text-transform: uppercase; }
 .comment-reply-text { color: #ddd; font-size: 0.82rem; margin: 0; }
 
 /* =========================================
-   13-17. AI CHAT (Launcher, Widget, Input, etc.)
+   12. AI CHAT
    ========================================= */
 .chat-backdrop {
   display: none; position: fixed; inset: 0;
   background: rgba(0, 0, 0, 0.5); z-index: 9997; cursor: pointer;
 }
 .chat-backdrop.active { display: block; }
-
 .ai-chat-launcher {
   position: fixed; top: 70px; right: 15px;
   display: inline-flex; align-items: center; gap: 8px;
@@ -360,7 +340,6 @@ section h2 {
   70% { box-shadow: 0 0 0 8px rgba(46, 204, 113, 0); }
   100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
 }
-
 .ai-chat-widget {
   display: none; position: fixed; inset: 0;
   width: 100vw; height: 100vh; height: 100dvh;
@@ -373,7 +352,7 @@ section h2 {
   padding: 14px 18px; flex-shrink: 0;
 }
 .ai-chat-title { display: flex; align-items: center; gap: 10px; color: #e0e0e0; font-weight: 600; font-size: 0.95rem; }
-.ai-dot { width: 8px; height: 8px; background-color: #2ecc71; border-radius: 50%; animation: pulse 2s infinite; }
+.ai-dot { width: 8px; height: 8px; background: #2ecc71; border-radius: 50%; animation: pulse 2s infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 .ai-chat-header-buttons { display: flex; align-items: center; gap: 8px; }
 .ai-chat-toggle {
@@ -395,14 +374,13 @@ section h2 {
   line-height: 1.5; max-width: 80%; word-wrap: break-word; width: fit-content;
 }
 .ai-msg-bot { background-color: #1c1b22; color: #e0e0e0; align-self: flex-start; border-bottom-left-radius: 4px; line-height: 1.7; margin-right: auto; }
-.ai-msg-user { background-color: #8b7ae7; color: #ffffff; align-self: flex-end; border-bottom-right-radius: 4px; margin-left: auto; }
+.ai-msg-user { background-color: #8b7ae7; color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; margin-left: auto; }
 .ai-msg-typing { background-color: #1c1b22; color: #888; align-self: flex-start; font-style: italic; }
-.ai-msg-bot strong { color: #ffffff; font-weight: 700; }
+.ai-msg-bot strong { color: #fff; font-weight: 700; }
 .ai-msg-bot em { color: #e0e0e0; font-style: italic; }
 .ai-heading { color: #a29bfe; font-weight: 700; font-size: 0.95rem; margin: 8px 0 5px 0; }
 .ai-bullet { display: block; padding-left: 4px; margin: 4px 0; line-height: 1.6; color: #e0e0e0; }
 .ai-spacer { height: 10px; display: block; }
-
 .ai-chat-input {
   display: flex; padding: 10px; gap: 6px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -415,7 +393,6 @@ section h2 {
   border-radius: 10px; color: #fff; font-size: 0.9rem;
   outline: none; font-family: inherit; min-width: 0;
 }
-.ai-chat-input input[type="text"]:focus { border-color: #6c5ce7; }
 .ai-chat-input button[type="submit"] {
   background-color: #6c5ce7; color: #fff; border: none;
   padding: 0 16px; height: 40px; border-radius: 10px;
@@ -423,7 +400,6 @@ section h2 {
 }
 .ai-chat-input button[type="submit"]:hover { background-color: #4e3ec9; }
 .ai-chat-input button[type="submit"]:disabled { opacity: 0.5; cursor: not-allowed; }
-
 .chat-action-btn {
   background-color: #1c1b22; color: #a29bfe;
   border: 1px solid rgba(108, 92, 231, 0.3);
@@ -433,21 +409,18 @@ section h2 {
 }
 .chat-action-btn:hover { background-color: #6c5ce7; color: #fff; }
 .chat-action-btn.recording { background-color: #e74c3c; color: #fff; }
-.chat-action-btn svg { display: block; }
-
 .msg-speak-btn {
   background: rgba(108, 92, 231, 0.15); border: none; color: #a29bfe;
   padding: 4px 10px; border-radius: 20px; font-size: 0.7rem;
   cursor: pointer; margin-top: 8px;
   display: inline-flex; align-items: center; gap: 5px; font-family: inherit;
 }
-.msg-speak-btn:hover { background: #6c5ce7; color: #fff; }
 .msg-speak-btn.speaking-active { background: linear-gradient(135deg, #6c5ce7, #7b4fbf); color: #fff; }
-.speak-word.speaking { background-color: #6c5ce7; color: #ffffff; border-radius: 4px; padding: 1px 3px; font-weight: 600; }
+.speak-word.speaking { background-color: #6c5ce7; color: #fff; border-radius: 4px; padding: 1px 3px; font-weight: 600; }
 .ai-chat-widget.keyboard-open { bottom: auto !important; }
 
 /* =========================================
-   20. PERSONAL WEBSITE NOTICE
+   13. PERSONAL NOTICE
    ========================================= */
 .personal-notice {
   width: 100%; padding: 10px 16px;
@@ -463,10 +436,9 @@ section h2 {
 .personal-notice strong { color: #a29bfe; font-weight: 600; }
 html.theme-day .personal-notice { background: rgba(108, 92, 231, 0.1); }
 html.theme-day .personal-notice p { color: #555; }
-html.theme-day .personal-notice strong { color: #6c5ce7; }
 
 /* =========================================
-   21. WARNING MODAL
+   14. WARNING MODAL
    ========================================= */
 .warning-modal-overlay {
   position: fixed; inset: 0; background: rgba(0, 0, 0, 0.88);
@@ -482,7 +454,7 @@ html.theme-day .personal-notice strong { color: #6c5ce7; }
 }
 .warning-modal .wm-icon { font-size: 2.5rem; margin-bottom: 12px; display: block; }
 .warning-modal h3 { color: #e74c3c; font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; }
-.warning-modal p { color: #ccc; font-size: 0.88rem; line-height: 1.6; margin-bottom: 20px; }
+.warning-modal p { color: #ccc; font-size: 0.88rem; margin-bottom: 20px; }
 .warning-modal p strong { color: #ff7b7b; }
 .warning-modal .wm-btns { display: flex; gap: 10px; }
 .warning-modal .wm-btn {
@@ -495,7 +467,7 @@ html.theme-day .personal-notice strong { color: #6c5ce7; }
 html.theme-day .warning-modal { background: #fff; }
 
 /* =========================================
-   22-23. THEMES
+   15. THEMES
    ========================================= */
 html.theme-day body { background-color: #f4f4f8; color: #1a1a1a; }
 html.theme-day header h1 { color: #6c5ce7; }
@@ -513,6 +485,7 @@ html.theme-day .comment-input-box input, html.theme-day .comment-input-box texta
   background-color: #f5f5f8; color: #1a1a1a;
 }
 html.theme-day .comment-card { background-color: #f5f5f8; }
+html.theme-day .comment-name { color: #1a1a1a; }
 html.theme-day .ai-chat-widget { background-color: #f4f4f8; }
 html.theme-day .ai-msg-bot { background-color: #ffffff; color: #333; }
 html.theme-day .ai-chat-input { background-color: #ebebf0; }
@@ -524,47 +497,10 @@ html.theme-amoled section:not(.categories) { background-color: #050505; }
 html.theme-amoled .poster-card { background-color: #0a0a0a; }
 html.theme-amoled .ai-chat-widget { background-color: #000000; }
 
-/* =========================================
-   24. FLOATING BUTTONS (TOP-LEFT, fixed)
-   ========================================= */
-#nexusThemeToggle,
-#nexusBackBtn {
-  position: fixed !important;
-  top: 20px !important;
-  left: 20px !important;
-  width: 46px !important;
-  height: 46px !important;
-  border-radius: 50% !important;
-  background: rgba(108, 92, 231, 0.9) !important;
-  color: #fff !important;
-  border: 1px solid rgba(108, 92, 231, 1) !important;
-  font-size: 1.3rem !important;
-  font-weight: 700 !important;
-  cursor: pointer !important;
-  z-index: 2147483647 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  line-height: 1 !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6) !important;
-  font-family: 'Space Grotesk', sans-serif !important;
-  align-items: center !important;
-  justify-content: center !important;
-  user-select: none !important;
-}
-
-@media (max-width: 600px) {
-  #nexusThemeToggle,
-  #nexusBackBtn {
-    top: 16px !important;
-    left: 16px !important;
-    width: 44px !important;
-    height: 44px !important;
-    font-size: 1.15rem !important;
-  }
-}
+/* NOTE: #nexusThemeToggle and #nexusBackBtn styles are in script.js (inline) */
 
 /* =========================================
-   25. RESPONSIVE
+   16. RESPONSIVE
    ========================================= */
 @media (max-width: 600px) {
   .movie-poster-large { float: none; display: block; margin: 0 auto 20px auto; }

@@ -1,5 +1,5 @@
 // =========================================
-// NEXUS - Main Script (SPA + Fixed Buttons)
+// NEXUS - Main Script
 // =========================================
 
 let __currentPage = (function() {
@@ -31,6 +31,8 @@ function applyTheme(t) {
 }
 
 function ensureFloatingButtons() {
+  const root = document.documentElement;
+
   let tBtn = document.getElementById('nexusThemeToggle');
   if (!tBtn) {
     tBtn = document.createElement('button');
@@ -46,7 +48,7 @@ function ensureFloatingButtons() {
       localStorage.setItem('nexus_theme', __currentTheme);
       applyTheme(__currentTheme);
     });
-    document.body.appendChild(tBtn);
+    root.appendChild(tBtn);
   }
 
   let bBtn = document.getElementById('nexusBackBtn');
@@ -62,18 +64,67 @@ function ensureFloatingButtons() {
       if (window.history.length > 1) window.history.back();
       else window.location.href = 'index.html';
     });
-    document.body.appendChild(bBtn);
+    root.appendChild(bBtn);
   }
+
+  const notice = document.querySelector('.personal-notice');
+  let topPx = 20;
+  if (notice && notice.offsetHeight > 0) {
+    topPx = notice.offsetHeight + 14;
+  } else if (notice) {
+    topPx = 70;
+  }
+
+  const styles = {
+    'position': 'fixed',
+    'top': topPx + 'px',
+    'left': '20px',
+    'right': 'auto',
+    'bottom': 'auto',
+    'width': '46px',
+    'height': '46px',
+    'border-radius': '50%',
+    'background': 'rgba(108, 92, 231, 0.95)',
+    'color': '#ffffff',
+    'border': '1px solid rgba(108, 92, 231, 1)',
+    'font-size': '1.3rem',
+    'font-weight': '700',
+    'cursor': 'pointer',
+    'z-index': '2147483647',
+    'padding': '0',
+    'margin': '0',
+    'line-height': '1',
+    'box-shadow': '0 6px 20px rgba(0, 0, 0, 0.6)',
+    'font-family': '"Space Grotesk", sans-serif',
+    'align-items': 'center',
+    'justify-content': 'center',
+    'user-select': 'none',
+    'transform': 'none',
+    '-webkit-transform': 'none',
+    'will-change': 'auto',
+    'contain': 'none',
+    'filter': 'none',
+    '-webkit-filter': 'none',
+    'backdrop-filter': 'none',
+    '-webkit-backdrop-filter': 'none',
+    'perspective': 'none',
+    'isolation': 'auto'
+  };
+
+  Object.entries(styles).forEach(([prop, val]) => {
+    try { tBtn.style.setProperty(prop, val, 'important'); } catch (e) {}
+    try { bBtn.style.setProperty(prop, val, 'important'); } catch (e) {}
+  });
 
   const home = isHomePage();
   const chatOpen = document.getElementById('chatWidget')?.classList.contains('active');
 
   if (chatOpen) {
-    tBtn.style.display = 'none';
-    bBtn.style.display = 'none';
+    tBtn.style.setProperty('display', 'none', 'important');
+    bBtn.style.setProperty('display', 'none', 'important');
   } else {
-    tBtn.style.display = home ? 'flex' : 'none';
-    bBtn.style.display = home ? 'none' : 'flex';
+    tBtn.style.setProperty('display', home ? 'flex' : 'none', 'important');
+    bBtn.style.setProperty('display', home ? 'none' : 'flex', 'important');
   }
 
   applyTheme(__currentTheme);
@@ -133,7 +184,7 @@ function initNexusPage() {
     })();
   }
 
-  // FEEDBACK
+  // FEEDBACK FORM
   const feedbackForm = document.getElementById('feedbackForm');
   let isSubmitting = false;
   if (feedbackForm) {
@@ -146,7 +197,8 @@ function initNexusPage() {
       const statusEl = document.getElementById('feedbackStatus');
       const submitBtn = document.getElementById('feedbackSubmit');
       if (!message) { isSubmitting = false; return; }
-      submitBtn.disabled = true; submitBtn.textContent = 'Sending...';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
       statusEl.textContent = '';
       try {
         const res = await fetch('/api/feedback', {
@@ -167,7 +219,8 @@ function initNexusPage() {
         statusEl.style.color = '#e74c3c';
       } finally {
         setTimeout(() => {
-          submitBtn.disabled = false; submitBtn.textContent = 'Send Message';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Send Message';
           isSubmitting = false;
         }, 3000);
       }
@@ -646,9 +699,6 @@ function initNexusPage() {
 
 async function loadNexusPage(url, pushHistory) {
   try {
-    const tBtn = document.getElementById('nexusThemeToggle');
-    const bBtn = document.getElementById('nexusBackBtn');
-
     const res = await fetch(url, { cache: 'no-cache' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const html = await res.text();
@@ -669,9 +719,6 @@ async function loadNexusPage(url, pushHistory) {
     const newBody = doc.body.cloneNode(true);
     newBody.querySelectorAll('script').forEach(s => s.remove());
     document.body.innerHTML = newBody.innerHTML;
-
-    if (tBtn && !document.getElementById('nexusThemeToggle')) document.body.appendChild(tBtn);
-    if (bBtn && !document.getElementById('nexusBackBtn')) document.body.appendChild(bBtn);
 
     allScripts.forEach(oldScript => {
       if (oldScript.src) return;
