@@ -1,15 +1,13 @@
 // =========================================
-// NEXUS - Main Script (SPA + Fixed Buttons)
+// NEXUS - Main Script (SPA + Fixed Buttons in Body)
 // =========================================
 
-// Current page tracker
 let __currentPage = (function() {
   const p = window.location.pathname;
   const file = p.split('/').pop();
   return file || 'index.html';
 })();
 
-// Capture base styles (don't re-add on every navigation)
 const __baseStyles = new Set();
 document.querySelectorAll('head style, head link[rel="stylesheet"]').forEach(el => {
   __baseStyles.add(el.outerHTML);
@@ -36,44 +34,63 @@ function applyTheme(t) {
 }
 
 // =========================================
-// FLOATING BUTTONS (appended to <html>, never removed on body swap)
+// FAB WRAPPER (inside body — survives SPA swap)
 // =========================================
+function ensureFabWrap() {
+  let wrap = document.getElementById('nexusFabWrap');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = 'nexusFabWrap';
+    wrap.setAttribute('style',
+      'position:fixed !important;' +
+      'top:0 !important;' +
+      'left:0 !important;' +
+      'width:0 !important;' +
+      'height:0 !important;' +
+      'z-index:2147483647 !important;' +
+      'pointer-events:none !important;'
+    );
+    document.body.appendChild(wrap);
+  }
+  return wrap;
+}
+
 function ensureFloatingButtons() {
-  const root = document.documentElement;
+  const wrap = ensureFabWrap();
 
   // THEME TOGGLE
-  if (!document.getElementById('nexusThemeToggle')) {
-    const btn = document.createElement('button');
-    btn.id = 'nexusThemeToggle';
-    btn.type = 'button';
-    btn.textContent = THEME_ICONS[__currentTheme];
-    btn.setAttribute('aria-label', 'Change theme');
-    btn.style.cssText = [
-      'position: fixed',
-      'top: 80px',
-      'left: 20px',
-      'width: 42px',
-      'height: 42px',
-      'border-radius: 50%',
-      'background: rgba(108, 92, 231, 0.6)',
-      'color: #fff',
-      'border: 1px solid rgba(108, 92, 231, 0.85)',
-      'font-size: 1.2rem',
-      'cursor: pointer',
-      'z-index: 2147483647',
-      'padding: 0',
-      'margin: 0',
-      'line-height: 1',
-      'box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5)',
-      'font-family: "Space Grotesk", sans-serif',
-      'align-items: center',
-      'justify-content: center',
-      'user-select: none',
-      'transform: none',
-      'will-change: auto',
-      'contain: none'
-    ].join(';');
-    btn.addEventListener('click', (e) => {
+  let tBtn = document.getElementById('nexusThemeToggle');
+  if (!tBtn) {
+    tBtn = document.createElement('button');
+    tBtn.id = 'nexusThemeToggle';
+    tBtn.type = 'button';
+    tBtn.textContent = THEME_ICONS[__currentTheme];
+    tBtn.setAttribute('aria-label', 'Change theme');
+    tBtn.setAttribute('style',
+      'position:fixed !important;' +
+      'top:20px !important;' +
+      'left:20px !important;' +
+      'width:42px !important;' +
+      'height:42px !important;' +
+      'border-radius:50% !important;' +
+      'background:rgba(108,92,231,0.65) !important;' +
+      'color:#fff !important;' +
+      'border:1px solid rgba(108,92,231,0.9) !important;' +
+      'font-size:1.2rem !important;' +
+      'cursor:pointer !important;' +
+      'z-index:2147483647 !important;' +
+      'padding:0 !important;' +
+      'margin:0 !important;' +
+      'line-height:1 !important;' +
+      'box-shadow:0 4px 14px rgba(0,0,0,0.5) !important;' +
+      'font-family:"Space Grotesk",sans-serif !important;' +
+      'align-items:center !important;' +
+      'justify-content:center !important;' +
+      'user-select:none !important;' +
+      'pointer-events:auto !important;' +
+      'transform:none !important;'
+    );
+    tBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       e.preventDefault();
       const idx = THEMES.indexOf(__currentTheme);
@@ -81,57 +98,62 @@ function ensureFloatingButtons() {
       localStorage.setItem('nexus_theme', __currentTheme);
       applyTheme(__currentTheme);
     });
-    root.appendChild(btn);
+    wrap.appendChild(tBtn);
   }
 
   // BACK BUTTON
-  if (!document.getElementById('nexusBackBtn')) {
-    const btn = document.createElement('button');
-    btn.id = 'nexusBackBtn';
-    btn.type = 'button';
-    btn.innerHTML = '←';
-    btn.setAttribute('aria-label', 'Go back');
-    btn.style.cssText = [
-      'position: fixed',
-      'top: 80px',
-      'left: 20px',
-      'width: 42px',
-      'height: 42px',
-      'border-radius: 50%',
-      'background: rgba(108, 92, 231, 0.6)',
-      'color: #fff',
-      'border: 1px solid rgba(108, 92, 231, 0.85)',
-      'font-size: 1.35rem',
-      'font-weight: 700',
-      'cursor: pointer',
-      'z-index: 2147483647',
-      'padding: 0',
-      'margin: 0',
-      'line-height: 1',
-      'box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5)',
-      'font-family: "Space Grotesk", sans-serif',
-      'align-items: center',
-      'justify-content: center',
-      'user-select: none',
-      'transform: none',
-      'will-change: auto',
-      'contain: none'
-    ].join(';');
-    btn.addEventListener('click', (e) => {
+  let bBtn = document.getElementById('nexusBackBtn');
+  if (!bBtn) {
+    bBtn = document.createElement('button');
+    bBtn.id = 'nexusBackBtn';
+    bBtn.type = 'button';
+    bBtn.innerHTML = '←';
+    bBtn.setAttribute('aria-label', 'Go back');
+    bBtn.setAttribute('style',
+      'position:fixed !important;' +
+      'top:20px !important;' +
+      'left:20px !important;' +
+      'width:42px !important;' +
+      'height:42px !important;' +
+      'border-radius:50% !important;' +
+      'background:rgba(108,92,231,0.65) !important;' +
+      'color:#fff !important;' +
+      'border:1px solid rgba(108,92,231,0.9) !important;' +
+      'font-size:1.35rem !important;' +
+      'font-weight:700 !important;' +
+      'cursor:pointer !important;' +
+      'z-index:2147483647 !important;' +
+      'padding:0 !important;' +
+      'margin:0 !important;' +
+      'line-height:1 !important;' +
+      'box-shadow:0 4px 14px rgba(0,0,0,0.5) !important;' +
+      'font-family:"Space Grotesk",sans-serif !important;' +
+      'align-items:center !important;' +
+      'justify-content:center !important;' +
+      'user-select:none !important;' +
+      'pointer-events:auto !important;' +
+      'transform:none !important;'
+    );
+    bBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       e.preventDefault();
       if (window.history.length > 1) window.history.back();
       else window.location.href = 'index.html';
     });
-    root.appendChild(btn);
+    wrap.appendChild(bBtn);
   }
 
-  // VISIBILITY — home pe theme, baaki pe back
+  // VISIBILITY — home: theme only; else: back only
   const home = isHomePage();
-  const tBtn = document.getElementById('nexusThemeToggle');
-  const bBtn = document.getElementById('nexusBackBtn');
-  if (tBtn) tBtn.style.display = home ? 'flex' : 'none';
-  if (bBtn) bBtn.style.display = home ? 'none' : 'flex';
+  const chatOpen = document.getElementById('chatWidget')?.classList.contains('active');
+
+  if (chatOpen) {
+    tBtn.style.display = 'none';
+    bBtn.style.display = 'none';
+  } else {
+    tBtn.style.display = home ? 'flex' : 'none';
+    bBtn.style.display = home ? 'none' : 'flex';
+  }
 
   applyTheme(__currentTheme);
 }
@@ -142,7 +164,6 @@ function ensureFloatingButtons() {
 function initNexusPage() {
   const home = isHomePage();
 
-  // Non-home pages pe feedback/comments remove
   if (!home) {
     const feedbackSection = document.querySelector('.feedback-section');
     if (feedbackSection) feedbackSection.remove();
@@ -152,9 +173,6 @@ function initNexusPage() {
 
   ensureFloatingButtons();
 
-  // =========================================
-  // DEVICE INFO
-  // =========================================
   async function getDeviceInfo() {
     let model = '';
     let platform = '';
@@ -181,9 +199,6 @@ function initNexusPage() {
     return { model, platform };
   }
 
-  // =========================================
-  // VISITOR TRACKING (once per session)
-  // =========================================
   const hasTrackedVisit = sessionStorage.getItem('nexus_visit_tracked');
   if (!hasTrackedVisit) {
     sessionStorage.setItem('nexus_visit_tracked', 'true');
@@ -194,7 +209,6 @@ function initNexusPage() {
       const browser = navigator.userAgent.includes('Chrome') ? 'Chrome' :
                       navigator.userAgent.includes('Firefox') ? 'Firefox' :
                       navigator.userAgent.includes('Safari') ? 'Safari' : 'Other';
-
       fetch('/api/visitor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -203,29 +217,22 @@ function initNexusPage() {
     })();
   }
 
-  // =========================================
   // FEEDBACK FORM
-  // =========================================
   const feedbackForm = document.getElementById('feedbackForm');
   let isSubmitting = false;
-
   if (feedbackForm) {
     feedbackForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (isSubmitting) return;
       isSubmitting = true;
-
       const name = document.getElementById('feedbackName').value.trim();
       const message = document.getElementById('feedbackMessage').value.trim();
       const statusEl = document.getElementById('feedbackStatus');
       const submitBtn = document.getElementById('feedbackSubmit');
-
       if (!message) { isSubmitting = false; return; }
-
       submitBtn.disabled = true;
       submitBtn.textContent = 'Sending...';
       statusEl.textContent = '';
-
       try {
         const res = await fetch('/api/feedback', {
           method: 'POST',
@@ -254,15 +261,12 @@ function initNexusPage() {
     });
   }
 
-  // =========================================
   // LIVE COMMENTS
-  // =========================================
   const commentName = document.getElementById('commentName');
   const commentMessage = document.getElementById('commentMessage');
   const commentSubmit = document.getElementById('commentSubmit');
   const commentStatus = document.getElementById('commentStatus');
   const commentsList = document.getElementById('commentsList');
-
   let isCommentSubmitting = false;
   let lastCommentsHash = '';
 
@@ -271,7 +275,6 @@ function initNexusPage() {
     card.className = 'comment-card';
     const initial = (comment.name || 'A').charAt(0).toUpperCase();
     const timeAgo = getTimeAgo(comment.timestamp);
-
     const header = document.createElement('div');
     header.className = 'comment-header';
     const avatar = document.createElement('div');
@@ -289,13 +292,11 @@ function initNexusPage() {
     meta.appendChild(timeEl);
     header.appendChild(avatar);
     header.appendChild(meta);
-
     const text = document.createElement('p');
     text.className = 'comment-text';
     text.textContent = comment.message;
     card.appendChild(header);
     card.appendChild(text);
-
     if (comment.reply) {
       const replyBlock = document.createElement('div');
       replyBlock.className = 'comment-reply';
@@ -309,7 +310,6 @@ function initNexusPage() {
       replyBlock.appendChild(replyText);
       card.appendChild(replyBlock);
     }
-
     if (prepend) commentsList.insertBefore(card, commentsList.firstChild);
     else commentsList.appendChild(card);
     return card;
@@ -404,9 +404,7 @@ function initNexusPage() {
     });
   }
 
-  // =========================================
   // AI CHAT
-  // =========================================
   const chatFab = document.getElementById('chatFab');
   const chatWidget = document.getElementById('chatWidget');
   const chatBackdrop = document.getElementById('chatBackdrop');
@@ -414,7 +412,6 @@ function initNexusPage() {
   const chatForm = document.getElementById('chatForm');
   const chatInput = document.getElementById('chatInput');
   const chatMessages = document.getElementById('chatMessages');
-
   let chatHistory = [];
   let isChatSending = false;
   let chatHistoryState = false;
@@ -434,6 +431,7 @@ function initNexusPage() {
     }
     document.body.style.overflow = '';
     stopSpeaking();
+    ensureFloatingButtons(); // re-show buttons
   }
 
   function pushChatHistory() {
@@ -459,6 +457,7 @@ function initNexusPage() {
         chatInput.focus();
         if (chatBackdrop) chatBackdrop.classList.add('active');
         pushChatHistory();
+        ensureFloatingButtons(); // hide buttons when chat opens
       } else {
         if (chatBackdrop) {
           chatBackdrop.classList.remove('active');
@@ -539,13 +538,10 @@ function initNexusPage() {
   }
   window.addEventListener('resize', adjustChatForKeyboard);
 
-  // =========================================
   // VOICE INPUT
-  // =========================================
   const voiceBtn = document.getElementById('voiceBtn');
   let recognition = null;
   let isRecording = false;
-
   if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SpeechRecognition();
@@ -575,7 +571,6 @@ function initNexusPage() {
       if (chatInput) chatInput.placeholder = 'Type your message...';
     };
   }
-
   if (voiceBtn) {
     voiceBtn.addEventListener('click', () => {
       if (!recognition) {
@@ -587,13 +582,10 @@ function initNexusPage() {
     });
   }
 
-  // =========================================
-  // TEXT-TO-SPEECH
-  // =========================================
+  // TTS
   let currentlySpeaking = false;
   let currentSpeakBtn = null;
   let currentMessageEl = null;
-
   function stopSpeaking() {
     if ('speechSynthesis' in window) speechSynthesis.cancel();
     if (currentMessageEl) {
@@ -607,7 +599,6 @@ function initNexusPage() {
     currentSpeakBtn = null;
     currentMessageEl = null;
   }
-
   function prepareForTTS(rootEl) {
     if (rootEl.dataset.speechWrapped === 'true') {
       rootEl.querySelectorAll('.speak-word').forEach(span => {
@@ -653,7 +644,6 @@ function initNexusPage() {
     rootEl.dataset.speechWrapped = 'true';
     return { cleanText, posMap };
   }
-
   function speakWithHighlight(messageDiv, speakBtn, text, lang = 'en-IN') {
     if (!('speechSynthesis' in window)) return;
     if (currentlySpeaking && currentSpeakBtn === speakBtn) { stopSpeaking(); return; }
@@ -779,6 +769,9 @@ function initNexusPage() {
 // =========================================
 async function loadNexusPage(url, pushHistory) {
   try {
+    // Save FAB wrap before body swap
+    const fabWrap = document.getElementById('nexusFabWrap');
+
     const res = await fetch(url, { cache: 'no-cache' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const html = await res.text();
@@ -786,10 +779,7 @@ async function loadNexusPage(url, pushHistory) {
 
     if (doc.title) document.title = doc.title;
 
-    // Remove SPA-added styles
     document.querySelectorAll('head [data-nexus-spa]').forEach(el => el.remove());
-
-    // Add new page's styles
     doc.querySelectorAll('head style, head link[rel="stylesheet"]').forEach(el => {
       const outer = el.outerHTML;
       if (__baseStyles.has(outer)) return;
@@ -802,9 +792,14 @@ async function loadNexusPage(url, pushHistory) {
     const newBody = doc.body.cloneNode(true);
     newBody.querySelectorAll('script').forEach(s => s.remove());
 
+    // 🔑 SWAP BODY
     document.body.innerHTML = newBody.innerHTML;
 
-    // Re-execute inline scripts
+    // 🔑 RE-APPEND FAB WRAP (survives swap)
+    if (fabWrap && !document.getElementById('nexusFabWrap')) {
+      document.body.appendChild(fabWrap);
+    }
+
     allScripts.forEach(oldScript => {
       if (oldScript.src) return;
       const newScript = document.createElement('script');
@@ -823,6 +818,8 @@ async function loadNexusPage(url, pushHistory) {
     window.location.href = url;
   }
 }
+
+window.__nexusLoadPage = loadNexusPage;
 
 (function setupSpaNavigation() {
   if (window.__nexusSpaReady) return;
