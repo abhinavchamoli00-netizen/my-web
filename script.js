@@ -2,12 +2,14 @@
 // NEXUS - Main Script (SPA + Fixed Buttons)
 // =========================================
 
+// Current page tracker
 let __currentPage = (function() {
   const p = window.location.pathname;
   const file = p.split('/').pop();
   return file || 'index.html';
 })();
 
+// Capture base styles (don't re-add on every navigation)
 const __baseStyles = new Set();
 document.querySelectorAll('head style, head link[rel="stylesheet"]').forEach(el => {
   __baseStyles.add(el.outerHTML);
@@ -19,7 +21,7 @@ function isHomePage() {
 }
 
 // =========================================
-// FLOATING BUTTONS — appended to <html> (never removed on body swap)
+// THEME STATE
 // =========================================
 const THEMES = ['dark', 'day', 'amoled'];
 const THEME_ICONS = { dark: '🌙', day: '☀️', amoled: '⬛' };
@@ -33,6 +35,9 @@ function applyTheme(t) {
   if (btn) btn.textContent = THEME_ICONS[t];
 }
 
+// =========================================
+// FLOATING BUTTONS (appended to <html>, never removed on body swap)
+// =========================================
 function ensureFloatingButtons() {
   const root = document.documentElement;
 
@@ -42,30 +47,35 @@ function ensureFloatingButtons() {
     btn.id = 'nexusThemeToggle';
     btn.type = 'button';
     btn.textContent = THEME_ICONS[__currentTheme];
+    btn.setAttribute('aria-label', 'Change theme');
     btn.style.cssText = [
-      'position:fixed',
-      'top:20px',
-      'left:20px',
-      'width:42px',
-      'height:42px',
-      'border-radius:50%',
-      'background:rgba(108,92,231,0.6)',
-      'color:#fff',
-      'border:1px solid rgba(108,92,231,0.8)',
-      'font-size:1.2rem',
-      'cursor:pointer',
-      'z-index:2147483647',
-      'padding:0',
-      'line-height:1',
-      'box-shadow:0 4px 14px rgba(0,0,0,0.5)',
-      'font-family:"Space Grotesk",sans-serif',
-      'align-items:center',
-      'justify-content:center',
-      'user-select:none',
-      'transform:none'
+      'position: fixed',
+      'top: 80px',
+      'left: 20px',
+      'width: 42px',
+      'height: 42px',
+      'border-radius: 50%',
+      'background: rgba(108, 92, 231, 0.6)',
+      'color: #fff',
+      'border: 1px solid rgba(108, 92, 231, 0.85)',
+      'font-size: 1.2rem',
+      'cursor: pointer',
+      'z-index: 2147483647',
+      'padding: 0',
+      'margin: 0',
+      'line-height: 1',
+      'box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5)',
+      'font-family: "Space Grotesk", sans-serif',
+      'align-items: center',
+      'justify-content: center',
+      'user-select: none',
+      'transform: none',
+      'will-change: auto',
+      'contain: none'
     ].join(';');
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
+      e.preventDefault();
       const idx = THEMES.indexOf(__currentTheme);
       __currentTheme = THEMES[(idx + 1) % THEMES.length];
       localStorage.setItem('nexus_theme', __currentTheme);
@@ -82,37 +92,41 @@ function ensureFloatingButtons() {
     btn.innerHTML = '←';
     btn.setAttribute('aria-label', 'Go back');
     btn.style.cssText = [
-      'position:fixed',
-      'top:20px',
-      'left:20px',
-      'width:42px',
-      'height:42px',
-      'border-radius:50%',
-      'background:rgba(108,92,231,0.6)',
-      'color:#fff',
-      'border:1px solid rgba(108,92,231,0.8)',
-      'font-size:1.35rem',
-      'font-weight:700',
-      'cursor:pointer',
-      'z-index:2147483647',
-      'padding:0',
-      'line-height:1',
-      'box-shadow:0 4px 14px rgba(0,0,0,0.5)',
-      'font-family:"Space Grotesk",sans-serif',
-      'align-items:center',
-      'justify-content:center',
-      'user-select:none',
-      'transform:none'
+      'position: fixed',
+      'top: 80px',
+      'left: 20px',
+      'width: 42px',
+      'height: 42px',
+      'border-radius: 50%',
+      'background: rgba(108, 92, 231, 0.6)',
+      'color: #fff',
+      'border: 1px solid rgba(108, 92, 231, 0.85)',
+      'font-size: 1.35rem',
+      'font-weight: 700',
+      'cursor: pointer',
+      'z-index: 2147483647',
+      'padding: 0',
+      'margin: 0',
+      'line-height: 1',
+      'box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5)',
+      'font-family: "Space Grotesk", sans-serif',
+      'align-items: center',
+      'justify-content: center',
+      'user-select: none',
+      'transform: none',
+      'will-change: auto',
+      'contain: none'
     ].join(';');
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
+      e.preventDefault();
       if (window.history.length > 1) window.history.back();
       else window.location.href = 'index.html';
     });
     root.appendChild(btn);
   }
 
-  // VISIBILITY (home pe theme toggle, baaki pages pe back button)
+  // VISIBILITY — home pe theme, baaki pe back
   const home = isHomePage();
   const tBtn = document.getElementById('nexusThemeToggle');
   const bBtn = document.getElementById('nexusBackBtn');
@@ -126,9 +140,9 @@ function ensureFloatingButtons() {
 // PAGE INITIALIZER
 // =========================================
 function initNexusPage() {
-
   const home = isHomePage();
 
+  // Non-home pages pe feedback/comments remove
   if (!home) {
     const feedbackSection = document.querySelector('.feedback-section');
     if (feedbackSection) feedbackSection.remove();
@@ -138,6 +152,9 @@ function initNexusPage() {
 
   ensureFloatingButtons();
 
+  // =========================================
+  // DEVICE INFO
+  // =========================================
   async function getDeviceInfo() {
     let model = '';
     let platform = '';
@@ -164,6 +181,9 @@ function initNexusPage() {
     return { model, platform };
   }
 
+  // =========================================
+  // VISITOR TRACKING (once per session)
+  // =========================================
   const hasTrackedVisit = sessionStorage.getItem('nexus_visit_tracked');
   if (!hasTrackedVisit) {
     sessionStorage.setItem('nexus_visit_tracked', 'true');
@@ -183,7 +203,9 @@ function initNexusPage() {
     })();
   }
 
+  // =========================================
   // FEEDBACK FORM
+  // =========================================
   const feedbackForm = document.getElementById('feedbackForm');
   let isSubmitting = false;
 
@@ -232,7 +254,9 @@ function initNexusPage() {
     });
   }
 
+  // =========================================
   // LIVE COMMENTS
+  // =========================================
   const commentName = document.getElementById('commentName');
   const commentMessage = document.getElementById('commentMessage');
   const commentSubmit = document.getElementById('commentSubmit');
@@ -380,7 +404,9 @@ function initNexusPage() {
     });
   }
 
+  // =========================================
   // AI CHAT
+  // =========================================
   const chatFab = document.getElementById('chatFab');
   const chatWidget = document.getElementById('chatWidget');
   const chatBackdrop = document.getElementById('chatBackdrop');
@@ -513,7 +539,9 @@ function initNexusPage() {
   }
   window.addEventListener('resize', adjustChatForKeyboard);
 
+  // =========================================
   // VOICE INPUT
+  // =========================================
   const voiceBtn = document.getElementById('voiceBtn');
   let recognition = null;
   let isRecording = false;
@@ -559,7 +587,9 @@ function initNexusPage() {
     });
   }
 
-  // TTS
+  // =========================================
+  // TEXT-TO-SPEECH
+  // =========================================
   let currentlySpeaking = false;
   let currentSpeakBtn = null;
   let currentMessageEl = null;
@@ -742,7 +772,6 @@ function initNexusPage() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
     return div;
   }
-
 }
 
 // =========================================
@@ -757,7 +786,10 @@ async function loadNexusPage(url, pushHistory) {
 
     if (doc.title) document.title = doc.title;
 
+    // Remove SPA-added styles
     document.querySelectorAll('head [data-nexus-spa]').forEach(el => el.remove());
+
+    // Add new page's styles
     doc.querySelectorAll('head style, head link[rel="stylesheet"]').forEach(el => {
       const outer = el.outerHTML;
       if (__baseStyles.has(outer)) return;
@@ -769,8 +801,10 @@ async function loadNexusPage(url, pushHistory) {
     const allScripts = Array.from(doc.body.querySelectorAll('script'));
     const newBody = doc.body.cloneNode(true);
     newBody.querySelectorAll('script').forEach(s => s.remove());
+
     document.body.innerHTML = newBody.innerHTML;
 
+    // Re-execute inline scripts
     allScripts.forEach(oldScript => {
       if (oldScript.src) return;
       const newScript = document.createElement('script');
