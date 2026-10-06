@@ -1,5 +1,5 @@
 // =========================================
-// NEXUS - Main Script (SPA + Fixed Bottom Buttons)
+// NEXUS - Main Script (SPA + Fixed Buttons)
 // =========================================
 
 let __currentPage = (function() {
@@ -83,17 +83,16 @@ function initNexusPage() {
   const home = isHomePage();
 
   if (!home) {
-    const feedbackSection = document.querySelector('.feedback-section');
-    if (feedbackSection) feedbackSection.remove();
-    const commentsSection = document.querySelector('.comments-section');
-    if (commentsSection) commentsSection.remove();
+    const fs = document.querySelector('.feedback-section');
+    if (fs) fs.remove();
+    const cs = document.querySelector('.comments-section');
+    if (cs) cs.remove();
   }
 
   ensureFloatingButtons();
 
   async function getDeviceInfo() {
-    let model = '';
-    let platform = '';
+    let model = '', platform = '';
     try {
       if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
         const h = await navigator.userAgentData.getHighEntropyValues(['model', 'platform', 'platformVersion']);
@@ -128,13 +127,13 @@ function initNexusPage() {
                       navigator.userAgent.includes('Firefox') ? 'Firefox' :
                       navigator.userAgent.includes('Safari') ? 'Safari' : 'Other';
       fetch('/api/visitor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ referrer, page: __currentPage, device, browser, model, platform })
       }).catch(() => {});
     })();
   }
 
+  // FEEDBACK
   const feedbackForm = document.getElementById('feedbackForm');
   let isSubmitting = false;
   if (feedbackForm) {
@@ -147,13 +146,11 @@ function initNexusPage() {
       const statusEl = document.getElementById('feedbackStatus');
       const submitBtn = document.getElementById('feedbackSubmit');
       if (!message) { isSubmitting = false; return; }
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Sending...';
+      submitBtn.disabled = true; submitBtn.textContent = 'Sending...';
       statusEl.textContent = '';
       try {
         const res = await fetch('/api/feedback', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, message })
         });
         const data = await res.json();
@@ -170,14 +167,14 @@ function initNexusPage() {
         statusEl.style.color = '#e74c3c';
       } finally {
         setTimeout(() => {
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Send Message';
+          submitBtn.disabled = false; submitBtn.textContent = 'Send Message';
           isSubmitting = false;
         }, 3000);
       }
     });
   }
 
+  // COMMENTS
   const commentName = document.getElementById('commentName');
   const commentMessage = document.getElementById('commentMessage');
   const commentSubmit = document.getElementById('commentSubmit');
@@ -186,63 +183,56 @@ function initNexusPage() {
   let isCommentSubmitting = false;
   let lastCommentsHash = '';
 
-  function renderComment(comment, prepend = false) {
+  function renderComment(c, prepend = false) {
     const card = document.createElement('div');
     card.className = 'comment-card';
-    const initial = (comment.name || 'A').charAt(0).toUpperCase();
-    const timeAgo = getTimeAgo(comment.timestamp);
     const header = document.createElement('div');
     header.className = 'comment-header';
-    const avatar = document.createElement('div');
-    avatar.className = 'comment-avatar';
-    avatar.textContent = initial;
+    const av = document.createElement('div');
+    av.className = 'comment-avatar';
+    av.textContent = (c.name || 'A').charAt(0).toUpperCase();
     const meta = document.createElement('div');
     meta.className = 'comment-meta';
-    const nameEl = document.createElement('span');
-    nameEl.className = 'comment-name';
-    nameEl.textContent = comment.name || 'Anonymous';
-    const timeEl = document.createElement('span');
-    timeEl.className = 'comment-time';
-    timeEl.textContent = timeAgo;
-    meta.appendChild(nameEl);
-    meta.appendChild(timeEl);
-    header.appendChild(avatar);
-    header.appendChild(meta);
-    const text = document.createElement('p');
-    text.className = 'comment-text';
-    text.textContent = comment.message;
-    card.appendChild(header);
-    card.appendChild(text);
-    if (comment.reply) {
-      const replyBlock = document.createElement('div');
-      replyBlock.className = 'comment-reply';
-      const replyLabel = document.createElement('span');
-      replyLabel.className = 'comment-reply-label';
-      replyLabel.textContent = '↳ Admin Reply';
-      const replyText = document.createElement('p');
-      replyText.className = 'comment-reply-text';
-      replyText.textContent = comment.reply;
-      replyBlock.appendChild(replyLabel);
-      replyBlock.appendChild(replyText);
-      card.appendChild(replyBlock);
+    const nm = document.createElement('span');
+    nm.className = 'comment-name';
+    nm.textContent = c.name || 'Anonymous';
+    const tm = document.createElement('span');
+    tm.className = 'comment-time';
+    tm.textContent = getTimeAgo(c.timestamp);
+    meta.appendChild(nm); meta.appendChild(tm);
+    header.appendChild(av); header.appendChild(meta);
+    const tx = document.createElement('p');
+    tx.className = 'comment-text';
+    tx.textContent = c.message;
+    card.appendChild(header); card.appendChild(tx);
+    if (c.reply) {
+      const rb = document.createElement('div');
+      rb.className = 'comment-reply';
+      const rl = document.createElement('span');
+      rl.className = 'comment-reply-label';
+      rl.textContent = '↳ Admin Reply';
+      const rt = document.createElement('p');
+      rt.className = 'comment-reply-text';
+      rt.textContent = c.reply;
+      rb.appendChild(rl); rb.appendChild(rt); card.appendChild(rb);
     }
     if (prepend) commentsList.insertBefore(card, commentsList.firstChild);
     else commentsList.appendChild(card);
     return card;
   }
 
-  function getTimeAgo(timestamp) {
-    const diff = Date.now() - timestamp;
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-    if (seconds < 30) return 'Just now';
-    if (seconds < 60) return seconds + 's ago';
-    if (minutes < 60) return minutes + 'm ago';
-    if (hours < 24) return hours + 'h ago';
-    if (days < 7) return days + 'd ago';
-    return new Date(timestamp).toLocaleDateString('en-IN');
+  function getTimeAgo(ts) {
+    const diff = Date.now() - ts;
+    const s = Math.floor(diff / 1000);
+    const m = Math.floor(s / 60);
+    const h = Math.floor(m / 60);
+    const d = Math.floor(h / 24);
+    if (s < 30) return 'Just now';
+    if (s < 60) return s + 's ago';
+    if (m < 60) return m + 'm ago';
+    if (h < 24) return h + 'h ago';
+    if (d < 7) return d + 'd ago';
+    return new Date(ts).toLocaleDateString('en-IN');
   }
 
   async function loadComments() {
@@ -251,20 +241,20 @@ function initNexusPage() {
       const res = await fetch('/api/comments');
       const data = await res.json();
       if (data.success && Array.isArray(data.comments)) {
-        const newHash = JSON.stringify(data.comments);
-        if (newHash === lastCommentsHash) return;
-        lastCommentsHash = newHash;
+        const nh = JSON.stringify(data.comments);
+        if (nh === lastCommentsHash) return;
+        lastCommentsHash = nh;
         commentsList.innerHTML = '';
         if (data.comments.length === 0) {
-          const empty = document.createElement('p');
-          empty.className = 'comments-empty';
-          empty.textContent = 'No comments yet. Be the first to share!';
-          commentsList.appendChild(empty);
+          const em = document.createElement('p');
+          em.className = 'comments-empty';
+          em.textContent = 'No comments yet. Be the first to share!';
+          commentsList.appendChild(em);
         } else {
           data.comments.forEach(c => renderComment(c));
         }
       }
-    } catch (err) {}
+    } catch (e) {}
   }
 
   if (commentsList) {
@@ -282,26 +272,23 @@ function initNexusPage() {
       if (!message) {
         commentStatus.textContent = '❌ Please write something before posting.';
         commentStatus.style.color = '#e74c3c';
-        isCommentSubmitting = false;
-        return;
+        isCommentSubmitting = false; return;
       }
       commentSubmit.disabled = true;
       commentSubmit.textContent = 'Posting...';
       commentStatus.textContent = '';
       try {
         const res = await fetch('/api/comments', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, message })
         });
         const data = await res.json();
         if (data.success && data.comment) {
           commentStatus.textContent = '✅ Posted!';
           commentStatus.style.color = '#2ecc71';
-          commentName.value = '';
-          commentMessage.value = '';
-          const emptyEl = commentsList.querySelector('.comments-empty');
-          if (emptyEl) emptyEl.remove();
+          commentName.value = ''; commentMessage.value = '';
+          const ee = commentsList.querySelector('.comments-empty');
+          if (ee) ee.remove();
           renderComment(data.comment, true);
           lastCommentsHash = '';
           setTimeout(() => { commentStatus.textContent = ''; }, 3000);
@@ -320,6 +307,7 @@ function initNexusPage() {
     });
   }
 
+  // CHAT
   const chatFab = document.getElementById('chatFab');
   const chatWidget = document.getElementById('chatWidget');
   const chatBackdrop = document.getElementById('chatBackdrop');
@@ -392,8 +380,7 @@ function initNexusPage() {
       isClosingChat = true;
       closeChatFully();
       if (chatHistoryState) {
-        chatHistoryState = false;
-        history.back();
+        chatHistoryState = false; history.back();
       }
       setTimeout(() => { isClosingChat = false; }, 400);
     });
@@ -401,14 +388,12 @@ function initNexusPage() {
 
   if (chatClose) {
     chatClose.addEventListener('click', (e) => {
-      e.stopPropagation();
-      e.preventDefault();
+      e.stopPropagation(); e.preventDefault();
       if (isClosingChat) return;
       isClosingChat = true;
       closeChatFully();
       if (chatHistoryState) {
-        chatHistoryState = false;
-        history.back();
+        chatHistoryState = false; history.back();
       }
       setTimeout(() => { isClosingChat = false; }, 400);
     });
@@ -418,14 +403,12 @@ function initNexusPage() {
     if (!chatWidget || !chatWidget.classList.contains('active')) return;
     const vv = window.visualViewport;
     if (!vv) return;
-    const viewportHeight = vv.height;
-    const viewportTop = vv.offsetTop || 0;
-    const windowHeight = window.innerHeight;
-    const keyboardHeight = windowHeight - viewportHeight;
-    const isKeyboardOpen = keyboardHeight > 100;
-    if (isKeyboardOpen) {
-      chatWidget.style.height = viewportHeight + 'px';
-      chatWidget.style.top = viewportTop + 'px';
+    const vh = vv.height, vt = vv.offsetTop || 0;
+    const wh = window.innerHeight;
+    const kh = wh - vh;
+    if (kh > 100) {
+      chatWidget.style.height = vh + 'px';
+      chatWidget.style.top = vt + 'px';
       chatWidget.style.bottom = 'auto';
       chatWidget.classList.add('keyboard-open');
     } else {
@@ -447,18 +430,17 @@ function initNexusPage() {
       setTimeout(adjustChatForKeyboard, 300);
       setTimeout(adjustChatForKeyboard, 600);
     });
-    chatInput.addEventListener('blur', () => {
-      setTimeout(adjustChatForKeyboard, 300);
-    });
+    chatInput.addEventListener('blur', () => setTimeout(adjustChatForKeyboard, 300));
   }
   window.addEventListener('resize', adjustChatForKeyboard);
 
+  // VOICE
   const voiceBtn = document.getElementById('voiceBtn');
   let recognition = null;
   let isRecording = false;
   if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new SpeechRecognition();
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SR();
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.lang = 'en-IN';
@@ -468,11 +450,9 @@ function initNexusPage() {
       if (chatInput) chatInput.placeholder = '🎤 Listening...';
     };
     recognition.onresult = (event) => {
-      let transcript = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        transcript += event.results[i][0].transcript;
-      }
-      if (chatInput) chatInput.value = transcript;
+      let t = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) t += event.results[i][0].transcript;
+      if (chatInput) chatInput.value = t;
     };
     recognition.onerror = () => {
       isRecording = false;
@@ -487,36 +467,31 @@ function initNexusPage() {
   }
   if (voiceBtn) {
     voiceBtn.addEventListener('click', () => {
-      if (!recognition) {
-        alert('Voice input not supported. Try Chrome.');
-        return;
-      }
-      if (isRecording) recognition.stop();
-      else recognition.start();
+      if (!recognition) { alert('Voice input not supported. Try Chrome.'); return; }
+      if (isRecording) recognition.stop(); else recognition.start();
     });
   }
 
+  // TTS
   let currentlySpeaking = false;
   let currentSpeakBtn = null;
   let currentMessageEl = null;
+
   function stopSpeaking() {
     if ('speechSynthesis' in window) speechSynthesis.cancel();
-    if (currentMessageEl) {
-      currentMessageEl.querySelectorAll('.speak-word.speaking').forEach(el => el.classList.remove('speaking'));
-    }
+    if (currentMessageEl) currentMessageEl.querySelectorAll('.speak-word.speaking').forEach(el => el.classList.remove('speaking'));
     if (currentSpeakBtn) {
       currentSpeakBtn.innerHTML = '🔊 Listen';
       currentSpeakBtn.classList.remove('speaking-active');
     }
-    currentlySpeaking = false;
-    currentSpeakBtn = null;
-    currentMessageEl = null;
+    currentlySpeaking = false; currentSpeakBtn = null; currentMessageEl = null;
   }
+
   function prepareForTTS(rootEl) {
     if (rootEl.dataset.speechWrapped === 'true') {
       rootEl.querySelectorAll('.speak-word').forEach(span => {
-        const text = document.createTextNode(span.textContent);
-        span.parentNode.replaceChild(text, span);
+        const t = document.createTextNode(span.textContent);
+        span.parentNode.replaceChild(t, span);
       });
       delete rootEl.dataset.speechWrapped;
     }
@@ -540,13 +515,13 @@ function initNexusPage() {
           fragment.appendChild(document.createTextNode(part));
           cleanText += part;
         } else {
-          const cleanWord = part.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').replace(/[*#_`~]/g, '');
-          if (!cleanWord) { fragment.appendChild(document.createTextNode(part)); return; }
+          const cw = part.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').replace(/[*#_`~]/g, '');
+          if (!cw) { fragment.appendChild(document.createTextNode(part)); return; }
           const span = document.createElement('span');
           span.className = 'speak-word';
           span.textContent = part;
           const start = cleanText.length;
-          cleanText += cleanWord;
+          cleanText += cw;
           const end = cleanText.length;
           posMap.push({ charStart: start, charEnd: end, span });
           fragment.appendChild(span);
@@ -557,6 +532,7 @@ function initNexusPage() {
     rootEl.dataset.speechWrapped = 'true';
     return { cleanText, posMap };
   }
+
   function speakWithHighlight(messageDiv, speakBtn, text, lang = 'en-IN') {
     if (!('speechSynthesis' in window)) return;
     if (currentlySpeaking && currentSpeakBtn === speakBtn) { stopSpeaking(); return; }
@@ -569,26 +545,22 @@ function initNexusPage() {
     currentlySpeaking = true;
     speakBtn.innerHTML = '⏹ Stop';
     speakBtn.classList.add('speaking-active');
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = lang;
-    utterance.rate = 1;
-    utterance.pitch = 1;
-    utterance.onboundary = (e) => {
+    const utt = new SpeechSynthesisUtterance(cleanText);
+    utt.lang = lang; utt.rate = 1; utt.pitch = 1;
+    utt.onboundary = (e) => {
       if (!currentlySpeaking) return;
-      const charIndex = e.charIndex;
+      const ci = e.charIndex;
       let match = null;
-      for (const p of posMap) {
-        if (charIndex >= p.charStart && charIndex < p.charEnd) { match = p; break; }
-      }
+      for (const p of posMap) if (ci >= p.charStart && ci < p.charEnd) { match = p; break; }
       if (match && match.span) {
         posMap.forEach(p => { if (p.span) p.span.classList.remove('speaking'); });
         match.span.classList.add('speaking');
         try { match.span.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (err) {}
       }
     };
-    utterance.onend = () => { stopSpeaking(); };
-    utterance.onerror = () => { stopSpeaking(); };
-    speechSynthesis.speak(utterance);
+    utt.onend = () => stopSpeaking();
+    utt.onerror = () => stopSpeaking();
+    speechSynthesis.speak(utt);
   }
 
   if (chatForm) {
@@ -605,10 +577,9 @@ function initNexusPage() {
       if (sendBtn) sendBtn.disabled = true;
       try {
         const { model } = await getDeviceInfo();
-        const payload = { message: message, history: chatHistory.slice(-10), deviceModel: model };
+        const payload = { message, history: chatHistory.slice(-10), deviceModel: model };
         const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
         const data = await res.json();
@@ -649,24 +620,20 @@ function initNexusPage() {
 
   function addChatMessage(text, type) {
     const div = document.createElement('div');
-    div.className = 'ai-msg ' + (
-      type === 'user' ? 'ai-msg-user' :
-      type === 'typing' ? 'ai-msg-typing' :
-      'ai-msg-bot'
-    );
+    div.className = 'ai-msg ' + (type === 'user' ? 'ai-msg-user' : type === 'typing' ? 'ai-msg-typing' : 'ai-msg-bot');
     if (type === 'bot' && text) {
       div.innerHTML = formatAIResponse(text);
       if (!text.includes('Thinking') && !text.includes('short break')) {
-        const speakBtn = document.createElement('button');
-        speakBtn.className = 'msg-speak-btn';
-        speakBtn.innerHTML = '🔊 Listen';
-        speakBtn.type = 'button';
-        speakBtn.addEventListener('click', (e) => {
+        const sb = document.createElement('button');
+        sb.className = 'msg-speak-btn';
+        sb.innerHTML = '🔊 Listen';
+        sb.type = 'button';
+        sb.addEventListener('click', (e) => {
           e.stopPropagation();
           const isHindi = /[\u0900-\u097F]/.test(text);
-          speakWithHighlight(div, speakBtn, text, isHindi ? 'hi-IN' : 'en-IN');
+          speakWithHighlight(div, sb, text, isHindi ? 'hi-IN' : 'en-IN');
         });
-        div.appendChild(speakBtn);
+        div.appendChild(sb);
       }
     } else {
       div.textContent = text;
@@ -701,7 +668,6 @@ async function loadNexusPage(url, pushHistory) {
     const allScripts = Array.from(doc.body.querySelectorAll('script'));
     const newBody = doc.body.cloneNode(true);
     newBody.querySelectorAll('script').forEach(s => s.remove());
-
     document.body.innerHTML = newBody.innerHTML;
 
     if (tBtn && !document.getElementById('nexusThemeToggle')) document.body.appendChild(tBtn);
@@ -709,18 +675,16 @@ async function loadNexusPage(url, pushHistory) {
 
     allScripts.forEach(oldScript => {
       if (oldScript.src) return;
-      const newScript = document.createElement('script');
-      newScript.textContent = oldScript.textContent;
-      document.body.appendChild(newScript);
+      const ns = document.createElement('script');
+      ns.textContent = oldScript.textContent;
+      document.body.appendChild(ns);
     });
 
     __currentPage = url.split('/').pop() || 'index.html';
     initNexusPage();
     window.scrollTo(0, 0);
 
-    if (pushHistory) {
-      history.pushState({ nexusPage: url }, '', window.location.pathname);
-    }
+    if (pushHistory) history.pushState({ nexusPage: url }, '', window.location.pathname);
   } catch (err) {
     window.location.href = url;
   }
@@ -747,9 +711,7 @@ window.__nexusLoadPage = loadNexusPage;
   });
 
   window.addEventListener('popstate', function(e) {
-    if (e.state && e.state.nexusPage) {
-      loadNexusPage(e.state.nexusPage, false);
-    }
+    if (e.state && e.state.nexusPage) loadNexusPage(e.state.nexusPage, false);
   });
 
   history.replaceState({ nexusPage: __currentPage }, '', window.location.pathname);
