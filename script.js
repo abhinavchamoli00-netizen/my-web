@@ -1,5 +1,5 @@
 // =========================================
-// NEXUS - Main Script (SPA-style, URL never changes)
+// NEXUS - Main Script (SPA + Fixed Buttons)
 // =========================================
 
 let __currentPage = (function() {
@@ -19,26 +19,107 @@ function isHomePage() {
 }
 
 // =========================================
-// FIXED FAB CONTAINER (survives SPA swaps)
+// FLOATING BUTTONS — appended to <html> (never removed on body swap)
 // =========================================
-function ensureFabContainer() {
-  let c = document.getElementById('nexusFabContainer');
-  if (c) return c;
-  c = document.createElement('div');
-  c.id = 'nexusFabContainer';
-  c.style.cssText = [
-    'position: fixed',
-    'top: 20px',
-    'left: 20px',
-    'z-index: 999999',
-    'display: flex',
-    'gap: 10px',
-    'align-items: center',
-    'pointer-events: none',
-    'will-change: transform'
-  ].join(';');
-  document.body.appendChild(c);
-  return c;
+const THEMES = ['dark', 'day', 'amoled'];
+const THEME_ICONS = { dark: '🌙', day: '☀️', amoled: '⬛' };
+let __currentTheme = localStorage.getItem('nexus_theme') || 'dark';
+if (!THEMES.includes(__currentTheme)) __currentTheme = 'dark';
+
+function applyTheme(t) {
+  document.documentElement.classList.remove('theme-dark', 'theme-day', 'theme-amoled');
+  document.documentElement.classList.add('theme-' + t);
+  const btn = document.getElementById('nexusThemeToggle');
+  if (btn) btn.textContent = THEME_ICONS[t];
+}
+
+function ensureFloatingButtons() {
+  const root = document.documentElement;
+
+  // THEME TOGGLE
+  if (!document.getElementById('nexusThemeToggle')) {
+    const btn = document.createElement('button');
+    btn.id = 'nexusThemeToggle';
+    btn.type = 'button';
+    btn.textContent = THEME_ICONS[__currentTheme];
+    btn.style.cssText = [
+      'position:fixed',
+      'top:20px',
+      'left:20px',
+      'width:42px',
+      'height:42px',
+      'border-radius:50%',
+      'background:rgba(108,92,231,0.6)',
+      'color:#fff',
+      'border:1px solid rgba(108,92,231,0.8)',
+      'font-size:1.2rem',
+      'cursor:pointer',
+      'z-index:2147483647',
+      'padding:0',
+      'line-height:1',
+      'box-shadow:0 4px 14px rgba(0,0,0,0.5)',
+      'font-family:"Space Grotesk",sans-serif',
+      'align-items:center',
+      'justify-content:center',
+      'user-select:none',
+      'transform:none'
+    ].join(';');
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = THEMES.indexOf(__currentTheme);
+      __currentTheme = THEMES[(idx + 1) % THEMES.length];
+      localStorage.setItem('nexus_theme', __currentTheme);
+      applyTheme(__currentTheme);
+    });
+    root.appendChild(btn);
+  }
+
+  // BACK BUTTON
+  if (!document.getElementById('nexusBackBtn')) {
+    const btn = document.createElement('button');
+    btn.id = 'nexusBackBtn';
+    btn.type = 'button';
+    btn.innerHTML = '←';
+    btn.setAttribute('aria-label', 'Go back');
+    btn.style.cssText = [
+      'position:fixed',
+      'top:20px',
+      'left:20px',
+      'width:42px',
+      'height:42px',
+      'border-radius:50%',
+      'background:rgba(108,92,231,0.6)',
+      'color:#fff',
+      'border:1px solid rgba(108,92,231,0.8)',
+      'font-size:1.35rem',
+      'font-weight:700',
+      'cursor:pointer',
+      'z-index:2147483647',
+      'padding:0',
+      'line-height:1',
+      'box-shadow:0 4px 14px rgba(0,0,0,0.5)',
+      'font-family:"Space Grotesk",sans-serif',
+      'align-items:center',
+      'justify-content:center',
+      'user-select:none',
+      'transform:none'
+    ].join(';');
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (window.history.length > 1) window.history.back();
+      else window.location.href = 'index.html';
+    });
+    root.appendChild(btn);
+  }
+
+  // VISIBILITY (home pe theme toggle, baaki pages pe back button)
+  const home = isHomePage();
+  const tBtn = document.getElementById('nexusThemeToggle');
+  const bBtn = document.getElementById('nexusBackBtn');
+  if (tBtn) tBtn.style.display = home ? 'flex' : 'none';
+  if (bBtn) bBtn.style.display = home ? 'none' : 'flex';
+
+  applyTheme(__currentTheme);
 }
 
 // =========================================
@@ -55,9 +136,7 @@ function initNexusPage() {
     if (commentsSection) commentsSection.remove();
   }
 
-  ensureFabContainer();
-  updateThemeToggleVisibility();
-  updateBackButtonVisibility();
+  ensureFloatingButtons();
 
   async function getDeviceInfo() {
     let model = '';
@@ -103,41 +182,6 @@ function initNexusPage() {
       }).catch(() => {});
     })();
   }
-
-  // POSTS TOGGLE
-  const postsToggle = document.getElementById('postsToggle');
-  const postsContent = document.getElementById('postsContent');
-  if (postsToggle && postsContent) {
-    postsToggle.addEventListener('click', () => {
-      const isExpanded = postsContent.classList.toggle('expanded');
-      postsToggle.classList.toggle('active', isExpanded);
-      const textSpan = postsToggle.querySelector('.posts-toggle-text');
-      if (textSpan) {
-        textSpan.textContent = isExpanded
-          ? 'Click here to hide 2026 updates'
-          : 'Click here to see 2026 updates';
-      }
-    });
-  }
-
-  // POSTS STATUS
-  (function updatePostStatus() {
-    const items = document.querySelectorAll('.post-item[data-date]');
-    if (!items.length) return;
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    items.forEach(item => {
-      const ds = item.getAttribute('data-date');
-      if (!ds) return;
-      const parts = ds.split('-').map(Number);
-      if (parts.length !== 3) return;
-      const d = new Date(parts[0], parts[1] - 1, parts[2]);
-      d.setHours(0, 0, 0, 0);
-      const nameEl = item.querySelector('.post-name');
-      if (!nameEl) return;
-      nameEl.textContent = (d <= now) ? 'Updated' : 'Soon';
-    });
-  })();
 
   // FEEDBACK FORM
   const feedbackForm = document.getElementById('feedbackForm');
@@ -242,11 +286,8 @@ function initNexusPage() {
       card.appendChild(replyBlock);
     }
 
-    if (prepend) {
-      commentsList.insertBefore(card, commentsList.firstChild);
-    } else {
-      commentsList.appendChild(card);
-    }
+    if (prepend) commentsList.insertBefore(card, commentsList.firstChild);
+    else commentsList.appendChild(card);
     return card;
   }
 
@@ -705,124 +746,10 @@ function initNexusPage() {
 }
 
 // =========================================
-// THEME TOGGLE (inside FAB container)
-// =========================================
-function updateThemeToggleVisibility() {
-  const btn = document.getElementById('nexusThemeToggle');
-  if (!btn) return;
-  btn.style.display = isHomePage() ? 'flex' : 'none';
-}
-
-(function setupThemeToggle() {
-  if (document.getElementById('nexusThemeToggle')) return;
-
-  const THEMES = ['dark', 'day', 'amoled'];
-  const ICONS = { dark: '🌙', day: '☀️', amoled: '⬛' };
-  let theme = localStorage.getItem('nexus_theme') || 'dark';
-  if (!THEMES.includes(theme)) theme = 'dark';
-
-  function applyTheme(t) {
-    document.documentElement.classList.remove('theme-dark', 'theme-day', 'theme-amoled');
-    document.documentElement.classList.add('theme-' + t);
-    const btn = document.getElementById('nexusThemeToggle');
-    if (btn) {
-      btn.textContent = ICONS[t];
-      btn.title = 'Theme: ' + t.charAt(0).toUpperCase() + t.slice(1);
-    }
-  }
-
-  const btn = document.createElement('button');
-  btn.id = 'nexusThemeToggle';
-  btn.type = 'button';
-  btn.style.cssText = [
-    'width: 42px',
-    'height: 42px',
-    'border-radius: 50%',
-    'background: rgba(108, 92, 231, 0.35)',
-    'border: 1px solid rgba(108, 92, 231, 0.6)',
-    'color: #fff',
-    'font-size: 1.2rem',
-    'cursor: pointer',
-    'display: flex',
-    'align-items: center',
-    'justify-content: center',
-    'font-family: Space Grotesk, sans-serif',
-    'padding: 0',
-    'line-height: 1',
-    'user-select: none',
-    'pointer-events: auto',
-    'box-shadow: 0 4px 14px rgba(0,0,0,0.35)'
-  ].join(';');
-  btn.addEventListener('click', () => {
-    const idx = THEMES.indexOf(theme);
-    theme = THEMES[(idx + 1) % THEMES.length];
-    localStorage.setItem('nexus_theme', theme);
-    applyTheme(theme);
-  });
-
-  ensureFabContainer().appendChild(btn);
-  applyTheme(theme);
-  updateThemeToggleVisibility();
-})();
-
-// =========================================
-// BACK BUTTON (inside FAB container)
-// =========================================
-function updateBackButtonVisibility() {
-  const btn = document.getElementById('nexusBackBtn');
-  if (!btn) return;
-  btn.style.display = isHomePage() ? 'none' : 'flex';
-}
-
-(function setupBackButton() {
-  if (document.getElementById('nexusBackBtn')) return;
-
-  const btn = document.createElement('button');
-  btn.id = 'nexusBackBtn';
-  btn.type = 'button';
-  btn.innerHTML = '←';
-  btn.title = 'Go back';
-  btn.setAttribute('aria-label', 'Go back');
-  btn.style.cssText = [
-    'width: 42px',
-    'height: 42px',
-    'border-radius: 50%',
-    'background: rgba(108, 92, 231, 0.35)',
-    'border: 1px solid rgba(108, 92, 231, 0.6)',
-    'color: #fff',
-    'font-size: 1.35rem',
-    'font-weight: 700',
-    'cursor: pointer',
-    'display: flex',
-    'align-items: center',
-    'justify-content: center',
-    'font-family: Space Grotesk, sans-serif',
-    'padding: 0',
-    'line-height: 1',
-    'user-select: none',
-    'pointer-events: auto',
-    'box-shadow: 0 4px 14px rgba(0,0,0,0.35)'
-  ].join(';');
-  btn.addEventListener('click', () => {
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      window.location.href = 'index.html';
-    }
-  });
-
-  ensureFabContainer().appendChild(btn);
-  updateBackButtonVisibility();
-})();
-
-// =========================================
 // SPA NAVIGATION
 // =========================================
 async function loadNexusPage(url, pushHistory) {
   try {
-    // 🔒 Save FAB container before swap
-    const fab = document.getElementById('nexusFabContainer');
-
     const res = await fetch(url, { cache: 'no-cache' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const html = await res.text();
@@ -843,11 +770,6 @@ async function loadNexusPage(url, pushHistory) {
     const newBody = doc.body.cloneNode(true);
     newBody.querySelectorAll('script').forEach(s => s.remove());
     document.body.innerHTML = newBody.innerHTML;
-
-    // 🔒 Re-append FAB container after swap
-    if (fab && !document.getElementById('nexusFabContainer')) {
-      document.body.appendChild(fab);
-    }
 
     allScripts.forEach(oldScript => {
       if (oldScript.src) return;
@@ -895,6 +817,10 @@ async function loadNexusPage(url, pushHistory) {
   history.replaceState({ nexusPage: __currentPage }, '', window.location.pathname);
 })();
 
+// =========================================
+// BOOTSTRAP
+// =========================================
+applyTheme(__currentTheme);
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initNexusPage);
 } else {
