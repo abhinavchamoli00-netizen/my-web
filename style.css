@@ -1302,3 +1302,54 @@ html.theme-day .movie-watch-box {
 }
 html.theme-day .watch-note { color: #6c5ce7; }
 html.theme-day .join-channel-btn { color: #6c5ce7; }
+/* =========================================
+   29. PERSONAL WEBSITE NOTICE BANNER
+   ========================================= */
+.personal-notice {
+  width: 100%;
+  padding: 10px 16px;
+  background: rgba(108, 92, 231, 0.12);
+  border-bottom: 1px solid rgba(108, 92, 231, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.personal-notice-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  text-align: left;
+}
+
+.personal-notice .pn-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #a29bfe;
+}
+
+.personal-notice p {
+  color: #b8b8c8;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.personal-notice strong {
+  color: #a29bfe;
+  font-weight: 600;
+}
+
+html.theme-day .personal-notice {
+  background: rgba(108, 92, 231, 0.08);
+  border-bottom-color: rgba(108, 92, 231, 0.2);
+}
+html.theme-day .personal-notice p { color: #555; }
+html.theme-day .personal-notice strong { color: #6c5ce7; }
+
+@media (max-width: 600px) {
+  .personal-notice { padding: 8px 12px; }
+  .personal-notice p { font-size: 0.72rem; }
+}
