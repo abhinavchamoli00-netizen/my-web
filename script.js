@@ -1,5 +1,5 @@
 // =========================================
-// NEXUS - Main Script (SPA + Fixed Buttons in Body)
+// NEXUS - Main Script (SPA + Fixed Bottom Buttons)
 // =========================================
 
 let __currentPage = (function() {
@@ -18,9 +18,6 @@ function isHomePage() {
   return p === 'index.html' || p === '' || p === '/';
 }
 
-// =========================================
-// THEME STATE
-// =========================================
 const THEMES = ['dark', 'day', 'amoled'];
 const THEME_ICONS = { dark: '🌙', day: '☀️', amoled: '⬛' };
 let __currentTheme = localStorage.getItem('nexus_theme') || 'dark';
@@ -33,32 +30,7 @@ function applyTheme(t) {
   if (btn) btn.textContent = THEME_ICONS[t];
 }
 
-// =========================================
-// FAB WRAPPER (inside body — survives SPA swap)
-// =========================================
-function ensureFabWrap() {
-  let wrap = document.getElementById('nexusFabWrap');
-  if (!wrap) {
-    wrap = document.createElement('div');
-    wrap.id = 'nexusFabWrap';
-    wrap.setAttribute('style',
-      'position:fixed !important;' +
-      'top:0 !important;' +
-      'left:0 !important;' +
-      'width:0 !important;' +
-      'height:0 !important;' +
-      'z-index:2147483647 !important;' +
-      'pointer-events:none !important;'
-    );
-    document.body.appendChild(wrap);
-  }
-  return wrap;
-}
-
 function ensureFloatingButtons() {
-  const wrap = ensureFabWrap();
-
-  // THEME TOGGLE
   let tBtn = document.getElementById('nexusThemeToggle');
   if (!tBtn) {
     tBtn = document.createElement('button');
@@ -66,30 +38,6 @@ function ensureFloatingButtons() {
     tBtn.type = 'button';
     tBtn.textContent = THEME_ICONS[__currentTheme];
     tBtn.setAttribute('aria-label', 'Change theme');
-    tBtn.setAttribute('style',
-      'position:fixed !important;' +
-      'top:20px !important;' +
-      'left:20px !important;' +
-      'width:42px !important;' +
-      'height:42px !important;' +
-      'border-radius:50% !important;' +
-      'background:rgba(108,92,231,0.65) !important;' +
-      'color:#fff !important;' +
-      'border:1px solid rgba(108,92,231,0.9) !important;' +
-      'font-size:1.2rem !important;' +
-      'cursor:pointer !important;' +
-      'z-index:2147483647 !important;' +
-      'padding:0 !important;' +
-      'margin:0 !important;' +
-      'line-height:1 !important;' +
-      'box-shadow:0 4px 14px rgba(0,0,0,0.5) !important;' +
-      'font-family:"Space Grotesk",sans-serif !important;' +
-      'align-items:center !important;' +
-      'justify-content:center !important;' +
-      'user-select:none !important;' +
-      'pointer-events:auto !important;' +
-      'transform:none !important;'
-    );
     tBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       e.preventDefault();
@@ -98,10 +46,9 @@ function ensureFloatingButtons() {
       localStorage.setItem('nexus_theme', __currentTheme);
       applyTheme(__currentTheme);
     });
-    wrap.appendChild(tBtn);
+    document.body.appendChild(tBtn);
   }
 
-  // BACK BUTTON
   let bBtn = document.getElementById('nexusBackBtn');
   if (!bBtn) {
     bBtn = document.createElement('button');
@@ -109,41 +56,15 @@ function ensureFloatingButtons() {
     bBtn.type = 'button';
     bBtn.innerHTML = '←';
     bBtn.setAttribute('aria-label', 'Go back');
-    bBtn.setAttribute('style',
-      'position:fixed !important;' +
-      'top:20px !important;' +
-      'left:20px !important;' +
-      'width:42px !important;' +
-      'height:42px !important;' +
-      'border-radius:50% !important;' +
-      'background:rgba(108,92,231,0.65) !important;' +
-      'color:#fff !important;' +
-      'border:1px solid rgba(108,92,231,0.9) !important;' +
-      'font-size:1.35rem !important;' +
-      'font-weight:700 !important;' +
-      'cursor:pointer !important;' +
-      'z-index:2147483647 !important;' +
-      'padding:0 !important;' +
-      'margin:0 !important;' +
-      'line-height:1 !important;' +
-      'box-shadow:0 4px 14px rgba(0,0,0,0.5) !important;' +
-      'font-family:"Space Grotesk",sans-serif !important;' +
-      'align-items:center !important;' +
-      'justify-content:center !important;' +
-      'user-select:none !important;' +
-      'pointer-events:auto !important;' +
-      'transform:none !important;'
-    );
     bBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       e.preventDefault();
       if (window.history.length > 1) window.history.back();
       else window.location.href = 'index.html';
     });
-    wrap.appendChild(bBtn);
+    document.body.appendChild(bBtn);
   }
 
-  // VISIBILITY — home: theme only; else: back only
   const home = isHomePage();
   const chatOpen = document.getElementById('chatWidget')?.classList.contains('active');
 
@@ -158,9 +79,6 @@ function ensureFloatingButtons() {
   applyTheme(__currentTheme);
 }
 
-// =========================================
-// PAGE INITIALIZER
-// =========================================
 function initNexusPage() {
   const home = isHomePage();
 
@@ -217,7 +135,6 @@ function initNexusPage() {
     })();
   }
 
-  // FEEDBACK FORM
   const feedbackForm = document.getElementById('feedbackForm');
   let isSubmitting = false;
   if (feedbackForm) {
@@ -261,7 +178,6 @@ function initNexusPage() {
     });
   }
 
-  // LIVE COMMENTS
   const commentName = document.getElementById('commentName');
   const commentMessage = document.getElementById('commentMessage');
   const commentSubmit = document.getElementById('commentSubmit');
@@ -404,7 +320,6 @@ function initNexusPage() {
     });
   }
 
-  // AI CHAT
   const chatFab = document.getElementById('chatFab');
   const chatWidget = document.getElementById('chatWidget');
   const chatBackdrop = document.getElementById('chatBackdrop');
@@ -431,7 +346,7 @@ function initNexusPage() {
     }
     document.body.style.overflow = '';
     stopSpeaking();
-    ensureFloatingButtons(); // re-show buttons
+    ensureFloatingButtons();
   }
 
   function pushChatHistory() {
@@ -457,7 +372,7 @@ function initNexusPage() {
         chatInput.focus();
         if (chatBackdrop) chatBackdrop.classList.add('active');
         pushChatHistory();
-        ensureFloatingButtons(); // hide buttons when chat opens
+        ensureFloatingButtons();
       } else {
         if (chatBackdrop) {
           chatBackdrop.classList.remove('active');
@@ -538,7 +453,6 @@ function initNexusPage() {
   }
   window.addEventListener('resize', adjustChatForKeyboard);
 
-  // VOICE INPUT
   const voiceBtn = document.getElementById('voiceBtn');
   let recognition = null;
   let isRecording = false;
@@ -582,7 +496,6 @@ function initNexusPage() {
     });
   }
 
-  // TTS
   let currentlySpeaking = false;
   let currentSpeakBtn = null;
   let currentMessageEl = null;
@@ -764,13 +677,10 @@ function initNexusPage() {
   }
 }
 
-// =========================================
-// SPA NAVIGATION
-// =========================================
 async function loadNexusPage(url, pushHistory) {
   try {
-    // Save FAB wrap before body swap
-    const fabWrap = document.getElementById('nexusFabWrap');
+    const tBtn = document.getElementById('nexusThemeToggle');
+    const bBtn = document.getElementById('nexusBackBtn');
 
     const res = await fetch(url, { cache: 'no-cache' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -792,13 +702,10 @@ async function loadNexusPage(url, pushHistory) {
     const newBody = doc.body.cloneNode(true);
     newBody.querySelectorAll('script').forEach(s => s.remove());
 
-    // 🔑 SWAP BODY
     document.body.innerHTML = newBody.innerHTML;
 
-    // 🔑 RE-APPEND FAB WRAP (survives swap)
-    if (fabWrap && !document.getElementById('nexusFabWrap')) {
-      document.body.appendChild(fabWrap);
-    }
+    if (tBtn && !document.getElementById('nexusThemeToggle')) document.body.appendChild(tBtn);
+    if (bBtn && !document.getElementById('nexusBackBtn')) document.body.appendChild(bBtn);
 
     allScripts.forEach(oldScript => {
       if (oldScript.src) return;
@@ -848,9 +755,6 @@ window.__nexusLoadPage = loadNexusPage;
   history.replaceState({ nexusPage: __currentPage }, '', window.location.pathname);
 })();
 
-// =========================================
-// BOOTSTRAP
-// =========================================
 applyTheme(__currentTheme);
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initNexusPage);

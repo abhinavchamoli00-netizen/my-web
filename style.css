@@ -80,7 +80,7 @@ footer .contact { color: #666; font-size: 0.85rem; }
 .posts-subtitle {
   color: #888;
   font-size: 0.85rem;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .posts-year {
@@ -92,10 +92,7 @@ footer .contact { color: #666; font-size: 0.85rem; }
   letter-spacing: 1px;
 }
 
-.posts-list {
-  display: flex;
-  flex-direction: column;
-}
+.posts-list { display: flex; flex-direction: column; }
 
 .post-item {
   display: flex;
@@ -108,9 +105,7 @@ footer .contact { color: #666; font-size: 0.85rem; }
   transition: all 0.2s ease;
 }
 
-.post-item:last-child {
-  border-bottom: none;
-}
+.post-item:last-child { border-bottom: none; }
 
 .post-item:hover {
   background: rgba(108, 92, 231, 0.08);
@@ -118,22 +113,44 @@ footer .contact { color: #666; font-size: 0.85rem; }
   border-radius: 6px;
 }
 
-.post-date {
-  color: #888;
-  font-size: 0.8rem;
-  font-weight: 500;
-  min-width: 65px;
-}
+.post-date { color: #888; font-size: 0.8rem; font-weight: 500; min-width: 65px; }
+.post-name { color: #ddd; font-size: 0.88rem; text-align: right; flex: 1; }
+.post-item:hover .post-name { color: #a29bfe; }
 
-.post-name {
-  color: #ddd;
-  font-size: 0.88rem;
-  text-align: right;
-  flex: 1;
-}
-
-.post-item:hover .post-name {
+.posts-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(108, 92, 231, 0.1);
+  border: 1px solid rgba(108, 92, 231, 0.3);
+  border-radius: 10px;
   color: #a29bfe;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: left;
+  outline: none;
+}
+
+.posts-toggle:hover {
+  background: rgba(108, 92, 231, 0.2);
+  border-color: #6c5ce7;
+  color: #ffffff;
+}
+
+.posts-toggle-arrow { font-size: 0.7rem; color: #6c5ce7; transition: transform 0.3s ease; margin-left: 10px; }
+.posts-toggle.active .posts-toggle-arrow { transform: rotate(180deg); color: #a29bfe; }
+.posts-content { display: none; margin-top: 16px; }
+.posts-content.expanded { display: block; animation: postsFadeIn 0.35s ease; }
+
+@keyframes postsFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* =========================================
@@ -181,7 +198,6 @@ footer .contact { color: #666; font-size: 0.85rem; }
   border-radius: 20px;
   letter-spacing: 1px;
   border: none !important;
-  filter: none !important;
   opacity: 1 !important;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
   z-index: 10;
@@ -257,7 +273,7 @@ section h2 {
   display: inline-block;
 }
 
-.stream-link:hover { background-color: #6c5ce7; color: #fff; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4); }
+.stream-link:hover { background-color: #6c5ce7; color: #fff; }
 
 /* =========================================
    9. MOVIE & GAME POSTERS GRID
@@ -278,12 +294,78 @@ section h2 {
   display: flex;
   flex-direction: column;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+  position: relative;
 }
 
 .poster-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(108, 92, 231, 0.3); }
 .poster-card img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; display: block; }
 .poster-card p { text-align: center; padding: 10px 5px; font-size: 0.9rem; color: #e0e0e0; margin: 0; }
 .poster-link { text-decoration: none; color: inherit; display: block; }
+
+/* Rating badge (IMDb / Meta) */
+.poster-rating-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #ffd93b;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  font-family: 'Space Grotesk', sans-serif;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.poster-rating-badge .rating-source {
+  color: #a29bfe;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-right: 2px;
+}
+
+/* 18+ warning badge */
+.poster-warning-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(231, 76, 60, 0.95);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  font-family: 'Space Grotesk', sans-serif;
+  pointer-events: none;
+}
+
+/* Restricted movie badge */
+.poster-card .restricted-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(231, 76, 60, 0.95);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  z-index: 6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  font-family: 'Space Grotesk', sans-serif;
+}
 
 /* =========================================
    10. MOVIE/GAME DETAIL PAGES
@@ -317,6 +399,29 @@ section h2 {
 }
 
 .back-btn:hover { background-color: #4e3ec9; }
+
+/* Content Warning Box */
+.content-warning {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: rgba(231, 76, 60, 0.08);
+  border: 1px solid rgba(231, 76, 60, 0.35);
+  border-left: 4px solid #e74c3c;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 20px 0 24px 0;
+  clear: both;
+}
+
+.content-warning .cw-icon { font-size: 1.4rem; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+.content-warning .cw-body { flex: 1; }
+.content-warning .cw-body strong { display: block; color: #e74c3c; font-size: 0.95rem; margin-bottom: 6px; letter-spacing: 0.3px; }
+.content-warning .cw-body p { color: #ccc; font-size: 0.85rem; line-height: 1.55; margin: 0; }
+.content-warning .cw-body p strong { display: inline; color: #ff7b7b; margin: 0; font-size: inherit; }
+.content-warning .cw-body em { color: #e0e0e0; font-style: italic; }
+.content-warning.strong { background: rgba(231, 76, 60, 0.12); border-color: rgba(231, 76, 60, 0.55); border-left-width: 5px; }
+.content-warning.strong .cw-body strong { color: #ff4444; font-size: 1rem; }
 
 /* =========================================
    11. FEEDBACK FORM
@@ -353,7 +458,6 @@ section h2 {
 
 .feedback-section input:focus,
 .feedback-section textarea:focus { border-color: #6c5ce7; box-shadow: 0 0 10px rgba(108, 92, 231, 0.3); }
-
 .feedback-section textarea { resize: vertical; min-height: 100px; }
 
 .feedback-section button {
@@ -370,7 +474,7 @@ section h2 {
   font-family: 'Space Grotesk', sans-serif;
 }
 
-.feedback-section button:hover:not(:disabled) { background-color: #4e3ec9; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4); }
+.feedback-section button:hover:not(:disabled) { background-color: #4e3ec9; }
 .feedback-section button:disabled { opacity: 0.6; cursor: not-allowed; }
 #feedbackStatus { margin-top: 12px; font-size: 0.9rem; min-height: 20px; }
 
@@ -415,7 +519,7 @@ section h2 {
 }
 
 .comment-input-box input:focus,
-.comment-input-box textarea:focus { border-color: #6c5ce7; box-shadow: 0 0 8px rgba(108, 92, 231, 0.25); }
+.comment-input-box textarea:focus { border-color: #6c5ce7; }
 .comment-input-box textarea { resize: vertical; min-height: 50px; max-height: 100px; }
 
 .comment-input-box button {
@@ -432,7 +536,7 @@ section h2 {
   font-family: 'Space Grotesk', sans-serif;
 }
 
-.comment-input-box button:hover:not(:disabled) { background-color: #4e3ec9; transform: translateY(-1px); box-shadow: 0 6px 14px rgba(108, 92, 231, 0.4); }
+.comment-input-box button:hover:not(:disabled) { background-color: #4e3ec9; }
 .comment-input-box button:disabled { opacity: 0.6; cursor: not-allowed; }
 #commentStatus { margin-top: 6px; font-size: 0.75rem; min-height: 14px; text-align: center; }
 
@@ -445,16 +549,12 @@ section h2 {
   border-radius: 10px;
   padding: 10px 12px;
   border: 1px solid rgba(108, 92, 231, 0.12);
-  animation: commentFadeIn 0.3s ease;
 }
-
-@keyframes commentFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
 .comment-header { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
 
 .comment-avatar {
-  width: 26px;
-  height: 26px;
+  width: 26px; height: 26px;
   border-radius: 50%;
   background: linear-gradient(135deg, #6c5ce7, #7b4fbf);
   color: #fff;
@@ -473,19 +573,12 @@ section h2 {
 .comments-loading { color: #888; text-align: center; padding: 10px; font-style: italic; font-size: 0.8rem; }
 .comments-empty { color: #666; text-align: center; padding: 10px; font-style: italic; font-size: 0.8rem; }
 
-/* Comment Reply (Admin Reply on Homepage) */
 .comment-reply {
   margin-top: 10px;
   padding: 8px 12px;
   background: rgba(108, 92, 231, 0.08);
   border-left: 3px solid #6c5ce7;
   border-radius: 0 8px 8px 0;
-  animation: replyFadeIn 0.4s ease;
-}
-
-@keyframes replyFadeIn {
-  from { opacity: 0; transform: translateX(-6px); }
-  to { opacity: 1; transform: translateX(0); }
 }
 
 .comment-reply-label {
@@ -498,14 +591,7 @@ section h2 {
   text-transform: uppercase;
 }
 
-.comment-reply-text {
-  color: #ddd;
-  font-size: 0.82rem;
-  line-height: 1.5;
-  margin: 0;
-  word-wrap: break-word;
-  white-space: pre-wrap;
-}
+.comment-reply-text { color: #ddd; font-size: 0.82rem; line-height: 1.5; margin: 0; }
 
 /* =========================================
    13. CHAT BACKDROP
@@ -517,12 +603,10 @@ section h2 {
   background: rgba(0, 0, 0, 0.5);
   z-index: 9997;
   cursor: pointer;
-  animation: fadeIn 0.2s ease;
 }
 
 .chat-backdrop.active { display: block; }
 .chat-backdrop.active.locked { cursor: default; background: rgba(0, 0, 0, 0); }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 /* =========================================
    14. AI CHAT LAUNCHER
@@ -545,11 +629,10 @@ section h2 {
   max-width: 180px;
 }
 
-.ai-chat-launcher:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(108, 92, 231, 0.7); }
+.ai-chat-launcher:hover { transform: translateY(-2px); }
 
 .ai-launcher-icon {
-  width: 30px;
-  height: 30px;
+  width: 30px; height: 30px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.15);
   display: flex;
@@ -568,7 +651,6 @@ section h2 {
   width: 8px; height: 8px;
   background: #2ecc71;
   border-radius: 50%;
-  box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
   animation: pulseGreen 2s infinite;
 }
 
@@ -594,19 +676,15 @@ section h2 {
   z-index: 9999;
   font-family: 'Space Grotesk', sans-serif;
   flex-direction: column;
-  box-sizing: border-box;
 }
 
-.ai-chat-widget.active { display: flex; animation: expandIn 0.3s ease; }
-@keyframes expandIn { from { opacity: 0.8; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+.ai-chat-widget.active { display: flex; }
 
 .ai-chat-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 14px 18px;
-  background: transparent;
-  cursor: pointer;
   flex-shrink: 0;
 }
 
@@ -616,7 +694,6 @@ section h2 {
   width: 8px; height: 8px;
   background-color: #2ecc71;
   border-radius: 50%;
-  box-shadow: 0 0 8px #2ecc71;
   animation: pulse 2s infinite;
 }
 
@@ -635,7 +712,6 @@ section h2 {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: 0.2s;
 }
 
 .ai-chat-toggle:hover { background: rgba(255, 255, 255, 0.2); }
@@ -650,7 +726,6 @@ section h2 {
   gap: 10px;
   flex: 1;
   min-height: 0;
-  align-items: stretch;
 }
 
 .ai-chat-messages::-webkit-scrollbar { width: 5px; }
@@ -666,9 +741,9 @@ section h2 {
   width: fit-content;
 }
 
-.ai-msg-bot { background-color: #1c1b22; color: #e0e0e0; align-self: flex-start; border-bottom-left-radius: 4px; line-height: 1.7; margin-right: auto; margin-left: 0; }
-.ai-msg-user { background-color: #8b7ae7; color: #ffffff; align-self: flex-end; border-bottom-right-radius: 4px; margin-left: auto; margin-right: 0; }
-.ai-msg-typing { background-color: #1c1b22; color: #888; align-self: flex-start; font-style: italic; margin-right: auto; }
+.ai-msg-bot { background-color: #1c1b22; color: #e0e0e0; align-self: flex-start; border-bottom-left-radius: 4px; line-height: 1.7; margin-right: auto; }
+.ai-msg-user { background-color: #8b7ae7; color: #ffffff; align-self: flex-end; border-bottom-right-radius: 4px; margin-left: auto; }
+.ai-msg-typing { background-color: #1c1b22; color: #888; align-self: flex-start; font-style: italic; }
 
 /* =========================================
    16. AI CHAT INPUT
@@ -708,7 +783,6 @@ section h2 {
   border-radius: 10px;
   font-size: 1rem;
   cursor: pointer;
-  transition: 0.2s;
   flex-shrink: 0;
 }
 
@@ -720,7 +794,7 @@ section h2 {
    ========================================= */
 .ai-msg-bot strong { color: #ffffff; font-weight: 700; }
 .ai-msg-bot em { color: #e0e0e0; font-style: italic; }
-.ai-heading { color: #a29bfe; font-weight: 700; font-size: 0.95rem; margin: 8px 0 5px 0; letter-spacing: 0.2px; }
+.ai-heading { color: #a29bfe; font-weight: 700; font-size: 0.95rem; margin: 8px 0 5px 0; }
 .ai-bullet { display: block; padding-left: 4px; margin: 4px 0; line-height: 1.6; color: #e0e0e0; }
 .ai-spacer { height: 10px; display: block; }
 
@@ -737,13 +811,11 @@ section h2 {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: 0.2s ease;
   flex-shrink: 0;
 }
 
-.chat-action-btn:hover { background-color: #6c5ce7; color: #fff; transform: scale(1.05); }
-.chat-action-btn.recording { background-color: #e74c3c; color: #fff; animation: micPulse 1s infinite; }
-@keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.6); } 50% { box-shadow: 0 0 0 8px rgba(231, 76, 60, 0); } }
+.chat-action-btn:hover { background-color: #6c5ce7; color: #fff; }
+.chat-action-btn.recording { background-color: #e74c3c; color: #fff; }
 .chat-action-btn svg { display: block; }
 
 .msg-speak-btn {
@@ -758,552 +830,28 @@ section h2 {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  transition: 0.2s;
   font-family: inherit;
 }
 
 .msg-speak-btn:hover { background: #6c5ce7; color: #fff; }
-.msg-speak-btn.speaking-active { background: linear-gradient(135deg, #6c5ce7, #7b4fbf); color: #fff; animation: speakPulse 1.2s infinite; }
-@keyframes speakPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.6); } 50% { box-shadow: 0 0 0 8px rgba(108, 92, 231, 0); } }
+.msg-speak-btn.speaking-active { background: linear-gradient(135deg, #6c5ce7, #7b4fbf); color: #fff; }
 
-.speak-word { transition: background-color 0.1s ease, color 0.1s ease; border-radius: 3px; padding: 0; display: inline; }
-.speak-word.speaking { background-color: #6c5ce7; color: #ffffff; border-radius: 4px; padding: 1px 3px; font-weight: 600; box-shadow: 0 0 10px rgba(108, 92, 231, 0.8); }
+.speak-word { transition: background-color 0.1s ease, color 0.1s ease; }
+.speak-word.speaking { background-color: #6c5ce7; color: #ffffff; border-radius: 4px; padding: 1px 3px; font-weight: 600; }
 
 /* =========================================
    19. MOBILE KEYBOARD OPEN
    ========================================= */
 .ai-chat-widget.keyboard-open { bottom: auto !important; }
-.ai-chat-widget.keyboard-open .ai-chat-messages { flex: 1; min-height: 0; }
 
 /* =========================================
-   20. RESPONSIVE / MOBILE
-   ========================================= */
-@media (max-width: 600px) {
-  .movie-poster-large { float: none; display: block; margin: 0 auto 20px auto; }
-  .categories { grid-template-columns: 1fr; padding: 15px; }
-  .card-container { gap: 10px; }
-  .poster-card { width: 100%; }
-  header h1 { font-size: 1.8rem; }
-  .movie-detail h1 { font-size: 2rem; }
-    .posts-section {
-    margin: 15px 12px;
-    padding: 16px 18px;
-  }
-
-  .posts-title {
-    font-size: 1.2rem;
-  }
-
-  .posts-subtitle {
-    font-size: 0.8rem;
-    margin-bottom: 16px;
-  }
-  .ai-chat-launcher { top: 65px; right: 10px; padding: 5px 12px 5px 5px; gap: 6px; }
-  .ai-launcher-icon { width: 26px; height: 26px; }
-  .ai-launcher-icon svg { width: 18px; height: 18px; }
-  .ai-launcher-title { font-size: 0.78rem; }
-  .chat-action-btn { width: 36px; height: 36px; }
-  .chat-action-btn svg { width: 16px; height: 16px; }
-  .ai-chat-input button[type="submit"] { padding: 0 12px; height: 36px; }
-  .ai-msg { max-width: 85%; }
-}
-/* POSTS TOGGLE / COLLAPSIBLE */
-.posts-toggle {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  padding: 12px 16px;
-  background: rgba(108, 92, 231, 0.1);
-  border: 1px solid rgba(108, 92, 231, 0.3);
-  border-radius: 10px;
-  color: #a29bfe;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  outline: none;
-}
-
-.posts-toggle:hover {
-  background: rgba(108, 92, 231, 0.2);
-  border-color: #6c5ce7;
-  color: #ffffff;
-}
-
-.posts-toggle-arrow {
-  font-size: 0.7rem;
-  color: #6c5ce7;
-  transition: transform 0.3s ease;
-}
-
-.posts-toggle.active .posts-toggle-arrow {
-  transform: rotate(180deg);
-}
-
-.posts-content {
-  display: none;
-  margin-top: 16px;
-}
-
-.posts-content.expanded {
-  display: block;
-  animation: postsFadeIn 0.35s ease;
-}
-
-@keyframes postsFadeIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-/* =========================================
-   21. THEME TOGGLE BUTTON
-   ========================================= */
-.nexus-theme-toggle {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: rgba(108, 92, 231, 0.25);
-  border: 1px solid rgba(108, 92, 231, 0.45);
-  color: #fff;
-  font-size: 1.2rem;
-  cursor: pointer;
-  z-index: 9996;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.25s ease;
-  font-family: 'Space Grotesk', sans-serif;
-  padding: 0;
-  line-height: 1;
-  user-select: none;
-}
-.nexus-theme-toggle:hover {
-  background: rgba(108, 92, 231, 0.5);
-  transform: scale(1.1);
-  box-shadow: 0 6px 18px rgba(108, 92, 231, 0.5);
-}
-.nexus-theme-toggle:active { transform: scale(0.95); }
-
-@media (max-width: 600px) {
-  .nexus-theme-toggle { top: 12px; left: 12px; width: 36px; height: 36px; font-size: 1rem; }
-}
-
-/* =========================================
-   22. DAY (LIGHT) THEME
-   ========================================= */
-html.theme-day body {
-  background-color: #f4f4f8;
-  color: #1a1a1a;
-}
-html.theme-day header h1 { color: #6c5ce7; }
-html.theme-day header p { color: #3b82f6; }
-
-html.theme-day .posts-section {
-  background-color: #ffffff;
-  border-color: rgba(108, 92, 231, 0.25);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-}
-html.theme-day .posts-title { color: #1a1a1a; }
-html.theme-day .posts-subtitle { color: #666; }
-html.theme-day .posts-year { color: #6c5ce7; }
-html.theme-day .post-item { border-bottom-color: rgba(0, 0, 0, 0.06); }
-html.theme-day .post-item:hover { background: rgba(108, 92, 231, 0.08); }
-html.theme-day .post-date { color: #777; }
-html.theme-day .post-name { color: #333; }
-html.theme-day .post-item:hover .post-name { color: #6c5ce7; }
-
-html.theme-day .posts-toggle {
-  background: rgba(108, 92, 231, 0.08);
-  color: #6c5ce7;
-  border-color: rgba(108, 92, 231, 0.35);
-}
-html.theme-day .posts-toggle:hover { background: rgba(108, 92, 231, 0.18); color: #4e3ec9; }
-
-html.theme-day .card {
-  background-color: #ffffff;
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-}
-html.theme-day .card h3,
-html.theme-day .card.locked h3 { color: #6c5ce7 !important; }
-html.theme-day .card p { color: #555; }
-
-html.theme-day section:not(.categories) { background-color: #ffffff; }
-html.theme-day section h2 { color: #6c5ce7 !important; }
-html.theme-day .poster-card { background-color: #ffffff; border-color: rgba(0,0,0,0.08); }
-html.theme-day .poster-card p { color: #1a1a1a; }
-html.theme-day .movie-detail h1 { color: #1a1a1a; }
-html.theme-day .movie-info p { color: #444; }
-html.theme-day .movie-info strong { color: #1a1a1a; }
-
-html.theme-day .feedback-section,
-html.theme-day .comments-section {
-  background-color: #ffffff;
-  border-color: rgba(108, 92, 231, 0.25);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-}
-html.theme-day .feedback-section h3,
-html.theme-day .comments-title { color: #6c5ce7; }
-html.theme-day .feedback-section > p { color: #666; }
-
-html.theme-day .feedback-section input,
-html.theme-day .feedback-section textarea,
-html.theme-day .comment-input-box input,
-html.theme-day .comment-input-box textarea {
-  background-color: #f5f5f8;
-  color: #1a1a1a;
-  border-color: rgba(108, 92, 231, 0.3);
-}
-html.theme-day .comment-input-box { background-color: #f5f5f8; border-color: rgba(108,92,231,0.2); }
-html.theme-day .comment-card { background-color: #f5f5f8; border-color: rgba(108,92,231,0.18); }
-html.theme-day .comment-name { color: #1a1a1a; }
-html.theme-day .comment-text { color: #444; }
-html.theme-day .comment-time { color: #888; }
-html.theme-day .comment-reply { background: rgba(108, 92, 231, 0.1); }
-html.theme-day .comment-reply-text { color: #333; }
-
-html.theme-day footer { border-top-color: rgba(0, 0, 0, 0.08); }
-html.theme-day footer .watermark { color: #777; }
-html.theme-day footer .contact { color: #999; }
-
-html.theme-day .ai-chat-widget { background-color: #f4f4f8; }
-html.theme-day .ai-chat-title { color: #333; }
-html.theme-day .ai-chat-toggle { color: #333; background: rgba(0,0,0,0.06); }
-html.theme-day .ai-chat-toggle:hover { background: rgba(0,0,0,0.15); }
-html.theme-day .ai-msg-bot { background-color: #ffffff; color: #333; }
-html.theme-day .ai-msg-bot strong { color: #1a1a1a; }
-html.theme-day .ai-chat-input { background-color: #ebebf0; border-top-color: rgba(0,0,0,0.08); }
-html.theme-day .ai-chat-input input[type="text"] { background-color: #ffffff; color: #1a1a1a; }
-html.theme-day .chat-action-btn { background-color: #ffffff; color: #6c5ce7; }
-html.theme-day .msg-speak-btn { background: rgba(108,92,231,0.12); }
-
-html.theme-day .nexus-theme-toggle {
-  background: rgba(108, 92, 231, 0.15);
-  color: #6c5ce7;
-  border-color: rgba(108, 92, 231, 0.4);
-}
-
-/* =========================================
-   23. AMOLED (PURE BLACK) THEME
-   ========================================= */
-html.theme-amoled body { background-color: #000000; }
-html.theme-amoled .posts-section { background-color: #0a0a0a; border-color: rgba(108, 92, 231, 0.2); }
-html.theme-amoled .card { background-color: #0a0a0a; }
-html.theme-amoled section:not(.categories) { background-color: #050505; }
-html.theme-amoled .poster-card { background-color: #0a0a0a; }
-html.theme-amoled .feedback-section,
-html.theme-amoled .comments-section { background-color: #0a0a0a; }
-html.theme-amoled .comment-input-box { background-color: #0a0a0a; }
-html.theme-amoled .comment-input-box input,
-html.theme-amoled .comment-input-box textarea { background-color: #000000; }
-html.theme-amoled .comment-card { background-color: #0a0a0a; }
-html.theme-amoled .ai-chat-widget { background-color: #000000; }
-html.theme-amoled .ai-msg-bot { background-color: #0a0a0a; }
-html.theme-amoled .ai-chat-input { background-color: #000000; }
-html.theme-amoled .ai-chat-input input[type="text"] { background-color: #0a0a0a; }
-html.theme-amoled footer { border-top-color: rgba(255,255,255,0.05); }
-/* =========================================
-   24. CONTENT WARNING BOX (Movie Detail Pages)
-   ========================================= */
-.content-warning {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  background: rgba(231, 76, 60, 0.08);
-  border: 1px solid rgba(231, 76, 60, 0.35);
-  border-left: 4px solid #e74c3c;
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin: 20px 0 24px 0;
-  clear: both;
-}
-
-.content-warning .cw-icon {
-  font-size: 1.4rem;
-  line-height: 1;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.content-warning .cw-body {
-  flex: 1;
-}
-
-.content-warning .cw-body strong {
-  display: block;
-  color: #e74c3c;
-  font-size: 0.95rem;
-  margin-bottom: 6px;
-  letter-spacing: 0.3px;
-}
-
-.content-warning .cw-body p {
-  color: #ccc;
-  font-size: 0.85rem;
-  line-height: 1.55;
-  margin: 0;
-}
-
-.content-warning .cw-body p strong {
-  display: inline;
-  color: #ff7b7b;
-  margin: 0;
-  font-size: inherit;
-}
-
-.content-warning .cw-body em {
-  color: #e0e0e0;
-  font-style: italic;
-}
-
-/* Day theme */
-html.theme-day .content-warning {
-  background: rgba(231, 76, 60, 0.06);
-  border-color: rgba(231, 76, 60, 0.3);
-}
-html.theme-day .content-warning .cw-body p { color: #444; }
-html.theme-day .content-warning .cw-body p strong { color: #c0392b; }
-html.theme-day .content-warning .cw-body em { color: #333; }
-
-/* Amoled theme */
-html.theme-amoled .content-warning {
-  background: rgba(231, 76, 60, 0.1);
-}
-
-@media (max-width: 600px) {
-  .content-warning { padding: 12px 14px; gap: 10px; }
-  .content-warning .cw-icon { font-size: 1.2rem; }
-  .content-warning .cw-body strong { font-size: 0.9rem; }
-  .content-warning .cw-body p { font-size: 0.82rem; }
-}
-/* =========================================
-   25. POSTER WARNING BADGE (18+)
-   ========================================= */
-.poster-card {
-  position: relative;
-}
-
-.poster-warning-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(231, 76, 60, 0.92);
-  color: #fff;
-  font-size: 0.68rem;
-  font-weight: 700;
-  padding: 4px 8px;
-  border-radius: 20px;
-  letter-spacing: 0.5px;
-  z-index: 5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  font-family: 'Space Grotesk', sans-serif;
-  pointer-events: none;
-}
-/* =========================================
-   26. BACK BUTTON (Top-Left Corner)
-   ========================================= */
-.nexus-back-btn {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: rgba(108, 92, 231, 0.25);
-  border: 1px solid rgba(108, 92, 231, 0.45);
-  color: #fff;
-  font-size: 1.35rem;
-  font-weight: 700;
-  cursor: pointer;
-  z-index: 9996;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.25s ease;
-  font-family: 'Space Grotesk', sans-serif;
-  padding: 0;
-  line-height: 1;
-  user-select: none;
-}
-.nexus-back-btn:hover {
-  background: rgba(108, 92, 231, 0.5);
-  transform: scale(1.1);
-  box-shadow: 0 6px 18px rgba(108, 92, 231, 0.5);
-}
-.nexus-back-btn:active { transform: scale(0.95); }
-
-
-html.theme-day .nexus-back-btn {
-  background: rgba(108, 92, 231, 0.15);
-  color: #6c5ce7;
-  border-color: rgba(108, 92, 231, 0.4);
-}
-
-@media (max-width: 600px) {
-  .nexus-back-btn { top: 12px; left: 12px; width: 36px; height: 36px; font-size: 1.15rem; }
-}
-/* =========================================
-   27. POSTER RATING BADGE (IMDb / Steam / etc.)
-   ========================================= */
-.poster-card {
-  position: relative;
-}
-
-.poster-rating-badge {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: rgba(0, 0, 0, 0.78);
-  color: #ffd93b;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 4px 8px;
-  border-radius: 6px;
-  letter-spacing: 0.3px;
-  z-index: 5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  font-family: 'Space Grotesk', sans-serif;
-  pointer-events: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.poster-rating-badge .rating-source {
-  color: #a29bfe;
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  margin-right: 2px;
-}
-
-/* Day theme tweak */
-html.theme-day .poster-rating-badge {
-  background: rgba(255, 255, 255, 0.95);
-  color: #c47f00;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-}
-html.theme-day .poster-rating-badge .rating-source { color: #6c5ce7; }
-
-/* Amoled */
-html.theme-amoled .poster-rating-badge { background: rgba(0, 0, 0, 0.9); }
-/* =========================================
-   POSTER RATING BADGE
-   ========================================= */
-.poster-card { position: relative; }
-
-.poster-rating-badge {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: rgba(0, 0, 0, 0.78);
-  color: #ffd93b;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 4px 8px;
-  border-radius: 6px;
-  letter-spacing: 0.3px;
-  z-index: 5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  font-family: 'Space Grotesk', sans-serif;
-  pointer-events: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.poster-rating-badge .rating-source {
-  color: #a29bfe;
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  margin-right: 2px;
-}
-
-html.theme-day .poster-rating-badge {
-  background: rgba(255, 255, 255, 0.95);
-  color: #c47f00;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-}
-html.theme-day .poster-rating-badge .rating-source { color: #6c5ce7; }
-/* =========================================
-   28. MOVIE WATCH BOX (Telegram Redirect)
-   ========================================= */
-.movie-watch-box {
-  max-width: 500px;
-  margin: 30px auto 10px auto;
-  padding: 22px 20px;
-  background: rgba(108, 92, 231, 0.08);
-  border: 1px solid rgba(108, 92, 231, 0.3);
-  border-radius: 14px;
-  text-align: center;
-  clear: both;
-}
-
-.watch-note {
-  color: #a29bfe;
-  font-size: 0.9rem;
-  margin-bottom: 14px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-}
-
-.watch-now-btn {
-  display: block;
-  padding: 14px 24px;
-  background: linear-gradient(135deg, #6c5ce7, #7b4fbf);
-  color: #fff;
-  text-decoration: none;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 1rem;
-  margin-bottom: 10px;
-  transition: 0.3s ease;
-  font-family: 'Space Grotesk', sans-serif;
-}
-
-.watch-now-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(108, 92, 231, 0.5);
-}
-
-.join-channel-btn {
-  display: block;
-  padding: 12px 20px;
-  background: rgba(108, 92, 231, 0.15);
-  color: #a29bfe;
-  text-decoration: none;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  border: 1px solid rgba(108, 92, 231, 0.4);
-  transition: 0.3s ease;
-  font-family: 'Space Grotesk', sans-serif;
-}
-
-.join-channel-btn:hover {
-  background: rgba(108, 92, 231, 0.3);
-  color: #fff;
-}
-
-html.theme-day .movie-watch-box {
-  background: rgba(108, 92, 231, 0.06);
-  border-color: rgba(108, 92, 231, 0.25);
-}
-html.theme-day .watch-note { color: #6c5ce7; }
-html.theme-day .join-channel-btn { color: #6c5ce7; }
-/* =========================================
-   29. PERSONAL WEBSITE NOTICE BANNER
+   20. PERSONAL WEBSITE NOTICE BANNER
    ========================================= */
 .personal-notice {
   width: 100%;
   padding: 10px 16px;
-  background: rgba(108, 92, 231, 0.12);
-  border-bottom: 1px solid rgba(108, 92, 231, 0.25);
+  background: rgba(108, 92, 231, 0.18);
+  border-bottom: 1px solid rgba(108, 92, 231, 0.3);
 }
 
 .personal-notice-inner {
@@ -1315,43 +863,21 @@ html.theme-day .join-channel-btn { color: #6c5ce7; }
   text-align: left;
 }
 
-.personal-notice .pn-icon {
-  font-size: 1rem;
-  flex-shrink: 0;
-  margin-top: 2px;
-  color: #a29bfe;
-}
+.personal-notice .pn-icon { font-size: 1rem; flex-shrink: 0; margin-top: 2px; color: #a29bfe; }
+.personal-notice p { color: #c8c8d8; font-size: 0.78rem; line-height: 1.5; margin: 0; }
+.personal-notice strong { color: #a29bfe; font-weight: 600; }
 
-.personal-notice p {
-  color: #b8b8c8;
-  font-size: 0.78rem;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.personal-notice strong {
-  color: #a29bfe;
-  font-weight: 600;
-}
-
-html.theme-day .personal-notice {
-  background: rgba(108, 92, 231, 0.08);
-  border-bottom-color: rgba(108, 92, 231, 0.2);
-}
+html.theme-day .personal-notice { background: rgba(108, 92, 231, 0.1); border-bottom-color: rgba(108, 92, 231, 0.25); }
 html.theme-day .personal-notice p { color: #555; }
 html.theme-day .personal-notice strong { color: #6c5ce7; }
 
-@media (max-width: 600px) {
-  .personal-notice { padding: 8px 12px; }
-  .personal-notice p { font-size: 0.72rem; }
-}
 /* =========================================
-   30. DOUBLE WARNING MODAL (Restricted Movies)
+   21. WARNING MODAL (Restricted movies popup)
    ========================================= */
 .warning-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.88);
   z-index: 2147483646;
   display: none;
   align-items: center;
@@ -1369,42 +895,14 @@ html.theme-day .personal-notice strong { color: #6c5ce7; }
   width: 100%;
   text-align: center;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-  animation: modalPop 0.25s ease;
 }
 
-@keyframes modalPop {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.warning-modal .wm-icon {
-  font-size: 2.5rem;
-  margin-bottom: 12px;
-  display: block;
-}
-
-.warning-modal h3 {
-  color: #e74c3c;
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin-bottom: 12px;
-  letter-spacing: 0.5px;
-}
-
-.warning-modal p {
-  color: #ccc;
-  font-size: 0.88rem;
-  line-height: 1.6;
-  margin-bottom: 20px;
-}
-
+.warning-modal .wm-icon { font-size: 2.5rem; margin-bottom: 12px; display: block; }
+.warning-modal h3 { color: #e74c3c; font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.5px; }
+.warning-modal p { color: #ccc; font-size: 0.88rem; line-height: 1.6; margin-bottom: 20px; }
 .warning-modal p strong { color: #ff7b7b; }
 
-.warning-modal .wm-btns {
-  display: flex;
-  gap: 10px;
-}
-
+.warning-modal .wm-btns { display: flex; gap: 10px; }
 .warning-modal .wm-btn {
   flex: 1;
   padding: 12px 16px;
@@ -1414,58 +912,133 @@ html.theme-day .personal-notice strong { color: #6c5ce7; }
   font-weight: 600;
   cursor: pointer;
   border: none;
-  transition: 0.2s;
 }
-
-.warning-modal .wm-back {
-  background: #1c1b22;
-  color: #aaa;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
+.warning-modal .wm-back { background: #1c1b22; color: #aaa; border: 1px solid rgba(255, 255, 255, 0.1); }
 .warning-modal .wm-back:hover { background: #2a2935; color: #fff; }
+.warning-modal .wm-continue { background: #e74c3c; color: #fff; }
+.warning-modal .wm-continue:hover { background: #c0392b; }
 
-.warning-modal .wm-continue {
-  background: #e74c3c;
-  color: #fff;
-}
-.warning-modal .wm-continue:hover {
-  background: #c0392b;
-  transform: translateY(-1px);
-}
-
-/* =========================================
-   31. RESTRICTED MOVIE CARD BADGE
-   ========================================= */
-.poster-card .restricted-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(231, 76, 60, 0.95);
-  color: #fff;
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 4px 8px;
-  border-radius: 20px;
-  letter-spacing: 0.5px;
-  z-index: 6;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  pointer-events: none;
-  font-family: 'Space Grotesk', sans-serif;
-}
-
-/* =========================================
-   32. STRONG CONTENT WARNING (for these 3 movies)
-   ========================================= */
-.content-warning.strong {
-  background: rgba(231, 76, 60, 0.12);
-  border-color: rgba(231, 76, 60, 0.55);
-  border-left-width: 5px;
-}
-.content-warning.strong .cw-body strong { color: #ff4444; font-size: 1rem; }
-
-/* Day theme */
 html.theme-day .warning-modal { background: #fff; }
 html.theme-day .warning-modal h3 { color: #c0392b; }
 html.theme-day .warning-modal p { color: #444; }
 html.theme-day .warning-modal .wm-back { background: #eee; color: #555; }
-html.theme-day .warning-modal .wm-back:hover { background: #ddd; color: #222; }
+
+/* =========================================
+   22. THEME: DAY (LIGHT)
+   ========================================= */
+html.theme-day body { background-color: #f4f4f8; color: #1a1a1a; }
+html.theme-day header h1 { color: #6c5ce7; }
+html.theme-day header p { color: #3b82f6; }
+
+html.theme-day .posts-section { background-color: #ffffff; }
+html.theme-day .posts-title { color: #1a1a1a; }
+html.theme-day .card { background-color: #ffffff; }
+html.theme-day .card h3, html.theme-day .card.locked h3 { color: #6c5ce7 !important; }
+html.theme-day .card p { color: #555; }
+html.theme-day section:not(.categories) { background-color: #ffffff; }
+html.theme-day section h2 { color: #6c5ce7 !important; }
+html.theme-day .poster-card { background-color: #ffffff; }
+html.theme-day .poster-card p { color: #1a1a1a; }
+html.theme-day .movie-detail h1 { color: #1a1a1a; }
+html.theme-day .movie-info p { color: #444; }
+html.theme-day .movie-info strong { color: #1a1a1a; }
+html.theme-day .feedback-section,
+html.theme-day .comments-section { background-color: #ffffff; }
+html.theme-day .feedback-section input,
+html.theme-day .feedback-section textarea,
+html.theme-day .comment-input-box input,
+html.theme-day .comment-input-box textarea {
+  background-color: #f5f5f8; color: #1a1a1a;
+}
+html.theme-day .comment-input-box { background-color: #f5f5f8; }
+html.theme-day .comment-card { background-color: #f5f5f8; }
+html.theme-day .comment-name { color: #1a1a1a; }
+html.theme-day .comment-text { color: #444; }
+html.theme-day .ai-chat-widget { background-color: #f4f4f8; }
+html.theme-day .ai-msg-bot { background-color: #ffffff; color: #333; }
+html.theme-day .ai-chat-input { background-color: #ebebf0; }
+html.theme-day .ai-chat-input input[type="text"] { background-color: #ffffff; color: #1a1a1a; }
+html.theme-day footer .watermark { color: #777; }
+
+/* =========================================
+   23. THEME: AMOLED (PURE BLACK)
+   ========================================= */
+html.theme-amoled body { background-color: #000000; }
+html.theme-amoled .posts-section { background-color: #0a0a0a; }
+html.theme-amoled .card { background-color: #0a0a0a; }
+html.theme-amoled section:not(.categories) { background-color: #050505; }
+html.theme-amoled .poster-card { background-color: #0a0a0a; }
+html.theme-amoled .feedback-section,
+html.theme-amoled .comments-section { background-color: #0a0a0a; }
+html.theme-amoled .comment-input-box { background-color: #0a0a0a; }
+html.theme-amoled .comment-card { background-color: #0a0a0a; }
+html.theme-amoled .ai-chat-widget { background-color: #000000; }
+html.theme-amoled .ai-msg-bot { background-color: #0a0a0a; }
+
+/* =========================================
+   24. FLOATING BUTTONS (bottom-left, fixed)
+   ========================================= */
+#nexusThemeToggle,
+#nexusBackBtn {
+  position: fixed !important;
+  bottom: 24px !important;
+  left: 20px !important;
+  top: auto !important;
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 50% !important;
+  background: rgba(108, 92, 231, 0.9) !important;
+  color: #fff !important;
+  border: 1px solid rgba(108, 92, 231, 1) !important;
+  font-size: 1.3rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  z-index: 2147483647 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6) !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  user-select: none !important;
+  transform: none !important;
+  -webkit-transform: none !important;
+  will-change: auto !important;
+  filter: none !important;
+  -webkit-filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  perspective: none !important;
+  contain: none !important;
+  isolation: auto !important;
+}
+
+@media (max-width: 600px) {
+  #nexusThemeToggle,
+  #nexusBackBtn {
+    bottom: 20px !important;
+    left: 16px !important;
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 1.15rem !important;
+  }
+}
+
+/* =========================================
+   25. RESPONSIVE / MOBILE
+   ========================================= */
+@media (max-width: 600px) {
+  .movie-poster-large { float: none; display: block; margin: 0 auto 20px auto; }
+  .categories { grid-template-columns: 1fr; padding: 15px; }
+  .card-container { gap: 10px; }
+  header h1 { font-size: 1.8rem; }
+  .movie-detail h1 { font-size: 2rem; }
+  .posts-section { margin: 15px 12px; padding: 16px 18px; }
+  .posts-title { font-size: 1.2rem; }
+  .ai-chat-launcher { top: 65px; right: 10px; }
+  .ai-msg { max-width: 85%; }
+  .personal-notice { padding: 8px 12px; }
+  .personal-notice p { font-size: 0.72rem; }
+}
