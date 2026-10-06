@@ -1,4 +1,4 @@
-/* =========================================
+﻿/* =========================================
    1. BASE / GLOBAL STYLES
    ========================================= */
 * {
@@ -876,8 +876,6 @@ section h2 {
   align-items: center;
   justify-content: center;
   transition: all 0.25s ease;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   font-family: 'Space Grotesk', sans-serif;
   padding: 0;
   line-height: 1;
@@ -1126,8 +1124,6 @@ html.theme-amoled .content-warning {
   align-items: center;
   justify-content: center;
   transition: all 0.25s ease;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   font-family: 'Space Grotesk', sans-serif;
   padding: 0;
   line-height: 1;
@@ -1175,8 +1171,6 @@ html.theme-day .nexus-back-btn {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
 }
 
 .poster-rating-badge .rating-source {
@@ -1310,8 +1304,6 @@ html.theme-day .join-channel-btn { color: #6c5ce7; }
   padding: 10px 16px;
   background: rgba(108, 92, 231, 0.12);
   border-bottom: 1px solid rgba(108, 92, 231, 0.25);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
 }
 
 .personal-notice-inner {
@@ -1365,8 +1357,6 @@ html.theme-day .personal-notice strong { color: #6c5ce7; }
   align-items: center;
   justify-content: center;
   padding: 20px;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
 }
 .warning-modal-overlay.active { display: flex; }
 
