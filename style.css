@@ -1353,3 +1353,129 @@ html.theme-day .personal-notice strong { color: #6c5ce7; }
   .personal-notice { padding: 8px 12px; }
   .personal-notice p { font-size: 0.72rem; }
 }
+/* =========================================
+   30. DOUBLE WARNING MODAL (Restricted Movies)
+   ========================================= */
+.warning-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 2147483646;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.warning-modal-overlay.active { display: flex; }
+
+.warning-modal {
+  background: #141414;
+  border: 1px solid rgba(231, 76, 60, 0.5);
+  border-radius: 16px;
+  padding: 28px 24px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  animation: modalPop 0.25s ease;
+}
+
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.warning-modal .wm-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.warning-modal h3 {
+  color: #e74c3c;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.warning-modal p {
+  color: #ccc;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.warning-modal p strong { color: #ff7b7b; }
+
+.warning-modal .wm-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.warning-modal .wm-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s;
+}
+
+.warning-modal .wm-back {
+  background: #1c1b22;
+  color: #aaa;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.warning-modal .wm-back:hover { background: #2a2935; color: #fff; }
+
+.warning-modal .wm-continue {
+  background: #e74c3c;
+  color: #fff;
+}
+.warning-modal .wm-continue:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+/* =========================================
+   31. RESTRICTED MOVIE CARD BADGE
+   ========================================= */
+.poster-card .restricted-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(231, 76, 60, 0.95);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  z-index: 6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* =========================================
+   32. STRONG CONTENT WARNING (for these 3 movies)
+   ========================================= */
+.content-warning.strong {
+  background: rgba(231, 76, 60, 0.12);
+  border-color: rgba(231, 76, 60, 0.55);
+  border-left-width: 5px;
+}
+.content-warning.strong .cw-body strong { color: #ff4444; font-size: 1rem; }
+
+/* Day theme */
+html.theme-day .warning-modal { background: #fff; }
+html.theme-day .warning-modal h3 { color: #c0392b; }
+html.theme-day .warning-modal p { color: #444; }
+html.theme-day .warning-modal .wm-back { background: #eee; color: #555; }
+html.theme-day .warning-modal .wm-back:hover { background: #ddd; color: #222; }
