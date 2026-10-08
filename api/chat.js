@@ -67,160 +67,113 @@ function checkRateLimit(ip) {
 }
 
 // =========================================
-// NEXUS SITE CONTENT
+// NEXUS SITE CONTENT (for clickable links only)
 // =========================================
 const NEXUS_CONTENT = `
-MOVIES (page: movies.html):
-- Shawshank Redemption (shawshank.html) — prison drama, hope, friendship, IMDb 9.3
-- Inception (inception.html) — mind-bending sci-fi, dreams within dreams, Nolan, IMDb 8.8
-- Interstellar (interstellar.html) — space, time, relativity, father-daughter, Nolan, IMDb 8.7
-- Fight Club (fightclub.html) — psychological, identity, anti-establishment, IMDb 8.8
-- Forrest Gump (forrestgump.html) — life journey, emotional, IMDb 8.8
-- The Matrix (matrix.html) — cyberpunk, simulated reality, action, IMDb 8.7
-- Shutter Island (shutterisland.html) — psychological thriller, mystery, IMDb 8.2
-- Tenet (tenet.html) — time inversion, complex, Nolan, IMDb 7.3
-- The Martian (martian.html) — space survival, science, IMDb 8.0
-- The Prestige (theprestige.html) — magicians, obsession, Nolan, IMDb 8.5
-- Memento (memento.html) — memory loss, reverse narrative, Nolan, IMDb 8.4
-- Looper (looper.html) — time travel, action, IMDb 7.4
-- Apollo 13 (apollo13.html) — space mission, survival, true story, IMDb 7.7
-- Cast Away (castaway.html) — survival, isolation, IMDb 7.8
-- Gravity (gravity.html) — space, survival, tension, IMDb 7.7
-- Into the Wild (intothewild.html) — adventure, nature, self-discovery, IMDb 8.1
-- Meet Joe Black (meetjoeblack.html) — death, love, philosophical, IMDb 7.2
-- Number 23 (number23.html) — psychological, obsession, IMDb 6.4
-- Project Hail Mary (projecthailmary.html) — sci-fi, space, survival
-- Seven (seven.html) — dark thriller, serial killer, mystery, IMDb 8.6
-- Perks of Being a Wallflower (perksofbeingawallflower.html) — coming of age, emotional, IMDb 7.9
-- The Social Network (socialnetwork.html) — Facebook origin, drama, IMDb 7.8
-- Who Am I (whoami.html) — hacker thriller, mystery, IMDb 7.4
-- Event Horizon (eventhorizon.html) — sci-fi horror, 18+, disturbing
-- The Exorcist (theexorcist.html) — classic horror, 18+, disturbing
-- Bring Her Back (bringherback.html) — horror, 18+, disturbing
-- When Evil Lurks (whenevillurks.html) — horror, 18+, disturbing
-- Insidious: Out of the Further (insidious.html) — horror, supernatural
-
-MARVEL (page: marvel.html):
-- Iron Man (ironman.html) — MCU origin, tech, Tony Stark, IMDb 7.9
-- Iron Man 2 (ironman2.html) — MCU, tech, action, IMDb 6.9
-- Spider-Man 2 (spiderman2.html) — Sam Raimi, emotional, superhero, IMDb 7.5
-- Thor (thor.html) — MCU, Norse mythology, fantasy, IMDb 7.0
-
-GAMES (page: games.html):
-- Red Dead Redemption (rdr1.html) — open world western, story, Metacritic 95
-
-BOOKS / READING (page: reading.html):
-- Diwar Mein Ek Khidki Rehti Thi (reading.html) — Hindi novel, Vinod Kumar Shukla
-- Gunahon Ka Devta (reading.html) — Hindi classic, Dharamvir Bharati, romance
-
-MUSIC (page: listening.html):
-- Talha Anjum — Pakistani rapper. Songs: Gumaan, Downers at Dusk, Departure Lane
+Available NEXUS links (for clickable references):
+shawshank.html, inception.html, interstellar.html, fightclub.html, forrestgump.html,
+matrix.html, shutterisland.html, tenet.html, martian.html, theprestige.html, memento.html,
+looper.html, apollo13.html, castaway.html, gravity.html, intothewild.html, meetjoeblack.html,
+number23.html, projecthailmary.html, seven.html, perksofbeingawallflower.html,
+socialnetwork.html, whoami.html, eventhorizon.html, theexorcist.html, bringherback.html,
+whenevillurks.html, insidious.html, ironman.html, ironman2.html, spiderman2.html, thor.html,
+rdr1.html, reading.html, listening.html
 `;
 
+// =========================================
+// PROMPTS — NO EXAMPLES, pure AI generation
+// =========================================
+
 function getRecommendSystemPrompt(mood) {
-  return `You are Nexus AI, a recommendation assistant for the NEXUS website.
+  return `You are Nexus AI, a recommendation assistant on the NEXUS website.
 
-The user wants recommendations. Mood/category they chose: **${mood}**
+User's mood/category: **${mood}**
 
-AVAILABLE CONTENT ON NEXUS WEBSITE:
+You have access to these NEXUS site pages (for optional clickable links):
 ${NEXUS_CONTENT}
 
-INSTRUCTIONS:
-1. Recommend **3-5 items** — mix from NEXUS site content above AND from external sources (IMDb, Netflix, Spotify, goodreads, etc.)
-2. For NEXUS site items, use this EXACT format to make them clickable:
-   [[link:PAGE_URL|TITLE]]
-   Example: [[link:inception.html|Inception]]
-3. For external recommendations, just use **bold** text — no link format
-4. Explain **WHY** each recommendation fits (2-3 short lines)
-5. Use bullets, keep it short, friendly
-6. Language: match user's input (English/Hindi/Hinglish)
-7. If mood is "Surprise Me" — pick random variety
-8. Don't recommend 18+ horror movies unless user specifically asks for horror
-9. End with a friendly nudge like "Want more like this?"
+TASK:
+Give 3-5 personalized recommendations based on the user's mood.
 
-FORMAT EXAMPLE:
-## 🎬 My Picks
+LINK RULES:
+- If you want to link to a NEXUS page, use this exact format: [[link:filename.html|Title]]
+- Otherwise just write the title in bold.
+- Don't force links if not relevant.
 
-**1. [[link:interstellar.html|Interstellar]]** (on Nexus)
-Space + time + love story. Perfect if you liked Inception's mind-bending feel.
+STYLE:
+- Short, punchy, one line why per item.
+- Use ## heading for the list.
+- Match user's language (English/Hindi/Hinglish).
+- Friendly tone, occasional emoji.
+- No 18+ horror unless asked.
 
-**2. Arrival** (2016)
-Similar slow-burn sci-fi with emotional core. Available on Prime.
-
-**3. [[link:theprestige.html|The Prestige]]** (on Nexus)
-Nolan's other masterpiece — obsession, mystery, twist.
-
-Want more? Just tell me the vibe!`;
+Be creative and varied. Don't repeat the same recommendations across chats.`;
 }
 
 function getCosmicPrompt(previousFacts) {
-  const topics = [
-    'black holes', 'neutron stars', 'dark matter', 'dark energy',
-    'Mars surface', 'Jupiter storms', 'Saturn rings', 'Venus atmosphere',
-    'quantum mechanics', 'time dilation', 'the Big Bang', 'the cosmic microwave background',
-    'exoplanets', 'rogue planets', 'comets', 'asteroid belts',
-    'the Sun', 'the Milky Way', 'Andromeda galaxy', 'galaxy clusters',
-    'the speed of light', 'gravitational waves', 'wormholes', 'the multiverse',
-    'the oldest stars', 'supernovae', 'pulsars', 'quasars',
-    'the Hubble constant', 'space-time fabric', 'the event horizon', 'antimatter',
-    'the Oort cloud', 'the Kuiper belt', 'the heliosphere', 'the observable universe',
-    'cosmic inflation', 'the Fermi paradox', 'the Drake equation', 'the Great Attractor',
-    'solar flares', 'auroras', 'cosmic rays', 'the interstellar medium',
-    'star formation', 'galaxy collisions', 'the Local Group', 'the cosmic web',
-    'gravitational lensing', 'Hawking radiation', 'the Planck constant', 'entropy',
-    'the Chandrasekhar limit', 'binary star systems', 'moons of Saturn', 'the Voyager probes'
-  ];
-  const topic = topics[Math.floor(Math.random() * topics.length)];
-  const seed = Date.now() + Math.random();
+  const seed = Date.now() + '_' + Math.random().toString(36).slice(2);
 
-  return `You are Nexus AI generating ONE fascinating cosmic fact.
+  return `You are a brilliant astrophysicist and science communicator.
 
-RANDOM TOPIC ASSIGNED: **${topic}**
+TASK: Generate ONE fascinating cosmic fact. Pick ANY random topic from space, astronomy, physics, or the universe — completely your choice.
 
-PREVIOUS FACTS TO AVOID (do not reuse or paraphrase): ${previousFacts || 'none'}
+PREVIOUS FACTS (avoid repeating or paraphrasing these): ${previousFacts || 'none yet'}
 
-STRICT RULES:
-1. The fact must be TRUE and VERIFIABLE.
-2. Must be about: ${topic}
-3. SURPRISING — not common knowledge.
-4. 2-3 sentences MAX.
-5. Include specific numbers, names, or comparisons.
-6. Start with a relevant emoji (🌟 🌌 🪐 ⭐ 🌠 🕳️ 💫 🌍 🛰️ ⚡).
-7. NO intro like "Here's a fact" — just say it.
-8. English only. Random seed: ${seed}
-9. Do NOT repeat or paraphrase previous facts listed above.
+RULES:
+1. Must be TRUE, VERIFIABLE, and SURPRISING.
+2. 2-3 sentences MAX. Short and punchy.
+3. Include specific numbers, distances, or comparisons.
+4. Start with a relevant emoji (🌟 🌌 🪐 ⭐ 🌠 🕳️ 💫 🌍 🛰️ ⚡ 🔭).
+5. NO intro like "Here's a fact" — say it directly.
+6. NO bullet points, NO headings, NO markdown.
+7. English only.
+8. Be DIFFERENT each time — do not reuse ideas from previous facts.
+9. Randomness seed for uniqueness: ${seed}
 
-Return ONLY the fact text.`;
+Return ONLY the fact text. Nothing else.`;
 }
 
 function getMixPrompt(submode, localTitles, previousPicks) {
-  const seed = Date.now() + Math.random();
-  const type = submode === 'movie' ? 'movies' : 'items (movies, games, books, music)';
+  const seed = Date.now() + '_' + Math.random().toString(36).slice(2);
+  const type = submode === 'movie' ? 'movies' : 'movies, games, books, or music';
 
-  return `You are Nexus AI recommending ${type} from the internet.
+  return `You are Nexus AI recommending ${type} to a user — real recommendations from your knowledge of world entertainment.
 
-USER WANTS: ${submode === 'movie' ? 'a movie to watch' : 'a random recommendation'}
+USER WANTS: ${submode === 'movie' ? 'a movie to watch' : 'a random great recommendation'}
 
-LOCAL TITLES ALREADY ON NEXUS (do NOT recommend these): ${localTitles}
+DO NOT recommend any of these (already on NEXUS):
+${localTitles}
 
-PREVIOUS RECOMMENDATIONS TO AVOID (from earlier requests): ${previousPicks || 'none yet'}
+DO NOT repeat these (previously recommended):
+${previousPicks || 'none yet'}
+
+TASK:
+Suggest EXACTLY 3 real, well-known ${type}.
+Each must be genuinely DIFFERENT from the others.
+Mix genres, decades, and moods — don't stick to one style.
+
+OUTPUT FORMAT — exactly 3 lines, nothing else:
+[[ext:TITLE|TYPE|WHY]]
+[[ext:TITLE|TYPE|WHY]]
+[[ext:TITLE|TYPE|WHY]]
+
+Where:
+- TITLE = real name of the item
+- TYPE = movie / game / book / music (lowercase)
+- WHY = ONE short sentence (max 12 words)
 
 STRICT RULES:
-1. Suggest EXACTLY 3 DIFFERENT real ${type}.
-2. Each must be DIFFERENT from the others AND from the avoid list above.
-3. Mix genres, decades, and moods. Don't stick to one type.
-4. Format EACH line EXACTLY like this (nothing else):
-   [[ext:Title|Type|Why]]
-5. Type must be one of: movie, game, book, music
-6. Why = ONE short line reason (max 12 words)
-7. NO intro text, NO outro, NO bullet points, NO numbering.
-8. Random seed for variety: ${seed}
-9. ABSOLUTELY DO NOT repeat items from the avoid list.
-10. If unsure, pick obscure-but-great choices for variety.
+1. Exactly 3 lines. No intro. No outro. No numbering. No bullets.
+2. NO examples should be reused — each call must feel fresh.
+3. Real, well-known titles only. No fictional made-up names.
+4. Uniqueness seed: ${seed}
 
-Return ONLY 3 lines in the exact format above.`;
+Begin now.`;
 }
 
+// =========================================
+// MAIN HANDLER
+// =========================================
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -255,15 +208,20 @@ module.exports = async function handler(req, res) {
   if (!apiKey) return res.status(500).json({ error: 'GROQ_API_KEY not configured' });
 
   let systemPrompt;
+  let temperature = 0.7;
+
   if (mode === 'recommend') {
     systemPrompt = getRecommendSystemPrompt(mood || 'Anything good');
+    temperature = 1.0;
   } else if (mode === 'cosmic') {
     const previousFacts = (body.previousFacts || []).join(' || ').substring(0, 800);
     systemPrompt = getCosmicPrompt(previousFacts);
+    temperature = 1.2;
   } else if (mode === 'mix') {
     const localTitles = (body.localTitles || []).join(', ').substring(0, 500);
     const previousPicks = (body.previousPicks || []).join(', ').substring(0, 500);
     systemPrompt = getMixPrompt(mood || 'random', localTitles, previousPicks);
+    temperature = 1.3;
   } else {
     systemPrompt = `You are Nexus AI, a helpful, intelligent, and friendly AI assistant on the Nexus website.
 
@@ -307,7 +265,7 @@ If someone asks something harmful, politely decline.`;
         body: JSON.stringify({
           model: modelName,
           messages,
-          temperature: mode === 'chat' ? 0.7 : 1.1,
+          temperature,
           max_tokens: 2048
         })
       });
