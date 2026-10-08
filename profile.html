@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - Nexus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <a href="index.html" style="text-decoration:none; color:inherit;"><h1>NEXUS</h1></a>
+    <p>My Profile</p>
+  </header>
+
+  <section class="profile-section">
+    <h2>👤 My Profile</h2>
+    <p class="profile-subtitle">Your personal NEXUS — everything you liked in one place.</p>
+
+    <div class="profile-stats" id="profileStats">
+      <div class="stat-card">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-label">Total Likes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎬</div>
+        <div class="stat-value" id="statMovies">0</div>
+        <div class="stat-label">Movies</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎮</div>
+        <div class="stat-value" id="statGames">0</div>
+        <div class="stat-label">Games</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📚</div>
+        <div class="stat-value" id="statBooks">0</div>
+        <div class="stat-label">Books</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🦸</div>
+        <div class="stat-value" id="statMarvel">0</div>
+        <div class="stat-label">Marvel</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎵</div>
+        <div class="stat-value" id="statMusic">0</div>
+        <div class="stat-label">Music</div>
+      </div>
+    </div>
+
+    <div class="profile-filter" id="profileFilter">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="Movies">Movies</button>
+      <button class="filter-btn" data-filter="Marvel">Marvel</button>
+      <button class="filter-btn" data-filter="Games">Games</button>
+      <button class="filter-btn" data-filter="Reading">Books</button>
+      <button class="filter-btn" data-filter="Music">Music</button>
+    </div>
+
+    <div class="profile-grid" id="profileGrid"></div>
+
+    <div class="profile-empty" id="profileEmpty" style="display:none;">
+      <div class="empty-icon">💫</div>
+      <h3>Nothing here yet</h3>
+      <p>Start exploring and tap the ⭐ on anything you like. It'll show up here.</p>
+      <a href="movies.html" class="back-btn" style="margin-top:20px;">Explore Movies →</a>
+    </div>
+  </section>
+
+  <footer>
+    <p class="watermark">Managed by <strong>Abhinav</strong></p>
+    <p class="contact">abhinavchamoli00@gmail.com</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

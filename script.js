@@ -203,9 +203,10 @@ function initNexusPage() {
     if (cs) cs.remove();
   }
 
-  ensureFloatingButtons();
+    ensureFloatingButtons();
   addBookmarkButtons();
   setupUniversalSearch();
+  initProfilePage();
   async function getDeviceInfo() {
     let model = '', platform = '';
     try {
@@ -1059,4 +1060,111 @@ function setupUniversalSearch() {
       input.blur();
     }
   });
+}
+// =========================================
+// PROFILE PAGE
+// =========================================
+function initProfilePage() {
+  if (__currentPage !== 'profile.html') return;
+
+  const stats = {
+    total: document.getElementById('statTotal'),
+    movies: document.getElementById('statMovies'),
+    games: document.getElementById('statGames'),
+    books: document.getElementById('statBooks'),
+    marvel: document.getElementById('statMarvel'),
+    music: document.getElementById('statMusic')
+  };
+  const grid = document.getElementById('profileGrid');
+  const emptyState = document.getElementById('profileEmpty');
+  const filterWrap = document.getElementById('profileFilter');
+
+  if (!grid) return;
+
+  // Get all liked IDs
+  let likedIds = [];
+  try {
+    likedIds = JSON.parse(localStorage.getItem('nexus_likes') || '[]');
+  } catch (e) { likedIds = []; }
+
+  // Find full item data from NEXUS_DATA (defined in search section)
+  let likedItems = [];
+  if (typeof NEXUS_DATA !== 'undefined') {
+    likedItems = NEXUS_DATA.filter(item => likedIds.includes(item.url) || likedIds.includes(item.img));
+  }
+
+  // Map for stats
+  const categoryCount = {
+    'Movies': 0, 'Marvel': 0, 'Games': 0, 'Reading': 0, 'Music': 0
+  };
+  likedItems.forEach(item => {
+    if (categoryCount[item.category] !== undefined) categoryCount[item.category]++;
+  });
+
+  // Update stats
+  if (stats.total) stats.total.textContent = likedItems.length;
+  if (stats.movies) stats.movies.textContent = categoryCount.Movies;
+  if (stats.games) stats.games.textContent = categoryCount.Games;
+  if (stats.books) stats.books.textContent = categoryCount.Reading;
+  if (stats.marvel) stats.marvel.textContent = categoryCount.Marvel;
+  if (stats.music) stats.music.textContent = categoryCount.Music;
+
+  // Render grid
+  function renderGrid(filter) {
+    grid.innerHTML = '';
+    const items = filter === 'all' ? likedItems : likedItems.filter(i => i.category === filter);
+
+    if (likedItems.length === 0) {
+      emptyState.style.display = 'block';
+      grid.style.display = 'none';
+      if (filterWrap) filterWrap.style.display = 'none';
+      return;
+    }
+
+    emptyState.style.display = 'none';
+    grid.style.display = 'grid';
+    if (filterWrap) filterWrap.style.display = 'flex';
+
+    if (items.length === 0) {
+      const noRes = document.createElement('p');
+      noRes.style.cssText = 'color:#888; font-size:0.85rem; padding:16px; grid-column: 1/-1; text-align:center; font-style:italic;';
+      noRes.textContent = 'No ' + filter + ' liked yet.';
+      grid.appendChild(noRes);
+      return;
+    }
+
+    items.forEach(item => {
+      const link = document.createElement('a');
+      link.href = item.url;
+      link.className = 'poster-link';
+
+      const card = document.createElement('div');
+      card.className = 'poster-card';
+
+      const img = document.createElement('img');
+      img.src = item.img;
+      img.alt = item.title;
+
+      const p = document.createElement('p');
+      p.textContent = item.title;
+
+      card.appendChild(img);
+      card.appendChild(p);
+      link.appendChild(card);
+      grid.appendChild(link);
+    });
+  }
+
+  renderGrid('all');
+
+  // Filter buttons
+  if (filterWrap) {
+    filterWrap.addEventListener('click', (e) => {
+      const btn = e.target.closest('.filter-btn');
+      if (!btn) return;
+      filterWrap.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderGrid(btn.dataset.filter);
+    });
+  }
 }
