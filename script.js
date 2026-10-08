@@ -205,7 +205,7 @@ function initNexusPage() {
 
   ensureFloatingButtons();
   addBookmarkButtons();
-
+  setupUniversalSearch();
   async function getDeviceInfo() {
     let model = '', platform = '';
     try {
@@ -833,4 +833,124 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initNexusPage);
 } else {
   initNexusPage();
+}
+// =========================================
+// UNIVERSAL SEARCH
+// =========================================
+
+const NEXUS_DATA = [
+  // MOVIES
+  { title: "Shawshank Redemption", category: "Movies", url: "shawshank.html", img: "images/movies/Shawshank.jpg" },
+  { title: "Inception", category: "Movies", url: "inception.html", img: "images/movies/Inception.jpg.jpg" },
+  { title: "Interstellar", category: "Movies", url: "interstellar.html", img: "images/movies/Interstellar.jpg.jpg" },
+  { title: "Fight Club", category: "Movies", url: "fightclub.html", img: "images/movies/fightclub.jpg" },
+  { title: "Forrest Gump", category: "Movies", url: "forrestgump.html", img: "images/movies/forestgump.jpg" },
+  { title: "The Matrix", category: "Movies", url: "matrix.html", img: "images/movies/The%20Matrix.jpg.jpg" },
+  { title: "Shutter Island", category: "Movies", url: "shutterisland.html", img: "images/movies/sutter%20island.jpg.jpg" },
+  { title: "Tenet", category: "Movies", url: "tenet.html", img: "images/movies/Tenet.jpg.jpg" },
+  { title: "The Martian", category: "Movies", url: "martian.html", img: "images/movies/the%20martian.jpg.jpg" },
+  { title: "The Prestige", category: "Movies", url: "theprestige.html", img: "images/movies/the%20Prestige.jpg.jpg" },
+  { title: "Memento", category: "Movies", url: "memento.html", img: "images/movies/Memento.jpg.jpg" },
+  { title: "Looper", category: "Movies", url: "looper.html", img: "images/movies/looper.jpg.jpg" },
+  { title: "Apollo 13", category: "Movies", url: "apollo13.html", img: "images/movies/Apollo13.jpg.jpg" },
+  { title: "Cast Away", category: "Movies", url: "castaway.html", img: "images/movies/cast%20away.jpg.jpg" },
+  { title: "Gravity", category: "Movies", url: "gravity.html", img: "images/movies/Gravity.jpg.jpg" },
+  { title: "Into the Wild", category: "Movies", url: "intothewild.html", img: "images/movies/Into_the_Wild.jpg.png" },
+  { title: "Meet Joe Black", category: "Movies", url: "meetjoeblack.html", img: "images/movies/Meet_Joe_Black.jpg.jpg" },
+  { title: "Number 23", category: "Movies", url: "number23.html", img: "images/movies/Number23.jpg.jpg" },
+  { title: "Project Hail Mary", category: "Movies", url: "projecthailmary.html", img: "images/movies/Project%20Hail%20Mary.jpg.jpg" },
+  { title: "Seven", category: "Movies", url: "seven.html", img: "images/movies/seven.jpg.jpg" },
+  { title: "Perks of Being a Wallflower", category: "Movies", url: "perksofbeingawallflower.html", img: "images/movies/the%20perks%20of%20being%20a%20wallflower.jpg.jpg" },
+  { title: "The Social Network", category: "Movies", url: "socialnetwork.html", img: "images/movies/the%20social%20network.jpg.jpg" },
+  { title: "Who Am I", category: "Movies", url: "whoami.html", img: "images/movies/who%20am%20i.jpg" },
+  { title: "Event Horizon", category: "Movies", url: "eventhorizon.html", img: "images/movies/eventhorizon.jpg" },
+  { title: "The Exorcist", category: "Movies", url: "theexorcist.html", img: "images/movies/theexorcist.jpg" },
+  { title: "Bring Her Back", category: "Movies", url: "bringherback.html", img: "images/movies/bringherback.jpg" },
+  { title: "When Evil Lurks", category: "Movies", url: "whenevillurks.html", img: "images/movies/whenevillurks.jpg" },
+  { title: "Insidious: Out of the Further", category: "Movies", url: "insidious.html", img: "images/movies/insidious.jpg" },
+
+  // MARVEL
+  { title: "Iron Man", category: "Marvel", url: "ironman.html", img: "images/marvel/iron%20man.jpg.jpg" },
+  { title: "Iron Man 2", category: "Marvel", url: "ironman2.html", img: "images/marvel/iron%20man2.jpg.jpg" },
+  { title: "Spider-Man 2", category: "Marvel", url: "spiderman2.html", img: "images/marvel/spiderman2.jpg" },
+  { title: "Thor", category: "Marvel", url: "thor.html", img: "images/marvel/thor.jpg.jpg" },
+
+  // GAMES
+  { title: "Red Dead Redemption", category: "Games", url: "rdr1.html", img: "images/games/rdr.jpg" },
+
+  // READING
+  { title: "Diwar Mein Ek Khidki Rehti Thi", category: "Reading", url: "reading.html", img: "images/reading/book2.jpg" },
+  { title: "Gunahon Ka Devta", category: "Reading", url: "reading.html", img: "images/reading/gunahonkadevta.jpg.jpg" },
+
+  // MUSIC
+  { title: "Talha Anjum", category: "Music", url: "listening.html", img: "images/music/talhaanjum.jpg" }
+];
+
+function setupUniversalSearch() {
+  const input = document.getElementById('nexusSearchInput');
+  const results = document.getElementById('nexusSearchResults');
+  if (!input || !results) return;
+  if (input.dataset.nexusReady === '1') return;
+  input.dataset.nexusReady = '1';
+
+  function renderResults(query) {
+    results.innerHTML = '';
+    const q = query.trim().toLowerCase();
+    if (!q) return;
+
+    const matches = NEXUS_DATA.filter(item =>
+      item.title.toLowerCase().includes(q) ||
+      item.category.toLowerCase().includes(q)
+    ).slice(0, 10);
+
+    if (matches.length === 0) {
+      const noRes = document.createElement('p');
+      noRes.className = 'search-no-results';
+      noRes.textContent = 'No results for "' + query + '"';
+      results.appendChild(noRes);
+      return;
+    }
+
+    matches.forEach(item => {
+      const link = document.createElement('a');
+      link.href = item.url;
+      link.className = 'search-result-item';
+
+      const img = document.createElement('img');
+      img.src = item.img;
+      img.alt = item.title;
+      img.className = 'search-result-img';
+      img.onerror = function() { this.style.display = 'none'; };
+
+      const info = document.createElement('div');
+      info.className = 'search-result-info';
+
+      const title = document.createElement('p');
+      title.className = 'search-result-title';
+      title.textContent = item.title;
+
+      const cat = document.createElement('span');
+      cat.className = 'search-result-category';
+      cat.textContent = item.category;
+
+      info.appendChild(title);
+      info.appendChild(cat);
+
+      link.appendChild(img);
+      link.appendChild(info);
+      results.appendChild(link);
+    });
+  }
+
+  input.addEventListener('input', (e) => {
+    renderResults(e.target.value);
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      input.value = '';
+      results.innerHTML = '';
+      input.blur();
+    }
+  });
 }
