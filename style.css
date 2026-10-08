@@ -702,3 +702,55 @@ html.theme-amoled .artist-card { background-color: #0a0a0a; }
   .music-artists-grid { grid-template-columns: 1fr; }
   .music-section h2 { font-size: 1.4rem; }
 }
+/* =========================================
+   WATCHLIST — Bookmark Button
+   ========================================= */
+.bookmark-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 8;
+  padding: 0;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.bookmark-btn:hover {
+  background: rgba(108, 92, 231, 0.6);
+  border-color: #6c5ce7;
+  transform: scale(1.1);
+}
+
+.bookmark-btn.active {
+  background: #6c5ce7;
+  border-color: #6c5ce7;
+  color: #ffffff;
+}
+
+.bookmark-btn.active svg {
+  fill: #ffffff;
+  stroke: #ffffff;
+}
+
+.bookmark-btn svg {
+  display: block;
+}
+
+/* Poster card ke corner pe 18+ badge ho toh bookmark thoda left shift */
+.poster-card .restricted-badge ~ .bookmark-btn,
+.poster-card .poster-warning-badge ~ .bookmark-btn {
+  right: auto;
+  left: 8px;
+  top: 8px;
+}

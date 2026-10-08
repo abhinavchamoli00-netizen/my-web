@@ -141,7 +141,7 @@ function initNexusPage() {
   }
 
   ensureFloatingButtons();
-
+  addBookmarkButtons();
   async function getDeviceInfo() {
     let model = '', platform = '';
     try {
@@ -770,3 +770,60 @@ if (document.readyState === 'loading') {
 } else {
   initNexusPage();
 }
+// =========================================
+// WATCHLIST — Bookmark buttons on cards
+// =========================================
+function getWatchlist() {
+  try {
+    return JSON.parse(localStorage.getItem('nexus_watchlist') || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
+function isInWatchlist(id) {
+  return getWatchlist().some(item => item.id === id);
+}
+
+function addBookmarkButtons() {
+  // Sirf movies / marvel / games / reading pages pe
+  const page = __currentPage;
+  const validPages = ['movies.html', 'marvel.html', 'games.html', 'reading.html'];
+  if (!validPages.includes(page)) return;
+
+  const cards = document.querySelectorAll('.poster-card');
+  cards.forEach(card => {
+    // Agar bookmark already hai toh skip
+    if (card.querySelector('.bookmark-btn')) return;
+
+    // Movie/game ka unique id banao — image src + name se
+    const link = card.closest('a');
+    const href = link ? link.getAttribute('href') : '';
+    const img = card.querySelector('img');
+    const imgSrc = img ? img.getAttribute('src') : '';
+    const name = card.querySelector('p') ? card.querySelector('p').textContent : '';
+
+    const id = href || imgSrc || name;
+    if (!id) return;
+
+    // Bookmark button banao
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'bookmark-btn';
+    btn.setAttribute('aria-label', 'Save to watchlist');
+    btn.dataset.id = id;
+    btn.dataset.name = name;
+    btn.dataset.img = imgSrc;
+    btn.dataset.href = href;
+    btn.dataset.page = page;
+
+    if (isInWatchlist(id)) btn.classList.add('active');
+
+    btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
+
+    // Card ke andar top-right corner pe add karo
+    card.appendChild(btn);
+  });
+}
+
+// Page load pe + SPA navigation pe buttons add karo
