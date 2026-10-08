@@ -67,7 +67,7 @@ function checkRateLimit(ip) {
 }
 
 // =========================================
-// NEXUS SITE CONTENT (for recommendations)
+// NEXUS SITE CONTENT
 // =========================================
 const NEXUS_CONTENT = `
 MOVIES (page: movies.html):
@@ -153,7 +153,7 @@ Nolan's other masterpiece — obsession, mystery, twist.
 Want more? Just tell me the vibe!`;
 }
 
-function getCosmicPrompt() {
+function getCosmicPrompt(previousFacts) {
   const topics = [
     'black holes', 'neutron stars', 'dark matter', 'dark energy',
     'Mars surface', 'Jupiter storms', 'Saturn rings', 'Venus atmosphere',
@@ -164,27 +164,36 @@ function getCosmicPrompt() {
     'the oldest stars', 'supernovae', 'pulsars', 'quasars',
     'the Hubble constant', 'space-time fabric', 'the event horizon', 'antimatter',
     'the Oort cloud', 'the Kuiper belt', 'the heliosphere', 'the observable universe',
-    'cosmic inflation', 'the Fermi paradox', 'the Drake equation', 'the Great Attractor'
+    'cosmic inflation', 'the Fermi paradox', 'the Drake equation', 'the Great Attractor',
+    'solar flares', 'auroras', 'cosmic rays', 'the interstellar medium',
+    'star formation', 'galaxy collisions', 'the Local Group', 'the cosmic web',
+    'gravitational lensing', 'Hawking radiation', 'the Planck constant', 'entropy',
+    'the Chandrasekhar limit', 'binary star systems', 'moons of Saturn', 'the Voyager probes'
   ];
   const topic = topics[Math.floor(Math.random() * topics.length)];
   const seed = Date.now() + Math.random();
 
-  return `You are Nexus AI. Generate ONE fascinating cosmic fact about: **${topic}**.
+  return `You are Nexus AI generating ONE fascinating cosmic fact.
+
+RANDOM TOPIC ASSIGNED: **${topic}**
+
+PREVIOUS FACTS TO AVOID (do not reuse or paraphrase): ${previousFacts || 'none'}
 
 STRICT RULES:
-1. The fact must be TRUE and VERIFIABLE — no fiction, no exaggeration.
-2. Make it SURPRISING — not something everyone knows.
-3. 2-3 sentences MAX. Short and punchy.
-4. Include specific numbers, names, or comparisons.
-5. Start with a relevant emoji (🌟 🌌 🪐 ⭐ 🌠 🕳️ 💫 🌍 🛰️ ⚡).
-6. NO intro like "Here's a fact" — say the fact directly.
-7. Language: English only.
-8. Random seed for uniqueness: ${seed}
+1. The fact must be TRUE and VERIFIABLE.
+2. Must be about: ${topic}
+3. SURPRISING — not common knowledge.
+4. 2-3 sentences MAX.
+5. Include specific numbers, names, or comparisons.
+6. Start with a relevant emoji (🌟 🌌 🪐 ⭐ 🌠 🕳️ 💫 🌍 🛰️ ⚡).
+7. NO intro like "Here's a fact" — just say it.
+8. English only. Random seed: ${seed}
+9. Do NOT repeat or paraphrase previous facts listed above.
 
-Return ONLY the fact text. Nothing else.`;
+Return ONLY the fact text.`;
 }
 
-function getMixPrompt(submode, localTitles) {
+function getMixPrompt(submode, localTitles, previousPicks) {
   const seed = Date.now() + Math.random();
   const type = submode === 'movie' ? 'movies' : 'items (movies, games, books, music)';
 
@@ -194,24 +203,22 @@ USER WANTS: ${submode === 'movie' ? 'a movie to watch' : 'a random recommendatio
 
 LOCAL TITLES ALREADY ON NEXUS (do NOT recommend these): ${localTitles}
 
+PREVIOUS RECOMMENDATIONS TO AVOID (from earlier requests): ${previousPicks || 'none yet'}
+
 STRICT RULES:
-1. Suggest EXACTLY 3 real, well-known ${type}.
-2. Each must be DIFFERENT from the others — mix genres/eras/types.
-3. Format EACH line EXACTLY like this:
-[[ext:Title|Type|Why]]
-   - Title: name of the item
-   - Type: movie / game / book / music
-   - Why: ONE short line reason (max 12 words)
-4. NO intro, NO outro, NO bullet points, NO other text.
-5. Random seed for variety: ${seed}
-6. Don't repeat the same items across requests.
+1. Suggest EXACTLY 3 DIFFERENT real ${type}.
+2. Each must be DIFFERENT from the others AND from the avoid list above.
+3. Mix genres, decades, and moods. Don't stick to one type.
+4. Format EACH line EXACTLY like this (nothing else):
+   [[ext:Title|Type|Why]]
+5. Type must be one of: movie, game, book, music
+6. Why = ONE short line reason (max 12 words)
+7. NO intro text, NO outro, NO bullet points, NO numbering.
+8. Random seed for variety: ${seed}
+9. ABSOLUTELY DO NOT repeat items from the avoid list.
+10. If unsure, pick obscure-but-great choices for variety.
 
-EXAMPLE OUTPUT (exactly 3 lines):
-[[ext:Arrival|movie|Slow-burn sci-fi with emotional depth]]
-[[ext:Disco Elysium|game|Detective RPG with incredible writing]]
-[[ext:The Alchemist|book|Simple philosophy, light read]]
-
-Now return ONLY 3 lines.`;
+Return ONLY 3 lines in the exact format above.`;
 }
 
 module.exports = async function handler(req, res) {
@@ -251,10 +258,12 @@ module.exports = async function handler(req, res) {
   if (mode === 'recommend') {
     systemPrompt = getRecommendSystemPrompt(mood || 'Anything good');
   } else if (mode === 'cosmic') {
-    systemPrompt = getCosmicPrompt();
+    const previousFacts = (body.previousFacts || []).join(' || ').substring(0, 800);
+    systemPrompt = getCosmicPrompt(previousFacts);
   } else if (mode === 'mix') {
     const localTitles = (body.localTitles || []).join(', ').substring(0, 500);
-    systemPrompt = getMixPrompt(mood || 'random', localTitles);
+    const previousPicks = (body.previousPicks || []).join(', ').substring(0, 500);
+    systemPrompt = getMixPrompt(mood || 'random', localTitles, previousPicks);
   } else {
     systemPrompt = `You are Nexus AI, a helpful, intelligent, and friendly AI assistant on the Nexus website.
 
@@ -298,7 +307,7 @@ If someone asks something harmful, politely decline.`;
         body: JSON.stringify({
           model: modelName,
           messages,
-          temperature: mode === 'chat' ? 0.7 : 0.9,
+          temperature: mode === 'chat' ? 0.7 : 1.1,
           max_tokens: 2048
         })
       });

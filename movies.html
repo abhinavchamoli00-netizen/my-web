@@ -303,7 +303,10 @@
       pendingUrl = null;
     }
 
-    document.addEventListener('click', function (e) {
+        document.addEventListener('click', function (e) {
+      // ✅ Skip if user clicked the star/like button
+      if (e.target.closest('.bookmark-btn')) return;
+
       const link = e.target.closest('a.restricted-movie');
       if (!link) return;
       e.preventDefault();
@@ -311,7 +314,6 @@
       pendingUrl = link.getAttribute('href');
       showModal();
     }, true);
-
     wmBackBtn.addEventListener('click', closeModal);
 
     wmContinueBtn.addEventListener('click', function () {
