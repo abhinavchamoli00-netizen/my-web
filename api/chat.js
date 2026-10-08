@@ -66,11 +66,8 @@ function checkRateLimit(ip) {
   return true;
 }
 
-// =========================================
-// NEXUS SITE CONTENT (for clickable links only)
-// =========================================
 const NEXUS_CONTENT = `
-Available NEXUS links (for clickable references):
+Available NEXUS links:
 shawshank.html, inception.html, interstellar.html, fightclub.html, forrestgump.html,
 matrix.html, shutterisland.html, tenet.html, martian.html, theprestige.html, memento.html,
 looper.html, apollo13.html, castaway.html, gravity.html, intothewild.html, meetjoeblack.html,
@@ -80,100 +77,64 @@ whenevillurks.html, insidious.html, ironman.html, ironman2.html, spiderman2.html
 rdr1.html, reading.html, listening.html
 `;
 
-// =========================================
-// PROMPTS — NO EXAMPLES, pure AI generation
-// =========================================
-
 function getRecommendSystemPrompt(mood) {
-  return `You are Nexus AI, a recommendation assistant on the NEXUS website.
+  return `You are Nexus AI recommending on the NEXUS website.
 
-User's mood/category: **${mood}**
+User mood: **${mood}**
 
-You have access to these NEXUS site pages (for optional clickable links):
+NEXUS pages you can link (use [[link:filename.html|Title]] format):
 ${NEXUS_CONTENT}
 
-TASK:
-Give 3-5 personalized recommendations based on the user's mood.
-
-LINK RULES:
-- If you want to link to a NEXUS page, use this exact format: [[link:filename.html|Title]]
-- Otherwise just write the title in bold.
-- Don't force links if not relevant.
-
-STYLE:
-- Short, punchy, one line why per item.
-- Use ## heading for the list.
-- Match user's language (English/Hindi/Hinglish).
-- Friendly tone, occasional emoji.
-- No 18+ horror unless asked.
-
-Be creative and varied. Don't repeat the same recommendations across chats.`;
+TASK: Give 3-5 recommendations matching the mood. Mix NEXUS-linked items with external picks. Short "why" per item. Friendly tone. Match user's language.`;
 }
 
 function getCosmicPrompt(previousFacts) {
-  const seed = Date.now() + '_' + Math.random().toString(36).slice(2);
+  const seed = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 
-  return `You are a brilliant astrophysicist and science communicator.
+  return `You are an astrophysicist. Generate ONE surprising, verifiable, TRUE cosmic fact.
 
-TASK: Generate ONE fascinating cosmic fact. Pick ANY random topic from space, astronomy, physics, or the universe — completely your choice.
+RANDOMNESS TOKEN: ${seed}
 
-PREVIOUS FACTS (avoid repeating or paraphrasing these): ${previousFacts || 'none yet'}
+FORBIDDEN (do not reuse these topics or facts): ${previousFacts || 'none'}
 
-RULES:
-1. Must be TRUE, VERIFIABLE, and SURPRISING.
-2. 2-3 sentences MAX. Short and punchy.
-3. Include specific numbers, distances, or comparisons.
-4. Start with a relevant emoji (🌟 🌌 🪐 ⭐ 🌠 🕳️ 💫 🌍 🛰️ ⚡ 🔭).
-5. NO intro like "Here's a fact" — say it directly.
-6. NO bullet points, NO headings, NO markdown.
-7. English only.
-8. Be DIFFERENT each time — do not reuse ideas from previous facts.
-9. Randomness seed for uniqueness: ${seed}
+DEEPLY IMPORTANT:
+- Pick a RANDOMLY CHOSEN niche topic — not the most obvious ones like "black holes bend light" or "Sun is a star".
+- Every output MUST be about a DIFFERENT topic than previous ones.
+- Think of obscure corners: specific moons, specific missions, weird physics, unusual stars, historical space events.
 
-Return ONLY the fact text. Nothing else.`;
+FORMAT:
+- 2-3 sentences MAX.
+- Start with one emoji.
+- No intro, no headings, no bullets. Just the fact.
+- English.
+
+Return ONLY the fact text.`;
 }
 
 function getMixPrompt(submode, localTitles, previousPicks) {
-  const seed = Date.now() + '_' + Math.random().toString(36).slice(2);
-  const type = submode === 'movie' ? 'movies' : 'movies, games, books, or music';
+  const seed = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+  const type = submode === 'movie' ? 'movies' : 'items';
 
-  return `You are Nexus AI recommending ${type} to a user — real recommendations from your knowledge of world entertainment.
+  return `Recommend 3 ${type} from world entertainment.
 
-USER WANTS: ${submode === 'movie' ? 'a movie to watch' : 'a random great recommendation'}
+RANDOMNESS TOKEN: ${seed}
 
-DO NOT recommend any of these (already on NEXUS):
-${localTitles}
+AVOID (already on NEXUS): ${localTitles}
+AVOID (previously recommended): ${previousPicks || 'none'}
 
-DO NOT repeat these (previously recommended):
-${previousPicks || 'none yet'}
-
-TASK:
-Suggest EXACTLY 3 real, well-known ${type}.
-Each must be genuinely DIFFERENT from the others.
-Mix genres, decades, and moods — don't stick to one style.
-
-OUTPUT FORMAT — exactly 3 lines, nothing else:
-[[ext:TITLE|TYPE|WHY]]
-[[ext:TITLE|TYPE|WHY]]
+MUST:
+- 3 REAL, well-known titles, all DIFFERENT from each other and from avoid list.
+- Vary genres/years/moods. No clustering.
+- Format EXACTLY (3 lines, nothing else):
 [[ext:TITLE|TYPE|WHY]]
 
-Where:
-- TITLE = real name of the item
-- TYPE = movie / game / book / music (lowercase)
-- WHY = ONE short sentence (max 12 words)
+TYPE = movie/game/book/music
+WHY = max 12 words
+NO intro, NO outro, NO bullets, NO numbering.
 
-STRICT RULES:
-1. Exactly 3 lines. No intro. No outro. No numbering. No bullets.
-2. NO examples should be reused — each call must feel fresh.
-3. Real, well-known titles only. No fictional made-up names.
-4. Uniqueness seed: ${seed}
-
-Begin now.`;
+Begin.`;
 }
 
-// =========================================
-// MAIN HANDLER
-// =========================================
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -209,19 +170,27 @@ module.exports = async function handler(req, res) {
 
   let systemPrompt;
   let temperature = 0.7;
+  let frequencyPenalty = 0;
+  let presencePenalty = 0;
 
   if (mode === 'recommend') {
     systemPrompt = getRecommendSystemPrompt(mood || 'Anything good');
-    temperature = 1.0;
+    temperature = 1.1;
+    frequencyPenalty = 1.2;
+    presencePenalty = 1.0;
   } else if (mode === 'cosmic') {
     const previousFacts = (body.previousFacts || []).join(' || ').substring(0, 800);
     systemPrompt = getCosmicPrompt(previousFacts);
-    temperature = 1.2;
+    temperature = 1.4;
+    frequencyPenalty = 1.8;
+    presencePenalty = 1.5;
   } else if (mode === 'mix') {
     const localTitles = (body.localTitles || []).join(', ').substring(0, 500);
     const previousPicks = (body.previousPicks || []).join(', ').substring(0, 500);
     systemPrompt = getMixPrompt(mood || 'random', localTitles, previousPicks);
-    temperature = 1.3;
+    temperature = 1.5;
+    frequencyPenalty = 1.8;
+    presencePenalty = 1.5;
   } else {
     systemPrompt = `You are Nexus AI, a helpful, intelligent, and friendly AI assistant on the Nexus website.
 
@@ -259,15 +228,23 @@ If someone asks something harmful, politely decline.`;
 
   for (const modelName of modelsToTry) {
     try {
+      const requestBody = {
+        model: modelName,
+        messages,
+        temperature,
+        max_tokens: 2048
+      };
+
+      // Add penalties for non-chat modes
+      if (mode !== 'chat') {
+        requestBody.frequency_penalty = frequencyPenalty;
+        requestBody.presence_penalty = presencePenalty;
+      }
+
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: modelName,
-          messages,
-          temperature,
-          max_tokens: 2048
-        })
+        body: JSON.stringify(requestBody)
       });
       const data = await response.json();
       if (response.ok && data.choices && data.choices[0]) {

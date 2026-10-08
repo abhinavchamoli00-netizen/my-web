@@ -1172,7 +1172,8 @@ function initProfilePage() {
 // =========================================
 // NEXUS LABS
 // =========================================
-function initLabsPage() {
+
+  function initLabsPage() {
   if (__currentPage !== 'labs.html') return;
 
   const movies = (typeof NEXUS_DATA !== 'undefined')
@@ -1199,17 +1200,33 @@ function initLabsPage() {
     { text: "Every passing minute is another chance to turn it all around.", by: "Vanilla Sky" }
   ];
 
-  function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  // ✅ PERSISTENT history via localStorage
+  function getHistory(key) {
+    try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) { return []; }
+  }
+  function setHistory(key, arr) {
+    try { localStorage.setItem(key, JSON.stringify(arr.slice(-30))); } catch (e) {}
+  }
 
+  function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
   function localRandom(pool) {
     if (!pool || pool.length === 0) return null;
     return rand(pool);
   }
-
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[c]));
+  }
+
+  // ✅ Fisher-Yates shuffle for true randomness
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
   }
 
   async function doMix(submode, resultEl, btnEl) {
@@ -1220,8 +1237,12 @@ function initLabsPage() {
 
     try {
       const pool = submode === 'movie' ? movies : allItems;
-      const localItem = localRandom(pool);
+      // ✅ Shuffle pool for true randomness
+      const shuffledPool = shuffle(pool);
+      const localItem = shuffledPool[0];
+
       const localTitles = allItems.map(x => x.title);
+      const previousPicks = getHistory('nexus_prev_picks');
 
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -1231,7 +1252,8 @@ function initLabsPage() {
           history: [],
           mode: 'mix',
           mood: submode,
-          localTitles: localTitles
+          localTitles: localTitles,
+          previousPicks: previousPicks
         })
       });
 
@@ -1249,6 +1271,10 @@ function initLabsPage() {
           });
         }
       }
+
+      // Save picks to persistent history
+      const newHistory = previousPicks.concat(externalItems.map(i => i.title));
+      setHistory('nexus_prev_picks', newHistory);
 
       let html = '<div class="mix-results">';
 
@@ -1320,18 +1346,24 @@ function initLabsPage() {
       factRes.innerHTML = '<div class="result-text" style="opacity:0.6;">🌌 Traveling through space...</div>';
 
       try {
+        const previousFacts = getHistory('nexus_prev_facts');
+
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             message: 'Give me a cosmic fact',
             history: [],
-            mode: 'cosmic'
+            mode: 'cosmic',
+            previousFacts: previousFacts
           })
         });
         const data = await res.json();
         if (data.success && data.reply) {
           factRes.innerHTML = `<div class="result-text">${data.reply}</div>`;
+          // Save to persistent history
+          const newFacts = previousFacts.concat([data.reply.substring(0, 150)]);
+          setHistory('nexus_prev_facts', newFacts);
         } else if (data.error === 'limit_reached') {
           factRes.innerHTML = `<div class="result-text">🚫 Nexus AI is taking a short break. Try again later.</div>`;
         } else {
