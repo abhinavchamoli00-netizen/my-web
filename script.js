@@ -130,6 +130,38 @@ function ensureFloatingButtons() {
   applyTheme(__currentTheme);
 }
 
+// =========================================
+// LIKE BUTTON (visual only, no storage)
+// =========================================
+function addBookmarkButtons() {
+  const page = __currentPage;
+  const validPages = ['movies.html', 'marvel.html', 'games.html', 'reading.html'];
+  if (!validPages.includes(page)) return;
+
+  const cards = document.querySelectorAll('.poster-card');
+  cards.forEach(card => {
+    if (card.querySelector('.bookmark-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'bookmark-btn';
+    btn.setAttribute('aria-label', 'Like');
+
+    // Star icon
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      btn.classList.toggle('active');
+      btn.style.transform = 'scale(1.4)';
+      setTimeout(() => { btn.style.transform = ''; }, 200);
+    });
+
+    card.appendChild(btn);
+  });
+}
+
 function initNexusPage() {
   const home = isHomePage();
 
@@ -142,6 +174,7 @@ function initNexusPage() {
 
   ensureFloatingButtons();
   addBookmarkButtons();
+
   async function getDeviceInfo() {
     let model = '', platform = '';
     try {
@@ -769,87 +802,4 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initNexusPage);
 } else {
   initNexusPage();
-}
-// =========================================
-// WATCHLIST — Bookmark buttons on cards
-// =========================================
-function getWatchlist() {
-  try {
-    return JSON.parse(localStorage.getItem('nexus_watchlist') || '[]');
-  } catch (e) {
-    return [];
-  }
-}
-
-function isInWatchlist(id) {
-  return getWatchlist().some(item => item.id === id);
-}
-
- function addBookmarkButtons() {
-  const page = __currentPage;
-  const validPages = ['movies.html', 'marvel.html', 'games.html', 'reading.html'];
-  if (!validPages.includes(page)) return;
-
-  const cards = document.querySelectorAll('.poster-card');
-  cards.forEach(card => {
-    if (card.querySelector('.bookmark-btn')) return;
-
-    const link = card.closest('a');
-    const href = link ? link.getAttribute('href') : '';
-    const img = card.querySelector('img');
-    const imgSrc = img ? img.getAttribute('src') : '';
-    const name = card.querySelector('p') ? card.querySelector('p').textContent : '';
-
-    const id = href || imgSrc || name;
-    if (!id) return;
-
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'bookmark-btn';
-    btn.setAttribute('aria-label', 'Save to watchlist');
-    btn.dataset.id = id;
-    btn.dataset.name = name;
-    btn.dataset.img = imgSrc;
-    btn.dataset.href = href;
-    btn.dataset.page = page;
-
-    if (isInWatchlist(id)) btn.classList.add('active');
-
-    btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
-
-    // ✅ Click handler — save/remove
-    btn.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const item = {
-        id: btn.dataset.id,
-        name: btn.dataset.name,
-        img: btn.dataset.img,
-        href: btn.dataset.href,
-        page: btn.dataset.page,
-        savedAt: Date.now()
-      };
-
-      let list = getWatchlist();
-      const exists = list.some(x => x.id === item.id);
-
-      if (exists) {
-        // Remove
-        list = list.filter(x => x.id !== item.id);
-        btn.classList.remove('active');
-      } else {
-        // Add
-        list.push(item);
-        btn.classList.add('active');
-        // Small pop animation
-        btn.style.transform = 'scale(1.3)';
-        setTimeout(() => { btn.style.transform = ''; }, 200);
-      }
-
-      localStorage.setItem('nexus_watchlist', JSON.stringify(list));
-    });
-
-    card.appendChild(btn);
-  });
 }
