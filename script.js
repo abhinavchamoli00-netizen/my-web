@@ -785,18 +785,15 @@ function isInWatchlist(id) {
   return getWatchlist().some(item => item.id === id);
 }
 
-function addBookmarkButtons() {
-  // Sirf movies / marvel / games / reading pages pe
+ function addBookmarkButtons() {
   const page = __currentPage;
   const validPages = ['movies.html', 'marvel.html', 'games.html', 'reading.html'];
   if (!validPages.includes(page)) return;
 
   const cards = document.querySelectorAll('.poster-card');
   cards.forEach(card => {
-    // Agar bookmark already hai toh skip
     if (card.querySelector('.bookmark-btn')) return;
 
-    // Movie/game ka unique id banao — image src + name se
     const link = card.closest('a');
     const href = link ? link.getAttribute('href') : '';
     const img = card.querySelector('img');
@@ -806,7 +803,6 @@ function addBookmarkButtons() {
     const id = href || imgSrc || name;
     if (!id) return;
 
-    // Bookmark button banao
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'bookmark-btn';
@@ -821,9 +817,39 @@ function addBookmarkButtons() {
 
     btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
 
-    // Card ke andar top-right corner pe add karo
+    // ✅ Click handler — save/remove
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const item = {
+        id: btn.dataset.id,
+        name: btn.dataset.name,
+        img: btn.dataset.img,
+        href: btn.dataset.href,
+        page: btn.dataset.page,
+        savedAt: Date.now()
+      };
+
+      let list = getWatchlist();
+      const exists = list.some(x => x.id === item.id);
+
+      if (exists) {
+        // Remove
+        list = list.filter(x => x.id !== item.id);
+        btn.classList.remove('active');
+      } else {
+        // Add
+        list.push(item);
+        btn.classList.add('active');
+        // Small pop animation
+        btn.style.transform = 'scale(1.3)';
+        setTimeout(() => { btn.style.transform = ''; }, 200);
+      }
+
+      localStorage.setItem('nexus_watchlist', JSON.stringify(list));
+    });
+
     card.appendChild(btn);
   });
 }
-
-// Page load pe + SPA navigation pe buttons add karo
