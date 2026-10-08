@@ -215,53 +215,44 @@
           <img src="images/movies/who%20am%20i.jpg" alt="Who Am I"><p>Who Am I</p>
         </div>
       </a>
-      
-      <!-- Insidious: Out of the Further -->
+
+      <!-- Insidious -->
       <a href="insidious.html" class="poster-link">
         <div class="poster-card">
           <div class="poster-rating-badge"><span class="rating-source">SOON</span>2026</div>
-          <img src="images/movies/insidious.jpg" alt="Insidious: Out of the Further">
-          <p>Insidious: Out of the Further</p>
+          <img src="images/movies/insidious.jpg" alt="Insidious: Out of the Further"><p>Insidious: Out of the Further</p>
         </div>
       </a>
 
       <!-- 🔴 RESTRICTED MOVIES (with popup warning) -->
 
-      <!-- Event Horizon -->
       <a href="eventhorizon.html" class="poster-link restricted-movie" data-movie="Event Horizon">
         <div class="poster-card">
           <div class="poster-rating-badge"><span class="rating-source">IMDb</span>6.6</div>
-          <div class="restricted-badge">⚠️ 18+</div>
           <img src="images/movies/eventhorizon.jpg" alt="Event Horizon">
           <p>Event Horizon</p>
         </div>
       </a>
 
-      <!-- The Exorcist -->
       <a href="theexorcist.html" class="poster-link restricted-movie" data-movie="The Exorcist">
         <div class="poster-card">
           <div class="poster-rating-badge"><span class="rating-source">IMDb</span>8.1</div>
-          <div class="restricted-badge">⚠️ 18+</div>
           <img src="images/movies/theexorcist.jpg" alt="The Exorcist">
           <p>The Exorcist</p>
         </div>
       </a>
 
-      <!-- Bring Her Back -->
       <a href="bringherback.html" class="poster-link restricted-movie" data-movie="Bring Her Back">
         <div class="poster-card">
           <div class="poster-rating-badge"><span class="rating-source">IMDb</span>7.1</div>
-          <div class="restricted-badge">⚠️ 18+</div>
           <img src="images/movies/bringherback.jpg" alt="Bring Her Back">
           <p>Bring Her Back</p>
         </div>
       </a>
 
-      <!-- When Evil Lurks -->
       <a href="whenevillurks.html" class="poster-link restricted-movie" data-movie="When Evil Lurks">
         <div class="poster-card">
           <div class="poster-rating-badge"><span class="rating-source">IMDb</span>6.9</div>
-          <div class="restricted-badge">⚠️ 18+</div>
           <img src="images/movies/whenevillurks.jpg" alt="When Evil Lurks">
           <p>When Evil Lurks</p>
         </div>
@@ -271,11 +262,11 @@
   </section>
 
   <footer>
-    <p class="watermark">Managed by <strong>Abhinav</strong> &#10024;</p>
+    <p class="watermark">Managed by <strong>Abhinav</strong></p>
     <p class="contact">abhinavchamoli00@gmail.com</p>
   </footer>
 
-  <!-- ⚠️ SINGLE WARNING MODAL -->
+  <!-- ⚠️ WARNING MODAL -->
   <div class="warning-modal-overlay" id="warningOverlay">
     <div class="warning-modal" id="warningModal">
       <span class="wm-icon" id="wmIcon">⚠️</span>
@@ -303,7 +294,7 @@
     function showModal() {
       wmIcon.textContent = '⚠️';
       wmTitle.textContent = 'Content Warning';
-      wmText.innerHTML = 'This movie contains <strong>extremely disturbing and graphic content</strong>, including intense horror, violence, and psychological terror. It is <strong>not suitable for minors</strong> or sensitive viewers. By continuing, you acknowledge that you are watching at your <strong>own risk</strong>. This is for <strong>time-pass only</strong> — please use your own discretion. <em>Viewer discretion is strongly advised.</em>';
+      wmText.innerHTML = 'This movie contains <strong>extremely disturbing and graphic content</strong>, including intense horror, violence, and psychological terror. It is <strong>not suitable for minors</strong> or sensitive viewers. By continuing, you acknowledge that you are watching at your <strong>own risk</strong>. This is for <strong>time-pass only</strong>. <em>Viewer discretion is strongly advised.</em>';
       overlay.classList.add('active');
     }
 
