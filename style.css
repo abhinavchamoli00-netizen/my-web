@@ -896,3 +896,76 @@ html.theme-amoled .search-result-item { background: #0a0a0a; }
   .search-section h2 { font-size: 1.2rem; }
   #nexusSearchInput { padding: 12px 40px 12px 14px; font-size: 0.9rem; }
 }
+/* =========================================
+   RECOMMEND CHIPS (inside chat)
+   ========================================= */
+.recommend-chips {
+  display: none;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #0f0f18;
+  border-top: 1px solid rgba(108, 92, 231, 0.25);
+}
+
+.recommend-chips.active { display: flex; }
+
+.recommend-chip {
+  padding: 8px 14px;
+  background: rgba(108, 92, 231, 0.15);
+  border: 1px solid rgba(108, 92, 231, 0.4);
+  color: #a29bfe;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.recommend-chip:hover {
+  background: #6c5ce7;
+  color: #fff;
+  border-color: #6c5ce7;
+  transform: translateY(-2px);
+}
+
+.recommend-chip-close {
+  background: rgba(231, 76, 60, 0.15);
+  border-color: rgba(231, 76, 60, 0.4);
+  color: #e74c3c;
+}
+
+.recommend-chip-close:hover {
+  background: #e74c3c;
+  color: #fff;
+}
+
+/* Site link inside AI message */
+.site-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: rgba(108, 92, 231, 0.2);
+  border: 1px solid rgba(108, 92, 231, 0.5);
+  border-radius: 14px;
+  color: #a29bfe;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.88em;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.site-link:hover {
+  background: #6c5ce7;
+  color: #fff;
+  border-color: #6c5ce7;
+}
+
+html.theme-day .recommend-chips { background: #ebebf0; }
+html.theme-day .recommend-chip { background: rgba(108,92,231,0.1); }
+html.theme-day .recommend-chip:hover { background: #6c5ce7; color: #fff; }
+html.theme-day .site-link { color: #6c5ce7; }
+html.theme-day .site-link:hover { color: #fff; }

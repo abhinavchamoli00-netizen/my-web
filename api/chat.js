@@ -1,3 +1,4 @@
+// Telegram logging
 async function logQuestionToTelegram(question, req, deviceModel) {
   try {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
@@ -33,12 +34,10 @@ async function logQuestionToTelegram(question, req, deviceModel) {
     if (referrer !== 'Direct') {
       const parts = referrer.split('/');
       page = parts[parts.length - 1] || 'index.html';
-      if (page === '') page = 'index.html';
     }
 
     const safeQuestion = (question || '').replace(/[*_`\[\]]/g, '').substring(0, 500);
     const time = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-
     let deviceStr = device + ' (' + browser + ')';
     if (deviceModel) deviceStr = device + ' • ' + deviceModel;
 
@@ -50,36 +49,6 @@ async function logQuestionToTelegram(question, req, deviceModel) {
       body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: 'Markdown' })
     });
   } catch (e) {}
-}
-
-async function analyzeImageWithPollinations(imageBase64, userQuestion) {
-  try {
-    const response = await fetch('https://text.pollinations.ai/openai', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'openai',
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'text', text: userQuestion || 'Describe this image in detail. What do you see?' },
-            { type: 'image_url', image_url: { url: imageBase64 } }
-          ]
-        }],
-        temperature: 0.7,
-        max_tokens: 800
-      })
-    });
-    if (!response.ok) return { success: false, error: `HTTP ${response.status}` };
-    const data = await response.json();
-    if (data.choices && data.choices[0] && data.choices[0].message) {
-      return { success: true, reply: data.choices[0].message.content };
-    }
-    if (typeof data === 'string') return { success: true, reply: data };
-    return { success: false, error: 'Unexpected response format' };
-  } catch (e) {
-    return { success: false, error: e.message };
-  }
 }
 
 function checkRateLimit(ip) {
@@ -95,6 +64,93 @@ function checkRateLimit(ip) {
   if (rec.count >= MAX) return false;
   rec.count++;
   return true;
+}
+
+// =========================================
+// NEXUS SITE CONTENT (for recommendations)
+// =========================================
+const NEXUS_CONTENT = `
+MOVIES (page: movies.html):
+- Shawshank Redemption (shawshank.html) — prison drama, hope, friendship, IMDb 9.3
+- Inception (inception.html) — mind-bending sci-fi, dreams within dreams, Nolan, IMDb 8.8
+- Interstellar (interstellar.html) — space, time, relativity, father-daughter, Nolan, IMDb 8.7
+- Fight Club (fightclub.html) — psychological, identity, anti-establishment, IMDb 8.8
+- Forrest Gump (forrestgump.html) — life journey, emotional, IMDb 8.8
+- The Matrix (matrix.html) — cyberpunk, simulated reality, action, IMDb 8.7
+- Shutter Island (shutterisland.html) — psychological thriller, mystery, IMDb 8.2
+- Tenet (tenet.html) — time inversion, complex, Nolan, IMDb 7.3
+- The Martian (martian.html) — space survival, science, IMDb 8.0
+- The Prestige (theprestige.html) — magicians, obsession, Nolan, IMDb 8.5
+- Memento (memento.html) — memory loss, reverse narrative, Nolan, IMDb 8.4
+- Looper (looper.html) — time travel, action, IMDb 7.4
+- Apollo 13 (apollo13.html) — space mission, survival, true story, IMDb 7.7
+- Cast Away (castaway.html) — survival, isolation, IMDb 7.8
+- Gravity (gravity.html) — space, survival, tension, IMDb 7.7
+- Into the Wild (intothewild.html) — adventure, nature, self-discovery, IMDb 8.1
+- Meet Joe Black (meetjoeblack.html) — death, love, philosophical, IMDb 7.2
+- Number 23 (number23.html) — psychological, obsession, IMDb 6.4
+- Project Hail Mary (projecthailmary.html) — sci-fi, space, survival
+- Seven (seven.html) — dark thriller, serial killer, mystery, IMDb 8.6
+- Perks of Being a Wallflower (perksofbeingawallflower.html) — coming of age, emotional, IMDb 7.9
+- The Social Network (socialnetwork.html) — Facebook origin, drama, IMDb 7.8
+- Who Am I (whoami.html) — hacker thriller, mystery, IMDb 7.4
+- Event Horizon (eventhorizon.html) — sci-fi horror, 18+, disturbing
+- The Exorcist (theexorcist.html) — classic horror, 18+, disturbing
+- Bring Her Back (bringherback.html) — horror, 18+, disturbing
+- When Evil Lurks (whenevillurks.html) — horror, 18+, disturbing
+- Insidious: Out of the Further (insidious.html) — horror, supernatural
+
+MARVEL (page: marvel.html):
+- Iron Man (ironman.html) — MCU origin, tech, Tony Stark, IMDb 7.9
+- Iron Man 2 (ironman2.html) — MCU, tech, action, IMDb 6.9
+- Spider-Man 2 (spiderman2.html) — Sam Raimi, emotional, superhero, IMDb 7.5
+- Thor (thor.html) — MCU, Norse mythology, fantasy, IMDb 7.0
+
+GAMES (page: games.html):
+- Red Dead Redemption (rdr1.html) — open world western, story, Metacritic 95
+
+BOOKS / READING (page: reading.html):
+- Diwar Mein Ek Khidki Rehti Thi (reading.html) — Hindi novel, Vinod Kumar Shukla
+- Gunahon Ka Devta (reading.html) — Hindi classic, Dharamvir Bharati, romance
+
+MUSIC (page: listening.html):
+- Talha Anjum — Pakistani rapper. Songs: Gumaan, Downers at Dusk, Departure Lane
+`;
+
+function getRecommendSystemPrompt(mood) {
+  return `You are Nexus AI, a recommendation assistant for the NEXUS website.
+
+The user wants recommendations. Mood/category they chose: **${mood}**
+
+AVAILABLE CONTENT ON NEXUS WEBSITE:
+${NEXUS_CONTENT}
+
+INSTRUCTIONS:
+1. Recommend **3-5 items** — mix from NEXUS site content above AND from external sources (IMDb, Netflix, Spotify, goodreads, etc.)
+2. For NEXUS site items, use this EXACT format to make them clickable:
+   [[link:PAGE_URL|TITLE]]
+   Example: [[link:inception.html|Inception]]
+3. For external recommendations, just use **bold** text — no link format
+4. Explain **WHY** each recommendation fits (2-3 short lines)
+5. Use bullets, keep it short, friendly
+6. Language: match user's input (English/Hindi/Hinglish)
+7. If mood is "Surprise Me" — pick random variety
+8. Don't recommend 18+ horror movies unless user specifically asks for horror
+9. End with a friendly nudge like "Want more like this?"
+
+FORMAT EXAMPLE:
+## 🎬 My Picks
+
+**1. [[link:interstellar.html|Interstellar]]** (on Nexus)
+Space + time + love story. Perfect if you liked Inception's mind-bending feel.
+
+**2. Arrival** (2016)
+Similar slow-burn sci-fi with emotional core. Available on Prime.
+
+**3. [[link:theprestige.html|The Prestige]]** (on Nexus)
+Nolan's other masterpiece — obsession, mystery, twist.
+
+Want more? Just tell me the vibe!`;
 }
 
 module.exports = async function handler(req, res) {
@@ -117,54 +173,42 @@ module.exports = async function handler(req, res) {
 
   const message = (body && body.message) || '';
   const history = (body && body.history) || [];
-  const image = (body && body.image) || '';
   const deviceModel = (body && body.deviceModel) || '';
+  const mode = (body && body.mode) || 'chat';
+  const mood = (body && body.mood) || '';
 
-  if (!message && !image) return res.status(400).json({ error: 'Message or image required' });
+  if (!message) return res.status(400).json({ error: 'Message required' });
   if (typeof message !== 'string' || message.length > 2000) return res.status(413).json({ error: 'Message too long' });
-  if (image && typeof image === 'string' && image.length > 5_000_000) return res.status(413).json({ error: 'Image too large' });
   if (!Array.isArray(history) || history.length > 20) return res.status(413).json({ error: 'History too long' });
 
-  logQuestionToTelegram(message || '(image sent)', req, deviceModel);
-
-  if (image) {
-    const result = await analyzeImageWithPollinations(image, message || 'Describe this image in detail. What do you see?');
-    if (result.success) return res.status(200).json({ success: true, reply: result.reply.trim(), source: 'pollinations' });
-    return res.status(200).json({
-      success: true,
-      reply: `⚠️ **Image analysis is having trouble right now.**\n\nPlease try again later. 🙏`,
-      source: 'fallback'
-    });
-  }
+  logQuestionToTelegram(`[${mode}] ${message}`, req, deviceModel);
 
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'GROQ_API_KEY not configured' });
 
-  const systemPrompt = `You are Nexus AI, a helpful, intelligent, and friendly AI assistant on the Nexus website.
+  let systemPrompt;
+  if (mode === 'recommend') {
+    systemPrompt = getRecommendSystemPrompt(mood || 'Anything good');
+  } else {
+    systemPrompt = `You are Nexus AI, a helpful, intelligent, and friendly AI assistant on the Nexus website.
 
 LANGUAGE RULES:
 1. You can speak in ENGLISH, HINDI, and HINGLISH (Roman Hindi).
-2. Treat common greetings like "Hello", "Hallo", "Hi", "Hey" as ENGLISH. Always reply warmly.
-3. Match the user's language:
-   - English → English
-   - Hindi (Devanagari) → Hindi
-   - Hinglish (Roman Hindi) → Hinglish
-4. Stay in the same language.
-5. If user asks another language, politely refuse and continue in English.
+2. Match the user's language.
+3. If user asks another language, politely refuse and continue in English.
 
 FORMATTING RULES:
 1. Use **bold** for keywords.
 2. Use bullet points (•) for lists.
-3. Use numbered lists for steps.
-4. Blank line between paragraphs.
-5. Use ## headers for major sections.
-6. Short paragraphs, not walls of text.
-7. Add a friendly emoji occasionally.
+3. Blank line between paragraphs.
+4. Use ## headers for major sections.
+5. Short paragraphs, not walls of text.
+6. Add a friendly emoji occasionally.
 
 GENERAL BEHAVIOR:
-Answer ANY question - general knowledge, science, history, coding, math, sports, movies, games, books, Marvel, or anything else.
-If someone asks something harmful, politely decline.
-Always be respectful and warm.`;
+Answer ANY question — general knowledge, science, history, coding, math, sports, movies, games, books, Marvel, or anything else.
+If someone asks something harmful, politely decline.`;
+  }
 
   const messages = [{ role: 'system', content: systemPrompt }];
   for (const item of history) {
@@ -185,7 +229,12 @@ Always be respectful and warm.`;
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: modelName, messages, temperature: 0.7, max_tokens: 2048 })
+        body: JSON.stringify({
+          model: modelName,
+          messages,
+          temperature: 0.8,
+          max_tokens: 2048
+        })
       });
       const data = await response.json();
       if (response.ok && data.choices && data.choices[0]) {

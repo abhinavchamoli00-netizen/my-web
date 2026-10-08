@@ -679,6 +679,109 @@ function initNexusPage() {
     utt.onerror = () => stopSpeaking();
     speechSynthesis.speak(utt);
   }
+  // =========================================
+  // RECOMMEND FLOW
+  // =========================================
+  const recommendBtn = document.getElementById('recommendBtn');
+
+  function buildRecommendChips() {
+    // Chips container banao
+    let chips = document.getElementById('recommendChips');
+    if (!chips) {
+      chips = document.createElement('div');
+      chips.id = 'recommendChips';
+      chips.className = 'recommend-chips';
+      const inputArea = document.querySelector('.ai-chat-input');
+      if (inputArea && inputArea.parentNode) {
+        inputArea.parentNode.insertBefore(chips, inputArea);
+      }
+    }
+    chips.innerHTML = '';
+
+    const options = [
+      { label: '🎬 Movie', mood: 'Movie' },
+      { label: '🎮 Game', mood: 'Game' },
+      { label: '📚 Book', mood: 'Book' },
+      { label: '🎵 Music', mood: 'Music' },
+      { label: '✨ Surprise Me', mood: 'Surprise Me' }
+    ];
+
+    options.forEach(opt => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'recommend-chip';
+      chip.textContent = opt.label;
+      chip.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        sendRecommendRequest(opt.mood);
+        chips.classList.remove('active');
+      });
+      chips.appendChild(chip);
+    });
+
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'recommend-chip recommend-chip-close';
+    close.textContent = '✕';
+    close.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      chips.classList.remove('active');
+    });
+    chips.appendChild(close);
+  }
+
+  async function sendRecommendRequest(mood) {
+    if (isChatSending) return;
+
+    const userMsg = `Recommend me something (${mood})`;
+    addChatMessage(userMsg, 'user');
+    const typingEl = addChatMessage('Finding recommendations...', 'typing');
+    isChatSending = true;
+    const sendBtn = document.getElementById('chatSend');
+    if (sendBtn) sendBtn.disabled = true;
+
+    try {
+      const { model } = await getDeviceInfo();
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: userMsg,
+          history: chatHistory.slice(-6),
+          deviceModel: model,
+          mode: 'recommend',
+          mood: mood
+        })
+      });
+      const data = await res.json();
+      typingEl.remove();
+      if (data.success) {
+        addChatMessage(data.reply, 'bot');
+        chatHistory.push({ role: 'user', text: userMsg });
+        chatHistory.push({ role: 'model', text: data.reply });
+      } else {
+        addChatMessage('⚠️ ' + (data.details || data.error || 'Error'), 'bot');
+      }
+    } catch (err) {
+      typingEl.remove();
+      addChatMessage('❌ Network error.', 'bot');
+    } finally {
+      isChatSending = false;
+      if (sendBtn) sendBtn.disabled = false;
+    }
+  }
+
+  if (recommendBtn) {
+    recommendBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      buildRecommendChips();
+      const chips = document.getElementById('recommendChips');
+      if (chips) chips.classList.toggle('active');
+    });
+  }
 
   if (chatForm) {
     chatForm.addEventListener('submit', async (e) => {
@@ -720,8 +823,11 @@ function initNexusPage() {
     });
   }
 
-  function formatAIResponse(text) {
+  
+      function formatAIResponse(text) {
     let html = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    // Site links: [[link:url|title]]
+    html = html.replace(/\[\[link:([^|\]]+)\|([^\]]+)\]\]/g, '<a href="$1" class="site-link">$2</a>');
     html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
     html = html.replace(/^#{1,4}\s*(.+)$/gm, '<div class="ai-heading">$1</div>');
