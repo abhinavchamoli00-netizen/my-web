@@ -153,6 +153,67 @@ Nolan's other masterpiece — obsession, mystery, twist.
 Want more? Just tell me the vibe!`;
 }
 
+function getCosmicPrompt() {
+  const topics = [
+    'black holes', 'neutron stars', 'dark matter', 'dark energy',
+    'Mars surface', 'Jupiter storms', 'Saturn rings', 'Venus atmosphere',
+    'quantum mechanics', 'time dilation', 'the Big Bang', 'the cosmic microwave background',
+    'exoplanets', 'rogue planets', 'comets', 'asteroid belts',
+    'the Sun', 'the Milky Way', 'Andromeda galaxy', 'galaxy clusters',
+    'the speed of light', 'gravitational waves', 'wormholes', 'the multiverse',
+    'the oldest stars', 'supernovae', 'pulsars', 'quasars',
+    'the Hubble constant', 'space-time fabric', 'the event horizon', 'antimatter',
+    'the Oort cloud', 'the Kuiper belt', 'the heliosphere', 'the observable universe',
+    'cosmic inflation', 'the Fermi paradox', 'the Drake equation', 'the Great Attractor'
+  ];
+  const topic = topics[Math.floor(Math.random() * topics.length)];
+  const seed = Date.now() + Math.random();
+
+  return `You are Nexus AI. Generate ONE fascinating cosmic fact about: **${topic}**.
+
+STRICT RULES:
+1. The fact must be TRUE and VERIFIABLE — no fiction, no exaggeration.
+2. Make it SURPRISING — not something everyone knows.
+3. 2-3 sentences MAX. Short and punchy.
+4. Include specific numbers, names, or comparisons.
+5. Start with a relevant emoji (🌟 🌌 🪐 ⭐ 🌠 🕳️ 💫 🌍 🛰️ ⚡).
+6. NO intro like "Here's a fact" — say the fact directly.
+7. Language: English only.
+8. Random seed for uniqueness: ${seed}
+
+Return ONLY the fact text. Nothing else.`;
+}
+
+function getMixPrompt(submode, localTitles) {
+  const seed = Date.now() + Math.random();
+  const type = submode === 'movie' ? 'movies' : 'items (movies, games, books, music)';
+
+  return `You are Nexus AI recommending ${type} from the internet.
+
+USER WANTS: ${submode === 'movie' ? 'a movie to watch' : 'a random recommendation'}
+
+LOCAL TITLES ALREADY ON NEXUS (do NOT recommend these): ${localTitles}
+
+STRICT RULES:
+1. Suggest EXACTLY 3 real, well-known ${type}.
+2. Each must be DIFFERENT from the others — mix genres/eras/types.
+3. Format EACH line EXACTLY like this:
+[[ext:Title|Type|Why]]
+   - Title: name of the item
+   - Type: movie / game / book / music
+   - Why: ONE short line reason (max 12 words)
+4. NO intro, NO outro, NO bullet points, NO other text.
+5. Random seed for variety: ${seed}
+6. Don't repeat the same items across requests.
+
+EXAMPLE OUTPUT (exactly 3 lines):
+[[ext:Arrival|movie|Slow-burn sci-fi with emotional depth]]
+[[ext:Disco Elysium|game|Detective RPG with incredible writing]]
+[[ext:The Alchemist|book|Simple philosophy, light read]]
+
+Now return ONLY 3 lines.`;
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -189,6 +250,11 @@ module.exports = async function handler(req, res) {
   let systemPrompt;
   if (mode === 'recommend') {
     systemPrompt = getRecommendSystemPrompt(mood || 'Anything good');
+  } else if (mode === 'cosmic') {
+    systemPrompt = getCosmicPrompt();
+  } else if (mode === 'mix') {
+    const localTitles = (body.localTitles || []).join(', ').substring(0, 500);
+    systemPrompt = getMixPrompt(mood || 'random', localTitles);
   } else {
     systemPrompt = `You are Nexus AI, a helpful, intelligent, and friendly AI assistant on the Nexus website.
 
@@ -232,7 +298,7 @@ If someone asks something harmful, politely decline.`;
         body: JSON.stringify({
           model: modelName,
           messages,
-          temperature: 0.8,
+          temperature: mode === 'chat' ? 0.7 : 0.9,
           max_tokens: 2048
         })
       });

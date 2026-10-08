@@ -1313,3 +1313,90 @@ html.theme-amoled .lab-card { background: #0a0a0a; }
   .labs-grid { grid-template-columns: 1fr; }
   .lab-icon { font-size: 2rem; }
 }
+/* =========================================
+   LABS — Mix result layout
+   ========================================= */
+.mix-results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+  text-align: left;
+  animation: fadeInResult 0.4s ease;
+}
+
+.mix-local {
+  background: rgba(108, 92, 231, 0.12);
+  border: 1px solid rgba(108, 92, 231, 0.4);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  position: relative;
+}
+
+.mix-local::before {
+  content: '⭐ On NEXUS';
+  position: absolute;
+  top: -9px;
+  left: 10px;
+  background: #6c5ce7;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+}
+
+.mix-local img {
+  width: 50px;
+  height: 75px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.mix-local-info { flex: 1; min-width: 0; }
+.mix-local-title { font-weight: 700; color: #fff; font-size: 0.92rem; margin-bottom: 2px; }
+.mix-local-cat { font-size: 0.7rem; color: #a29bfe; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 6px; }
+.mix-local-link { display: inline-block; font-size: 0.78rem; color: #a29bfe; font-weight: 600; text-decoration: none; }
+.mix-local-link:hover { color: #fff; }
+
+.mix-external {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.mix-external-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+.mix-external-info { flex: 1; min-width: 0; }
+.mix-external-title { font-weight: 700; color: #fff; font-size: 0.88rem; margin-bottom: 2px; }
+
+.mix-external-type {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #6cb2eb;
+  background: rgba(108, 178, 235, 0.15);
+  padding: 1px 7px;
+  border-radius: 8px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.mix-external-why { color: #aaa; font-size: 0.78rem; line-height: 1.4; font-style: italic; }
+
+html.theme-day .mix-local { background: rgba(108, 92, 231, 0.08); }
+html.theme-day .mix-local-title { color: #1a1a1a; }
+html.theme-day .mix-external { background: #f8f8fc; border-color: rgba(0,0,0,0.08); }
+html.theme-day .mix-external-title { color: #1a1a1a; }
+html.theme-day .mix-external-why { color: #666; }
+html.theme-amoled .mix-external { background: #0a0a0a; }

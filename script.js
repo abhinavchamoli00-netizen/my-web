@@ -1175,33 +1175,12 @@ function initProfilePage() {
 function initLabsPage() {
   if (__currentPage !== 'labs.html') return;
 
-  // Data — NEXUS_DATA (already defined) use karte hain
   const movies = (typeof NEXUS_DATA !== 'undefined')
     ? NEXUS_DATA.filter(x => x.category === 'Movies' || x.category === 'Marvel')
     : [];
 
   const allItems = (typeof NEXUS_DATA !== 'undefined') ? NEXUS_DATA : [];
 
-  // --- Cosmic Facts ---
-  const cosmicFacts = [
-    "A day on Venus is longer than its year. Venus takes 243 Earth days to rotate once, but only 225 to orbit the Sun.",
-    "There are more stars in the observable universe than grains of sand on all of Earth's beaches.",
-    "The observable universe is about 93 billion light-years across — but it might be infinitely larger.",
-    "A teaspoon of neutron star material would weigh about 6 billion tons on Earth.",
-    "If you could fall into a black hole, time would slow down so much that you'd watch the entire future of the universe pass by.",
-    "Light from the Sun takes 8 minutes 20 seconds to reach Earth. But light from Proxima Centauri (nearest star) takes 4.24 years.",
-    "Saturn's rings are only about 10 meters thick on average — yet they span 282,000 km wide.",
-    "The Milky Way and Andromeda galaxies will collide in about 4.5 billion years. But stars won't crash — space is that empty.",
-    "There's a planet made of diamond — 55 Cancri e. It's twice Earth's size and largely carbon.",
-    "Sound cannot travel through space. The 'explosions' in Star Wars would be completely silent.",
-    "The coldest place in the universe is the Boomerang Nebula at -272°C — one degree above absolute zero.",
-    "Jupiter's Great Red Spot is a storm larger than Earth that has been raging for at least 350 years.",
-    "If the Sun were the size of a white blood cell, the Milky Way would be the size of the United States.",
-    "There are more possible chess games than atoms in the observable universe.",
-    "Time moves slightly faster on your head than your feet. Einstein proved this with general relativity."
-  ];
-
-  // --- Cinema Quotes ---
   const cinemaQuotes = [
     { text: "Why do we fall, sir? So that we can learn to pick ourselves up.", by: "Batman Begins" },
     { text: "Do or do not. There is no try.", by: "The Empire Strikes Back" },
@@ -1214,57 +1193,160 @@ function initLabsPage() {
     { text: "Do you know what kind of world this is? This isn't a world. It's a tomb.", by: "Interstellar" },
     { text: "It's only after we've lost everything that we're free to do anything.", by: "Fight Club" },
     { text: "Some men just want to watch the world burn.", by: "The Dark Knight" },
-    { text: "Time is a flat circle. Everything we've ever done or will do, we're gonna do over and over again.", by: "True Detective" },
-    { text: "Every passing minute is another chance to turn it all around.", by: "Vanilla Sky" },
     { text: "Hope is a good thing, maybe the best of things. And no good thing ever dies.", by: "The Shawshank Redemption" },
     { text: "What we do in life echoes in eternity.", by: "Gladiator" },
-    { text: "The end is where we start from.", by: "T.S. Eliot (quoted in Tenet)" },
-    { text: "We are all just stories in the end. Just make it a good one.", by: "Doctor Who" }
+    { text: "We are all just stories in the end. Just make it a good one.", by: "Doctor Who" },
+    { text: "Every passing minute is another chance to turn it all around.", by: "Vanilla Sky" }
   ];
 
   function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-  // --- Random Pick ---
+  function localRandom(pool) {
+    if (!pool || pool.length === 0) return null;
+    return rand(pool);
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  async function doMix(submode, resultEl, btnEl) {
+    const oldText = btnEl.textContent;
+    btnEl.textContent = '✨ Asking the cosmos...';
+    btnEl.disabled = true;
+    resultEl.innerHTML = '<div class="result-text" style="opacity:0.6;">🌌 Searching beyond NEXUS...</div>';
+
+    try {
+      const pool = submode === 'movie' ? movies : allItems;
+      const localItem = localRandom(pool);
+      const localTitles = allItems.map(x => x.title);
+
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: 'Give me recommendations',
+          history: [],
+          mode: 'mix',
+          mood: submode,
+          localTitles: localTitles
+        })
+      });
+
+      const data = await res.json();
+
+      let externalItems = [];
+      if (data.success && data.reply) {
+        const regex = /\[\[ext:([^|\]]+)\|([^|\]]+)\|([^\]]+)\]\]/g;
+        let m;
+        while ((m = regex.exec(data.reply)) !== null) {
+          externalItems.push({
+            title: m[1].trim(),
+            type: m[2].trim().toLowerCase(),
+            why: m[3].trim()
+          });
+        }
+      }
+
+      let html = '<div class="mix-results">';
+
+      externalItems.forEach(item => {
+        let icon = '🌐';
+        if (item.type === 'movie') icon = '🎬';
+        else if (item.type === 'game') icon = '🎮';
+        else if (item.type === 'book') icon = '📚';
+        else if (item.type === 'music') icon = '🎵';
+
+        html += `
+          <div class="mix-external">
+            <div class="mix-external-icon">${icon}</div>
+            <div class="mix-external-info">
+              <div class="mix-external-title">${escapeHtml(item.title)}</div>
+              <span class="mix-external-type">${escapeHtml(item.type)}</span>
+              <div class="mix-external-why">${escapeHtml(item.why)}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      if (localItem) {
+        html += `
+          <div class="mix-local">
+            <img src="${localItem.img}" alt="${localItem.title}" onerror="this.style.display='none'">
+            <div class="mix-local-info">
+              <div class="mix-local-title">${escapeHtml(localItem.title)}</div>
+              <div class="mix-local-cat">${escapeHtml(localItem.category)}</div>
+              <a href="${localItem.url}" class="mix-local-link">Open in NEXUS →</a>
+            </div>
+          </div>
+        `;
+      }
+
+      html += '</div>';
+      resultEl.innerHTML = html;
+    } catch (err) {
+      resultEl.innerHTML = '<div class="result-text">❌ Network error. Try again.</div>';
+    } finally {
+      btnEl.textContent = oldText;
+      btnEl.disabled = false;
+    }
+  }
+
   const randomBtn = document.getElementById('randomPickBtn');
   const randomRes = document.getElementById('randomPickResult');
-  if (randomBtn && randomRes && allItems.length > 0) {
-    randomBtn.addEventListener('click', () => {
-      const item = rand(allItems);
-      randomRes.innerHTML = `
-        <img src="${item.img}" alt="${item.title}" class="result-poster" onerror="this.style.display='none'">
-        <div class="result-title">${item.title}</div>
-        <div class="result-sub">${item.category}</div>
-        <a href="${item.url}">Open in NEXUS →</a>
-      `;
-    });
+  if (randomBtn && randomRes) {
+    randomBtn.addEventListener('click', () => doMix('random', randomRes, randomBtn));
   }
 
-  // --- What to Watch ---
   const watchBtn = document.getElementById('watchPickBtn');
   const watchRes = document.getElementById('watchPickResult');
-  if (watchBtn && watchRes && movies.length > 0) {
-    watchBtn.addEventListener('click', () => {
-      const item = rand(movies);
-      watchRes.innerHTML = `
-        <img src="${item.img}" alt="${item.title}" class="result-poster" onerror="this.style.display='none'">
-        <div class="result-title">${item.title}</div>
-        <div class="result-sub">${item.category}</div>
-        <a href="${item.url}">Watch Now →</a>
-      `;
-    });
+  if (watchBtn && watchRes) {
+    watchBtn.addEventListener('click', () => doMix('movie', watchRes, watchBtn));
   }
 
-  // --- Cosmic Fact ---
   const factBtn = document.getElementById('cosmicFactBtn');
   const factRes = document.getElementById('cosmicFactResult');
+  let factLoading = false;
+
   if (factBtn && factRes) {
-    factBtn.addEventListener('click', () => {
-      const fact = rand(cosmicFacts);
-      factRes.innerHTML = `<div class="result-text">🌌 ${fact}</div>`;
+    factBtn.addEventListener('click', async () => {
+      if (factLoading) return;
+      factLoading = true;
+      const oldText = factBtn.textContent;
+      factBtn.textContent = '✨ Consulting the cosmos...';
+      factBtn.disabled = true;
+      factRes.innerHTML = '<div class="result-text" style="opacity:0.6;">🌌 Traveling through space...</div>';
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: 'Give me a cosmic fact',
+            history: [],
+            mode: 'cosmic'
+          })
+        });
+        const data = await res.json();
+        if (data.success && data.reply) {
+          factRes.innerHTML = `<div class="result-text">${data.reply}</div>`;
+        } else if (data.error === 'limit_reached') {
+          factRes.innerHTML = `<div class="result-text">🚫 Nexus AI is taking a short break. Try again later.</div>`;
+        } else {
+          factRes.innerHTML = `<div class="result-text">⚠️ Cosmic waves blocked. Try again.</div>`;
+        }
+      } catch (err) {
+        factRes.innerHTML = `<div class="result-text">❌ Network error. Try again.</div>`;
+      } finally {
+        factLoading = false;
+        factBtn.textContent = oldText;
+        factBtn.disabled = false;
+      }
     });
   }
 
-  // --- Cinema Quote ---
   const quoteBtn = document.getElementById('quoteBtn');
   const quoteRes = document.getElementById('quoteResult');
   if (quoteBtn && quoteRes) {
