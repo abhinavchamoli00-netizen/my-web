@@ -130,9 +130,6 @@ function ensureFloatingButtons() {
   applyTheme(__currentTheme);
 }
 
-// =========================================
-// LIKE BUTTON (visual only, no storage)
-// =========================================
 function addBookmarkButtons() {
   const page = __currentPage;
   const validPages = ['movies.html', 'marvel.html', 'games.html', 'reading.html'];
@@ -142,20 +139,54 @@ function addBookmarkButtons() {
   cards.forEach(card => {
     if (card.querySelector('.bookmark-btn')) return;
 
+    // Card ka unique ID banao
+    const link = card.closest('a');
+    const href = link ? link.getAttribute('href') : '';
+    const img = card.querySelector('img');
+    const imgSrc = img ? img.getAttribute('src') : '';
+    const id = href || imgSrc;
+    if (!id) return;
+
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'bookmark-btn';
     btn.setAttribute('aria-label', 'Like');
+    btn.dataset.id = id;
 
     // Star icon
     btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
 
+    // Agar pehle se liked hai toh bhara hua dikhao
+    let likes = [];
+    try {
+      likes = JSON.parse(localStorage.getItem('nexus_likes') || '[]');
+    } catch (e) { likes = []; }
+
+    if (likes.includes(id)) btn.classList.add('active');
+
     btn.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
-      btn.classList.toggle('active');
-      btn.style.transform = 'scale(1.4)';
-      setTimeout(() => { btn.style.transform = ''; }, 200);
+
+      let likes = [];
+      try {
+        likes = JSON.parse(localStorage.getItem('nexus_likes') || '[]');
+      } catch (e) { likes = []; }
+
+      const idx = likes.indexOf(id);
+      if (idx > -1) {
+        // Unlike
+        likes.splice(idx, 1);
+        btn.classList.remove('active');
+      } else {
+        // Like
+        likes.push(id);
+        btn.classList.add('active');
+        btn.style.transform = 'scale(1.4)';
+        setTimeout(() => { btn.style.transform = ''; }, 200);
+      }
+
+      localStorage.setItem('nexus_likes', JSON.stringify(likes));
     });
 
     card.appendChild(btn);
