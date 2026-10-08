@@ -1127,3 +1127,189 @@ html.theme-amoled .stat-card { background: #0a0a0a; }
   .stat-label { font-size: 0.65rem; }
   .profile-grid { grid-template-columns: repeat(2, 1fr); }
 }
+/* =========================================
+   NEXUS LABS
+   ========================================= */
+.labs-section {
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 25px 20px;
+  background: #101018;
+  border-radius: 24px;
+  width: 95%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.labs-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 6px;
+  border-left: 4px solid #6c5ce7;
+  padding-left: 12px;
+  color: #a29bfe !important;
+}
+
+.labs-subtitle {
+  color: #888;
+  font-size: 0.85rem;
+  margin-bottom: 24px;
+  padding-left: 16px;
+}
+
+.labs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.lab-card {
+  background: #141414;
+  border: 1px solid rgba(108, 92, 231, 0.2);
+  border-radius: 18px;
+  padding: 22px 18px;
+  text-align: center;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.lab-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(108, 92, 231, 0.15), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.lab-card:hover {
+  border-color: #6c5ce7;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(108, 92, 231, 0.3);
+}
+
+.lab-card:hover::before { opacity: 1; }
+
+.lab-icon {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.lab-card h3 {
+  color: #a29bfe;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.lab-card > p {
+  color: #888;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  min-height: 38px;
+}
+
+.lab-btn {
+  display: inline-block;
+  padding: 10px 22px;
+  background: linear-gradient(135deg, #6c5ce7, #7b4fbf);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
+}
+
+.lab-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(108, 92, 231, 0.6);
+}
+
+.lab-btn:active { transform: translateY(0); }
+
+.lab-result {
+  margin-top: 16px;
+  min-height: 0;
+  font-size: 0.88rem;
+  color: #e0e0e0;
+  line-height: 1.5;
+  transition: all 0.3s ease;
+}
+
+.lab-result:empty { display: none; }
+
+.lab-result a {
+  color: #a29bfe;
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 1px dashed rgba(162, 155, 254, 0.5);
+  transition: all 0.2s ease;
+}
+
+.lab-result a:hover {
+  color: #fff;
+  border-bottom-color: #fff;
+}
+
+.lab-result .result-poster {
+  width: 80px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin: 0 auto 8px auto;
+  display: block;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  animation: fadeInResult 0.4s ease;
+}
+
+.lab-result .result-title {
+  font-weight: 700;
+  color: #a29bfe;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.lab-result .result-sub {
+  color: #888;
+  font-size: 0.78rem;
+  margin-bottom: 8px;
+}
+
+.lab-result .result-text {
+  font-style: italic;
+  color: #ccc;
+  line-height: 1.6;
+  padding: 0 6px;
+}
+
+@keyframes fadeInResult {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Day theme */
+html.theme-day .labs-section { background: #fff; }
+html.theme-day .lab-card { background: #f8f8fc; }
+html.theme-day .lab-card > p { color: #666; }
+html.theme-day .lab-result { color: #333; }
+html.theme-day .lab-result .result-text { color: #444; }
+
+/* Amoled */
+html.theme-amoled .labs-section { background: #050505; }
+html.theme-amoled .lab-card { background: #0a0a0a; }
+
+/* Mobile */
+@media (max-width: 600px) {
+  .labs-section h2 { font-size: 1.4rem; }
+  .labs-grid { grid-template-columns: 1fr; }
+  .lab-icon { font-size: 2rem; }
+}

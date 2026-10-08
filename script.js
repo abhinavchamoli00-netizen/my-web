@@ -207,6 +207,7 @@ function initNexusPage() {
   addBookmarkButtons();
   setupUniversalSearch();
   initProfilePage();
+    initLabsPage();
   async function getDeviceInfo() {
     let model = '', platform = '';
     try {
@@ -1165,6 +1166,114 @@ function initProfilePage() {
       filterWrap.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       renderGrid(btn.dataset.filter);
+    });
+  }
+}
+// =========================================
+// NEXUS LABS
+// =========================================
+function initLabsPage() {
+  if (__currentPage !== 'labs.html') return;
+
+  // Data — NEXUS_DATA (already defined) use karte hain
+  const movies = (typeof NEXUS_DATA !== 'undefined')
+    ? NEXUS_DATA.filter(x => x.category === 'Movies' || x.category === 'Marvel')
+    : [];
+
+  const allItems = (typeof NEXUS_DATA !== 'undefined') ? NEXUS_DATA : [];
+
+  // --- Cosmic Facts ---
+  const cosmicFacts = [
+    "A day on Venus is longer than its year. Venus takes 243 Earth days to rotate once, but only 225 to orbit the Sun.",
+    "There are more stars in the observable universe than grains of sand on all of Earth's beaches.",
+    "The observable universe is about 93 billion light-years across — but it might be infinitely larger.",
+    "A teaspoon of neutron star material would weigh about 6 billion tons on Earth.",
+    "If you could fall into a black hole, time would slow down so much that you'd watch the entire future of the universe pass by.",
+    "Light from the Sun takes 8 minutes 20 seconds to reach Earth. But light from Proxima Centauri (nearest star) takes 4.24 years.",
+    "Saturn's rings are only about 10 meters thick on average — yet they span 282,000 km wide.",
+    "The Milky Way and Andromeda galaxies will collide in about 4.5 billion years. But stars won't crash — space is that empty.",
+    "There's a planet made of diamond — 55 Cancri e. It's twice Earth's size and largely carbon.",
+    "Sound cannot travel through space. The 'explosions' in Star Wars would be completely silent.",
+    "The coldest place in the universe is the Boomerang Nebula at -272°C — one degree above absolute zero.",
+    "Jupiter's Great Red Spot is a storm larger than Earth that has been raging for at least 350 years.",
+    "If the Sun were the size of a white blood cell, the Milky Way would be the size of the United States.",
+    "There are more possible chess games than atoms in the observable universe.",
+    "Time moves slightly faster on your head than your feet. Einstein proved this with general relativity."
+  ];
+
+  // --- Cinema Quotes ---
+  const cinemaQuotes = [
+    { text: "Why do we fall, sir? So that we can learn to pick ourselves up.", by: "Batman Begins" },
+    { text: "Do or do not. There is no try.", by: "The Empire Strikes Back" },
+    { text: "I'm going to make him an offer he can't refuse.", by: "The Godfather" },
+    { text: "Where we're going, we don't need eyes to see.", by: "Event Horizon" },
+    { text: "Your future hasn't been written yet. No one's has. So make it a good one.", by: "Back to the Future" },
+    { text: "Mama always said life was like a box of chocolates. You never know what you're gonna get.", by: "Forrest Gump" },
+    { text: "The things you own end up owning you.", by: "Fight Club" },
+    { text: "You take the blue pill — the story ends. You take the red pill — you stay in Wonderland.", by: "The Matrix" },
+    { text: "Do you know what kind of world this is? This isn't a world. It's a tomb.", by: "Interstellar" },
+    { text: "It's only after we've lost everything that we're free to do anything.", by: "Fight Club" },
+    { text: "Some men just want to watch the world burn.", by: "The Dark Knight" },
+    { text: "Time is a flat circle. Everything we've ever done or will do, we're gonna do over and over again.", by: "True Detective" },
+    { text: "Every passing minute is another chance to turn it all around.", by: "Vanilla Sky" },
+    { text: "Hope is a good thing, maybe the best of things. And no good thing ever dies.", by: "The Shawshank Redemption" },
+    { text: "What we do in life echoes in eternity.", by: "Gladiator" },
+    { text: "The end is where we start from.", by: "T.S. Eliot (quoted in Tenet)" },
+    { text: "We are all just stories in the end. Just make it a good one.", by: "Doctor Who" }
+  ];
+
+  function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  // --- Random Pick ---
+  const randomBtn = document.getElementById('randomPickBtn');
+  const randomRes = document.getElementById('randomPickResult');
+  if (randomBtn && randomRes && allItems.length > 0) {
+    randomBtn.addEventListener('click', () => {
+      const item = rand(allItems);
+      randomRes.innerHTML = `
+        <img src="${item.img}" alt="${item.title}" class="result-poster" onerror="this.style.display='none'">
+        <div class="result-title">${item.title}</div>
+        <div class="result-sub">${item.category}</div>
+        <a href="${item.url}">Open in NEXUS →</a>
+      `;
+    });
+  }
+
+  // --- What to Watch ---
+  const watchBtn = document.getElementById('watchPickBtn');
+  const watchRes = document.getElementById('watchPickResult');
+  if (watchBtn && watchRes && movies.length > 0) {
+    watchBtn.addEventListener('click', () => {
+      const item = rand(movies);
+      watchRes.innerHTML = `
+        <img src="${item.img}" alt="${item.title}" class="result-poster" onerror="this.style.display='none'">
+        <div class="result-title">${item.title}</div>
+        <div class="result-sub">${item.category}</div>
+        <a href="${item.url}">Watch Now →</a>
+      `;
+    });
+  }
+
+  // --- Cosmic Fact ---
+  const factBtn = document.getElementById('cosmicFactBtn');
+  const factRes = document.getElementById('cosmicFactResult');
+  if (factBtn && factRes) {
+    factBtn.addEventListener('click', () => {
+      const fact = rand(cosmicFacts);
+      factRes.innerHTML = `<div class="result-text">🌌 ${fact}</div>`;
+    });
+  }
+
+  // --- Cinema Quote ---
+  const quoteBtn = document.getElementById('quoteBtn');
+  const quoteRes = document.getElementById('quoteResult');
+  if (quoteBtn && quoteRes) {
+    quoteBtn.addEventListener('click', () => {
+      const q = rand(cinemaQuotes);
+      quoteRes.innerHTML = `
+        <div class="result-text">"${q.text}"</div>
+        <div class="result-sub" style="margin-top:10px;">— ${q.by}</div>
+      `;
     });
   }
 }
