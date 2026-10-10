@@ -1400,3 +1400,296 @@ html.theme-day .mix-external { background: #f8f8fc; border-color: rgba(0,0,0,0.0
 html.theme-day .mix-external-title { color: #1a1a1a; }
 html.theme-day .mix-external-why { color: #666; }
 html.theme-amoled .mix-external { background: #0a0a0a; }
+/* =========================================
+   CJP PROTEST REPORT PAGE
+   ========================================= */
+.report-section {
+  max-width: 780px;
+  margin: 20px auto;
+  padding: 0;
+  width: 95%;
+}
+
+/* Header */
+.report-header {
+  background: linear-gradient(135deg, #1a0f2e, #0b0a13);
+  border: 1px solid rgba(108, 92, 231, 0.3);
+  border-radius: 20px;
+  padding: 28px 24px;
+  margin-bottom: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.report-badge {
+  display: inline-block;
+  background: rgba(108, 92, 231, 0.2);
+  color: #a29bfe;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 20px;
+  letter-spacing: 1.5px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(108, 92, 231, 0.4);
+}
+
+.report-title {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 10px;
+  letter-spacing: -0.5px;
+}
+
+.report-subtitle {
+  color: #a29bfe;
+  font-size: 0.95rem;
+  font-style: italic;
+  margin-bottom: 20px;
+}
+
+.report-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(108, 92, 231, 0.2);
+}
+
+.meta-item {
+  background: rgba(108, 92, 231, 0.1);
+  color: #b8b8d0;
+  font-size: 0.72rem;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(108, 92, 231, 0.2);
+}
+
+.meta-item strong { color: #a29bfe; font-weight: 600; }
+
+/* Hero */
+.report-hero {
+  margin-bottom: 20px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #0b0a13;
+  border: 1px solid rgba(108, 92, 231, 0.2);
+}
+
+.report-hero img,
+.report-image-block img {
+  width: 100%;
+  display: block;
+  border-radius: 18px;
+}
+
+.report-image-block {
+  margin: 24px 0;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #0b0a13;
+  border: 1px solid rgba(108, 92, 231, 0.2);
+}
+
+.report-hero.no-image,
+.report-image-block.no-image {
+  display: none;
+}
+
+.image-caption {
+  color: #777;
+  font-size: 0.75rem;
+  text-align: center;
+  padding: 10px 16px;
+  background: rgba(108, 92, 231, 0.05);
+  font-style: italic;
+  margin: 0;
+}
+
+/* Body */
+.report-body {
+  background: #101018;
+  border-radius: 20px;
+  padding: 28px 24px;
+  border: 1px solid rgba(108, 92, 231, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.report-body p {
+  color: #c8c8d8;
+  font-size: 0.98rem;
+  line-height: 1.75;
+  margin-bottom: 18px;
+}
+
+.report-body strong { color: #ffffff; font-weight: 600; }
+.report-body em { color: #a29bfe; }
+
+.lead-para {
+  font-size: 1.05rem !important;
+  color: #e0e0e8 !important;
+  padding-left: 16px;
+  border-left: 3px solid #6c5ce7;
+}
+
+.report-body h3 {
+  color: #a29bfe;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 28px 0 14px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(108, 92, 231, 0.2);
+}
+
+/* Quote */
+.report-quote {
+  background: rgba(108, 92, 231, 0.08);
+  border-left: 4px solid #6c5ce7;
+  border-radius: 0 12px 12px 0;
+  padding: 20px 22px;
+  margin: 24px 0;
+  position: relative;
+}
+
+.report-quote::before {
+  content: '"';
+  position: absolute;
+  top: -10px;
+  left: 12px;
+  font-size: 4rem;
+  color: rgba(108, 92, 231, 0.3);
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+
+.report-quote p {
+  color: #e0e0e8 !important;
+  font-style: italic;
+  font-size: 1rem !important;
+  margin-bottom: 10px !important;
+  position: relative;
+  z-index: 1;
+}
+
+.quote-author {
+  display: block;
+  color: #a29bfe;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+/* Stats */
+.report-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.report-stat {
+  background: rgba(108, 92, 231, 0.1);
+  border: 1px solid rgba(108, 92, 231, 0.3);
+  border-radius: 14px;
+  padding: 18px 12px;
+  text-align: center;
+  transition: all 0.25s ease;
+}
+
+.report-stat:hover {
+  border-color: #6c5ce7;
+  transform: translateY(-2px);
+  background: rgba(108, 92, 231, 0.18);
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #a29bfe;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: #888;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Disclaimer */
+.report-disclaimer {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: rgba(255, 159, 67, 0.06);
+  border: 1px solid rgba(255, 159, 67, 0.25);
+  border-left: 4px solid #ff9f43;
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-top: 24px;
+}
+
+.disclaimer-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.disclaimer-body { flex: 1; }
+
+.disclaimer-body strong {
+  display: block;
+  color: #ff9f43;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.disclaimer-body p {
+  color: #aaa;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  margin: 0 0 8px 0;
+}
+
+.disclaimer-note {
+  color: #666 !important;
+  font-size: 0.72rem !important;
+  font-style: italic;
+  margin-bottom: 0 !important;
+}
+
+/* Day theme */
+html.theme-day .report-header { background: linear-gradient(135deg, #f0e8ff, #ffffff); }
+html.theme-day .report-title { color: #1a1a1a; }
+html.theme-day .report-body { background: #ffffff; }
+html.theme-day .report-body p { color: #444; }
+html.theme-day .report-body strong { color: #1a1a1a; }
+html.theme-day .report-stat { background: rgba(108, 92, 231, 0.06); }
+html.theme-day .stat-value { color: #6c5ce7; }
+html.theme-day .report-disclaimer { background: rgba(255, 159, 67, 0.08); }
+
+/* Amoled */
+html.theme-amoled .report-body { background: #050505; }
+html.theme-amoled .report-header { background: linear-gradient(135deg, #0a0510, #000000); }
+
+/* Mobile */
+@media (max-width: 600px) {
+  .report-title { font-size: 1.4rem; }
+  .report-subtitle { font-size: 0.82rem; }
+  .report-header { padding: 22px 18px; }
+  .report-body { padding: 22px 18px; }
+  .report-body p { font-size: 0.92rem; }
+  .report-body h3 { font-size: 1.05rem; }
+  .report-meta { gap: 6px; }
+  .meta-item { font-size: 0.68rem; padding: 4px 10px; }
+  .report-stats { grid-template-columns: repeat(2, 1fr); }
+  .stat-value { font-size: 1.4rem; }
+  .report-quote p { font-size: 0.92rem !important; }
+}
