@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://nexus-project-alpha8.vercel.app/sitemap.xml
