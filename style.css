@@ -1799,3 +1799,66 @@ html.theme-amoled .report-card {
   .report-card-icon { font-size: 1.8rem; }
   .section-intro { font-size: 0.82rem; padding-left: 12px; }
 }
+/* =========================================
+   REPORT TIMELINE
+   ========================================= */
+.timeline {
+  margin: 24px 0;
+  padding-left: 24px;
+  border-left: 2px solid rgba(108, 92, 231, 0.3);
+  position: relative;
+}
+
+.timeline-item {
+  position: relative;
+  padding: 12px 0 12px 16px;
+  margin-bottom: 4px;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -31px;
+  top: 18px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #6c5ce7;
+  border: 2px solid #101018;
+  box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.4);
+}
+
+.timeline-item.highlight::before {
+  background: #e74c3c;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.3);
+  animation: pulseRed 2s infinite;
+}
+
+@keyframes pulseRed {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.3); }
+  50% { box-shadow: 0 0 0 8px rgba(231, 76, 60, 0.1); }
+}
+
+.timeline-date {
+  display: inline-block;
+  background: rgba(108, 92, 231, 0.2);
+  color: #a29bfe;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.timeline-content {
+  color: #c8c8d8;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.timeline-content strong { color: #fff; }
+
+html.theme-day .timeline-content { color: #444; }
+html.theme-day .timeline-content strong { color: #1a1a1a; }
+html.theme-day .timeline-item::before { border-color: #fff; }
