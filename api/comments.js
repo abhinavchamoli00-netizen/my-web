@@ -1,5 +1,5 @@
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', 'https://nexus-project-alpha8.vercel.app');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -23,7 +23,7 @@ module.exports = async function handler(req, res) {
   };
 
   // =====================
-  // GET: Fetch all comments
+  // GET: Fetch all comments (public — hidden filtered out)
   // =====================
   if (req.method === 'GET') {
     try {
@@ -37,6 +37,9 @@ module.exports = async function handler(req, res) {
         comments = data.record.comments;
       }
       
+      // ✅ Filter out hidden comments from public view
+      comments = comments.filter(c => !c.hidden);
+      
       comments = comments.slice(-50).reverse();
       return res.status(200).json({ success: true, comments });
     } catch (error) {
@@ -48,7 +51,7 @@ module.exports = async function handler(req, res) {
   // POST: Add new comment
   // =====================
   if (req.method === 'POST') {
-    // ✅ SECURITY FIX: Rate limit — 5 comments per 5 minutes per IP
+    // Rate limit
     if (!global._cmtRate) global._cmtRate = new Map();
     const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
     const now = Date.now();
@@ -76,7 +79,6 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    // ✅ SECURITY FIX: Length limits
     if (typeof message !== 'string' || message.length > 300) {
       return res.status(413).json({ error: 'Message too long (max 300 chars)' });
     }

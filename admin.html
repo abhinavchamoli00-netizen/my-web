@@ -126,7 +126,30 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      transition: all 0.2s ease;
     }
+
+    .c-card.hidden-card {
+      background: #0e0e14;
+      opacity: 0.55;
+      border-color: rgba(255, 159, 67, 0.3);
+      position: relative;
+    }
+
+    .c-card.hidden-card::before {
+      content: '🚫 HIDDEN';
+      position: absolute;
+      top: -8px;
+      right: 12px;
+      background: #ff9f43;
+      color: #000;
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 8px;
+      letter-spacing: 0.8px;
+    }
+
     .c-card .top {
       display: flex;
       justify-content: space-between;
@@ -178,6 +201,21 @@
       border-color: rgba(231, 76, 60, 0.3);
     }
     .c-card .btn.del:hover { background: #e74c3c; color: #fff; }
+
+    /* ✅ Hide button styling */
+    .c-card .btn.hide {
+      background: rgba(255, 159, 67, 0.1);
+      color: #ff9f43;
+      border-color: rgba(255, 159, 67, 0.4);
+    }
+    .c-card .btn.hide:hover { background: #ff9f43; color: #000; }
+
+    .c-card .btn.unhide {
+      background: rgba(46, 204, 113, 0.1);
+      color: #2ecc71;
+      border-color: rgba(46, 204, 113, 0.4);
+    }
+    .c-card .btn.unhide:hover { background: #2ecc71; color: #fff; }
 
     .existing-reply {
       background: #1c1b22;
@@ -274,7 +312,6 @@
 
 <script>
 (function() {
-  // ⚠️ MUST MATCH Vercel env var "MY_DEVICE_TOKEN" exactly
   const MY_DEVICE_TOKEN = 'nexus-my-device-2026-abhinav';
 
   const lockScreen = document.getElementById('lockScreen');
@@ -287,7 +324,7 @@
   const clearBtn = document.getElementById('clearBtn');
   const lockBtn = document.getElementById('lockBtn');
 
-  // 🚨 Alert Telegram when admin page is opened (skip if this is YOUR device)
+  // Admin visit alert
   if (!sessionStorage.getItem('_adm_visit_logged')) {
     sessionStorage.setItem('_adm_visit_logged', '1');
     (async () => {
@@ -392,7 +429,7 @@
 
     comments.forEach(c => {
       const card = document.createElement('div');
-      card.className = 'c-card';
+      card.className = 'c-card' + (c.hidden ? ' hidden-card' : '');
 
       const top = document.createElement('div');
       top.className = 'top';
@@ -437,12 +474,25 @@
         if (replyBox.classList.contains('active')) replyInput.focus();
       });
 
+      // ✅ Hide / Unhide button
+      const hideBtn = document.createElement('button');
+      if (c.hidden) {
+        hideBtn.className = 'btn unhide';
+        hideBtn.textContent = '👁️ Unhide';
+        hideBtn.addEventListener('click', () => unhideComment(c.id));
+      } else {
+        hideBtn.className = 'btn hide';
+        hideBtn.textContent = '🚫 Hide';
+        hideBtn.addEventListener('click', () => hideComment(c.id));
+      }
+
       const del = document.createElement('button');
       del.className = 'btn del';
       del.textContent = 'Delete';
       del.addEventListener('click', () => deleteComment(c.id));
 
       btns.appendChild(replyBtn);
+      btns.appendChild(hideBtn);
       btns.appendChild(del);
 
       top.appendChild(meta);
@@ -511,6 +561,36 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: pass, action: 'delete', commentId: id, deviceToken: MY_DEVICE_TOKEN })
+      });
+      const data = await res.json();
+      if (data.success) renderComments(data.comments || []);
+    } catch (e) {}
+  }
+
+  // ✅ Hide comment
+  async function hideComment(id) {
+    const pass = sessionStorage.getItem('_adm');
+    if (!pass) return;
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass, action: 'hide', commentId: id, deviceToken: MY_DEVICE_TOKEN })
+      });
+      const data = await res.json();
+      if (data.success) renderComments(data.comments || []);
+    } catch (e) {}
+  }
+
+  // ✅ Unhide comment
+  async function unhideComment(id) {
+    const pass = sessionStorage.getItem('_adm');
+    if (!pass) return;
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass, action: 'unhide', commentId: id, deviceToken: MY_DEVICE_TOKEN })
       });
       const data = await res.json();
       if (data.success) renderComments(data.comments || []);

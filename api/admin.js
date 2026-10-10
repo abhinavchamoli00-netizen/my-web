@@ -22,7 +22,6 @@ module.exports = async function handler(req, res) {
   const TRUSTED_TOKEN = process.env.MY_DEVICE_TOKEN || '';
   const isTrusted = !!(TRUSTED_TOKEN && deviceToken === TRUSTED_TOKEN);
 
-  // helper: build device string
   const buildDeviceStr = (ua, model) => {
     let device = 'Desktop';
     if (/Mobi|Android|iPhone|iPod/i.test(ua)) device = 'Mobile';
@@ -35,7 +34,6 @@ module.exports = async function handler(req, res) {
     return model ? `${device} • ${model}` : `${device} (${browser})`;
   };
 
-  // helper: geo lookup
   const lookupLocation = async (ip) => {
     try {
       if (!ip || ip === 'Unknown') return 'Unknown';
@@ -48,14 +46,9 @@ module.exports = async function handler(req, res) {
     return 'Unknown';
   };
 
-  // =========================================
-  // SPECIAL ACTION: visitAlert (no password needed)
-  // =========================================
+  // Visit alert
   if (action === 'visitAlert') {
-    if (isTrusted) {
-      return res.status(200).json({ success: true, skipped: true });
-    }
-
+    if (isTrusted) return res.status(200).json({ success: true, skipped: true });
     try {
       const botToken = process.env.TELEGRAM_BOT_TOKEN;
       const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -75,9 +68,7 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ success: true });
   }
 
-  // =========================================
-  // WRONG PASSWORD ALERT (skip if trusted device)
-  // =========================================
+  // Wrong password alert
   if (password && password !== ADMIN_PASS && !isTrusted) {
     try {
       const botToken = process.env.TELEGRAM_BOT_TOKEN;
@@ -117,6 +108,7 @@ module.exports = async function handler(req, res) {
     else if (readData.record && readData.record.comments) comments = readData.record.comments;
 
     if (action === 'verify') {
+      // Admin sees ALL comments (including hidden)
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
@@ -124,10 +116,29 @@ module.exports = async function handler(req, res) {
       const before = comments.length;
       comments = comments.filter(c => c.id !== commentId);
       if (comments.length === before) return res.status(404).json({ error: 'Not found' });
+      const saveRes = await fetch(baseUrl, { method: 'PUT', headers, body: JSON.stringify(comments) });
+      if (!saveRes.ok) return res.status(500).json({ error: 'Save failed' });
+      return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
+    }
 
-      const saveRes = await fetch(baseUrl, {
-        method: 'PUT', headers, body: JSON.stringify(comments)
-      });
+    // ✅ NEW: Hide comment
+    if (action === 'hide') {
+      const idx = comments.findIndex(c => c.id === commentId);
+      if (idx === -1) return res.status(404).json({ error: 'Comment not found' });
+      comments[idx].hidden = true;
+      comments[idx].hiddenAt = Date.now();
+      const saveRes = await fetch(baseUrl, { method: 'PUT', headers, body: JSON.stringify(comments) });
+      if (!saveRes.ok) return res.status(500).json({ error: 'Save failed' });
+      return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
+    }
+
+    // ✅ NEW: Unhide comment
+    if (action === 'unhide') {
+      const idx = comments.findIndex(c => c.id === commentId);
+      if (idx === -1) return res.status(404).json({ error: 'Comment not found' });
+      delete comments[idx].hidden;
+      delete comments[idx].hiddenAt;
+      const saveRes = await fetch(baseUrl, { method: 'PUT', headers, body: JSON.stringify(comments) });
       if (!saveRes.ok) return res.status(500).json({ error: 'Save failed' });
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
@@ -135,16 +146,11 @@ module.exports = async function handler(req, res) {
     if (action === 'reply') {
       if (!replyText) return res.status(400).json({ error: 'Reply text required' });
       if (replyText.length > 400) return res.status(400).json({ error: 'Reply too long' });
-
       const idx = comments.findIndex(c => c.id === commentId);
       if (idx === -1) return res.status(404).json({ error: 'Comment not found' });
-
       comments[idx].reply = replyText;
       comments[idx].replyTimestamp = Date.now();
-
-      const saveRes = await fetch(baseUrl, {
-        method: 'PUT', headers, body: JSON.stringify(comments)
-      });
+      const saveRes = await fetch(baseUrl, { method: 'PUT', headers, body: JSON.stringify(comments) });
       if (!saveRes.ok) return res.status(500).json({ error: 'Save failed' });
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
@@ -152,21 +158,15 @@ module.exports = async function handler(req, res) {
     if (action === 'unreply') {
       const idx = comments.findIndex(c => c.id === commentId);
       if (idx === -1) return res.status(404).json({ error: 'Comment not found' });
-
       delete comments[idx].reply;
       delete comments[idx].replyTimestamp;
-
-      const saveRes = await fetch(baseUrl, {
-        method: 'PUT', headers, body: JSON.stringify(comments)
-      });
+      const saveRes = await fetch(baseUrl, { method: 'PUT', headers, body: JSON.stringify(comments) });
       if (!saveRes.ok) return res.status(500).json({ error: 'Save failed' });
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
     if (action === 'clear') {
-      const saveRes = await fetch(baseUrl, {
-        method: 'PUT', headers, body: JSON.stringify([])
-      });
+      const saveRes = await fetch(baseUrl, { method: 'PUT', headers, body: JSON.stringify([]) });
       if (!saveRes.ok) return res.status(500).json({ error: 'Save failed' });
       return res.status(200).json({ success: true, comments: [] });
     }
