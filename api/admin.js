@@ -108,22 +108,31 @@ module.exports = async function handler(req, res) {
     else if (readData.record && readData.record.comments) comments = readData.record.comments;
 
     if (action === 'verify') {
-      // Admin sees ALL comments (including hidden)
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
+    // ✅ DELETE — with better error handling
     if (action === 'delete') {
       const before = comments.length;
-      comments = comments.filter(c => c.id !== commentId);
-      if (comments.length === before) return res.status(404).json({ error: 'Not found' });
+      comments = comments.filter(c => String(c.id) !== String(commentId));
+      if (comments.length === before) {
+        return res.status(404).json({ 
+          error: 'Comment not found',
+          lookingFor: commentId,
+          availableIds: comments.slice(-5).map(c => c.id)
+        });
+      }
       const saveRes = await fetch(baseUrl, { method: 'PUT', headers, body: JSON.stringify(comments) });
-      if (!saveRes.ok) return res.status(500).json({ error: 'Save failed' });
+      if (!saveRes.ok) {
+        const errText = await saveRes.text().catch(() => 'unknown');
+        return res.status(500).json({ error: 'Save failed', details: errText });
+      }
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // ✅ NEW: Hide comment
+    // ✅ HIDE
     if (action === 'hide') {
-      const idx = comments.findIndex(c => c.id === commentId);
+      const idx = comments.findIndex(c => String(c.id) === String(commentId));
       if (idx === -1) return res.status(404).json({ error: 'Comment not found' });
       comments[idx].hidden = true;
       comments[idx].hiddenAt = Date.now();
@@ -132,9 +141,9 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // ✅ NEW: Unhide comment
+    // ✅ UNHIDE
     if (action === 'unhide') {
-      const idx = comments.findIndex(c => c.id === commentId);
+      const idx = comments.findIndex(c => String(c.id) === String(commentId));
       if (idx === -1) return res.status(404).json({ error: 'Comment not found' });
       delete comments[idx].hidden;
       delete comments[idx].hiddenAt;
@@ -143,10 +152,11 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
+    // REPLY
     if (action === 'reply') {
       if (!replyText) return res.status(400).json({ error: 'Reply text required' });
       if (replyText.length > 400) return res.status(400).json({ error: 'Reply too long' });
-      const idx = comments.findIndex(c => c.id === commentId);
+      const idx = comments.findIndex(c => String(c.id) === String(commentId));
       if (idx === -1) return res.status(404).json({ error: 'Comment not found' });
       comments[idx].reply = replyText;
       comments[idx].replyTimestamp = Date.now();
@@ -155,8 +165,9 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
+    // UNREPLY
     if (action === 'unreply') {
-      const idx = comments.findIndex(c => c.id === commentId);
+      const idx = comments.findIndex(c => String(c.id) === String(commentId));
       if (idx === -1) return res.status(404).json({ error: 'Comment not found' });
       delete comments[idx].reply;
       delete comments[idx].replyTimestamp;
@@ -165,6 +176,7 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
+    // CLEAR
     if (action === 'clear') {
       const saveRes = await fetch(baseUrl, { method: 'PUT', headers, body: JSON.stringify([]) });
       if (!saveRes.ok) return res.status(500).json({ error: 'Save failed' });
