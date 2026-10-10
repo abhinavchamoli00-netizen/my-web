@@ -1693,3 +1693,109 @@ html.theme-amoled .report-header { background: linear-gradient(135deg, #0a0510, 
   .stat-value { font-size: 1.4rem; }
   .report-quote p { font-size: 0.92rem !important; }
 }
+/* =========================================
+   POLITICAL HUB PAGE
+   ========================================= */
+.section-intro {
+  color: #888;
+  font-size: 0.9rem;
+  margin-bottom: 22px;
+  padding-left: 16px;
+  line-height: 1.5;
+}
+
+/* Report card (asymmetric — different from poster) */
+.report-card {
+  grid-column: span 2;
+  background: linear-gradient(135deg, #141414, #1a1033) !important;
+  border: 1px solid rgba(108, 92, 231, 0.35) !important;
+  border-radius: 18px !important;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.25s ease;
+  aspect-ratio: auto !important;
+}
+
+.report-card:hover {
+  border-color: #6c5ce7 !important;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(108, 92, 231, 0.4) !important;
+}
+
+.report-card-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(231, 76, 60, 0.95);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  animation: livePulse 2s infinite;
+  z-index: 5;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.95); }
+}
+
+.report-card-body {
+  padding: 22px 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.report-card-icon {
+  font-size: 2.2rem;
+  margin-bottom: 6px;
+}
+
+.report-card h3 {
+  color: #ffffff !important;
+  font-size: 1.2rem !important;
+  font-weight: 700;
+  margin: 0 !important;
+  letter-spacing: 0.2px;
+}
+
+.report-card-date {
+  color: #a29bfe;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.3px;
+}
+
+.report-card-desc {
+  color: #aaa;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  margin: 8px 0 0 0;
+}
+
+/* Day theme */
+html.theme-day .report-card {
+  background: linear-gradient(135deg, #ffffff, #f0e8ff) !important;
+}
+html.theme-day .report-card h3 { color: #1a1a1a !important; }
+html.theme-day .report-card-desc { color: #555; }
+
+/* Amoled */
+html.theme-amoled .report-card {
+  background: linear-gradient(135deg, #0a0a0a, #0a0510) !important;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .report-card { grid-column: span 2 !important; }
+  .report-card-body { padding: 18px 16px; }
+  .report-card h3 { font-size: 1.05rem !important; }
+  .report-card-desc { font-size: 0.8rem; }
+  .report-card-icon { font-size: 1.8rem; }
+  .section-intro { font-size: 0.82rem; padding-left: 12px; }
+}
