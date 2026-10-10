@@ -1965,3 +1965,234 @@ html.theme-amoled .political-card {
   .political-card .report-card-desc { font-size: 0.8rem; }
   .political-card .report-card-icon { font-size: 1.8rem; }
 }
+/* =========================================
+   PROFESSIONAL REPORT — Extras
+   ========================================= */
+
+/* Table of Contents */
+.report-toc {
+  background: #101018;
+  border: 1px solid rgba(108, 92, 231, 0.25);
+  border-radius: 16px;
+  padding: 18px 22px;
+  margin-bottom: 20px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+.report-toc h4 {
+  color: #a29bfe;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  letter-spacing: 0.5px;
+}
+
+.report-toc ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.report-toc li { display: inline-block; }
+
+.report-toc a {
+  display: inline-block;
+  padding: 6px 12px;
+  background: rgba(108, 92, 231, 0.1);
+  border: 1px solid rgba(108, 92, 231, 0.25);
+  color: #b8b8d0;
+  font-size: 0.78rem;
+  border-radius: 18px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.report-toc a:hover {
+  background: #6c5ce7;
+  color: #fff;
+  border-color: #6c5ce7;
+}
+
+/* Section anchors — offset for sticky header */
+.report-body section {
+  scroll-margin-top: 20px;
+}
+
+/* Fact flag (inline unverified marker) */
+.fact-flag {
+  display: inline-block;
+  font-size: 0.72rem;
+  color: #ffb347;
+  background: rgba(255, 159, 67, 0.1);
+  border: 1px dashed rgba(255, 159, 67, 0.4);
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-style: normal;
+  margin: 2px 0;
+}
+
+/* Report list */
+.report-list {
+  padding-left: 22px;
+  margin: 12px 0 18px 0;
+}
+
+.report-list li {
+  color: #c8c8d8;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
+/* Fact grid */
+.fact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 16px 0;
+}
+
+.fact-box {
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid;
+}
+
+.fact-box h4 {
+  font-size: 0.9rem;
+  margin: 0 0 10px 0;
+  letter-spacing: 0.3px;
+}
+
+.fact-box ul {
+  padding-left: 18px;
+  margin: 0;
+}
+
+.fact-box li {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  margin-bottom: 8px;
+}
+
+.fact-box.confirmed {
+  background: rgba(46, 204, 113, 0.06);
+  border-color: rgba(46, 204, 113, 0.3);
+}
+
+.fact-box.confirmed h4 { color: #2ecc71; }
+.fact-box.confirmed li { color: #b8d4c0; }
+
+.fact-box.disputed {
+  background: rgba(255, 159, 67, 0.06);
+  border-color: rgba(255, 159, 67, 0.3);
+}
+
+.fact-box.disputed h4 { color: #ff9f43; }
+.fact-box.disputed li { color: #d4c0a8; }
+
+/* References */
+.refs-note {
+  color: #888;
+  font-size: 0.82rem;
+  font-style: italic;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background: rgba(108, 92, 231, 0.05);
+  border-left: 3px solid rgba(108, 92, 231, 0.4);
+  border-radius: 0 8px 8px 0;
+}
+
+.refs-list {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.refs-list li {
+  color: #c8c8d8;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.ref-placeholder {
+  color: #a29bfe;
+  font-weight: 600;
+}
+
+.ref-meta {
+  color: #666;
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
+/* Corrections */
+.corrections-list {
+  padding-left: 20px;
+  margin: 0 0 12px 0;
+}
+
+.corrections-list li {
+  color: #c8c8d8;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.corrections-note {
+  color: #888;
+  font-size: 0.82rem;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Gallery note */
+.gallery-note {
+  color: #888;
+  font-size: 0.82rem;
+  font-style: italic;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: rgba(255, 159, 67, 0.05);
+  border-left: 3px solid rgba(255, 159, 67, 0.35);
+  border-radius: 0 8px 8px 0;
+}
+
+/* Figure spacing */
+.report-image-block {
+  margin: 24px 0;
+  padding: 0;
+}
+
+/* Day theme overrides */
+html.theme-day .report-toc { background: #ffffff; }
+html.theme-day .report-toc a { background: rgba(108, 92, 231, 0.06); color: #555; }
+html.theme-day .report-toc a:hover { color: #fff; }
+html.theme-day .report-list li { color: #444; }
+html.theme-day .refs-list li { color: #444; }
+html.theme-day .corrections-list li { color: #444; }
+html.theme-day .fact-box.confirmed li { color: #2c5c3e; }
+html.theme-day .fact-box.disputed li { color: #7a5a2a; }
+html.theme-day .fact-flag { color: #b36b00; background: rgba(255, 159, 67, 0.12); }
+
+/* Amoled */
+html.theme-amoled .report-toc { background: #050505; }
+
+/* Mobile */
+@media (max-width: 600px) {
+  .fact-grid {
+    grid-template-columns: 1fr;
+  }
+  .report-toc ol {
+    gap: 6px;
+  }
+  .report-toc a {
+    font-size: 0.72rem;
+    padding: 5px 10px;
+  }
+  .fact-box li { font-size: 0.82rem; }
+  .report-list li { font-size: 0.88rem; }
+}
