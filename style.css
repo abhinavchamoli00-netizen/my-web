@@ -1862,3 +1862,106 @@ html.theme-amoled .report-card {
 html.theme-day .timeline-content { color: #444; }
 html.theme-day .timeline-content strong { color: #1a1a1a; }
 html.theme-day .timeline-item::before { border-color: #fff; }
+/* =========================================
+   POLITICAL GRID (equal size cards)
+   ========================================= */
+.political-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+.political-card {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #141414, #1a1033);
+  border: 1px solid rgba(108, 92, 231, 0.35);
+  border-radius: 18px;
+  padding: 22px 20px 20px 20px;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  transition: all 0.25s ease;
+  min-height: 260px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+}
+
+.political-card:hover {
+  border-color: #6c5ce7;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(108, 92, 231, 0.4);
+}
+
+.political-card .report-card-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(231, 76, 60, 0.95);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  z-index: 5;
+}
+
+.political-card .report-card-icon {
+  font-size: 2rem;
+  margin-bottom: 12px;
+  margin-top: 4px;
+}
+
+.political-card h3 {
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  line-height: 1.3;
+  letter-spacing: 0.2px;
+}
+
+.political-card .report-card-date {
+  color: #a29bfe;
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  letter-spacing: 0.3px;
+}
+
+.political-card .report-card-desc {
+  color: #aaa;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin: 0;
+  flex: 1;
+}
+
+/* Day theme */
+html.theme-day .political-card {
+  background: linear-gradient(135deg, #ffffff, #f0e8ff);
+}
+html.theme-day .political-card h3 { color: #1a1a1a; }
+html.theme-day .political-card .report-card-desc { color: #555; }
+
+/* Amoled */
+html.theme-amoled .political-card {
+  background: linear-gradient(135deg, #0a0a0a, #0a0510);
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .political-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .political-card {
+    padding: 20px 18px;
+    min-height: auto;
+  }
+  .political-card h3 { font-size: 1rem; }
+  .political-card .report-card-desc { font-size: 0.8rem; }
+  .political-card .report-card-icon { font-size: 1.8rem; }
+}
