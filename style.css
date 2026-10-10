@@ -2196,3 +2196,18 @@ html.theme-amoled .report-toc { background: #050505; }
   .fact-box li { font-size: 0.82rem; }
   .report-list li { font-size: 0.88rem; }
 }
+/* Inline report link */
+.report-inline-link {
+  display: inline-block;
+  color: #a29bfe;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(162, 155, 254, 0.5);
+  padding-bottom: 1px;
+  transition: all 0.2s ease;
+}
+
+.report-inline-link:hover {
+  color: #ffffff;
+  border-bottom-color: #ffffff;
+}
