@@ -253,8 +253,10 @@ function initNexusPage() {
     } catch (e) {}
   }
 
-  // SOCIAL CLICK TRACKING (keepalive = fixes cancellation on new tab)
-  document.addEventListener('click', async (e) => {
+    // =========================================
+  // SOCIAL CLICK TRACKING (sendBeacon — most reliable)
+  // =========================================
+  document.addEventListener('click', (e) => {
     const link = e.target.closest('a');
     if (!link) return;
 
@@ -270,27 +272,44 @@ function initNexusPage() {
     else if (/facebook\.com/i.test(href)) socialName = 'Facebook';
     else return;
 
-    try {
-      const { model, platform } = await getDeviceInfo();
-      const device = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
-      const browser = navigator.userAgent.includes('Chrome') ? 'Chrome' :
-                      navigator.userAgent.includes('Firefox') ? 'Firefox' :
-                      navigator.userAgent.includes('Safari') ? 'Safari' : 'Other';
+    const device = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+    const browser = navigator.userAgent.includes('Chrome') ? 'Chrome' :
+                    navigator.userAgent.includes('Firefox') ? 'Firefox' :
+                    navigator.userAgent.includes('Safari') ? 'Safari' : 'Other';
 
+    const payload = JSON.stringify({
+      type: 'socialClick',
+      socialName: socialName,
+      socialUrl: href,
+      referrer: document.referrer || 'Direct',
+      page: __currentPage,
+      device: device,
+      browser: browser,
+      model: '',
+      platform: ''
+    });
+
+    // ✅ sendBeacon — works even when navigating to new tab
+    if (navigator.sendBeacon) {
+      try {
+        const blob = new Blob([payload], { type: 'application/json' });
+        navigator.sendBeacon('/api/visitor', blob);
+      } catch (err) {
+        fetch('/api/visitor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          keepalive: true,
+          body: payload
+        }).catch(() => {});
+      }
+    } else {
       fetch('/api/visitor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         keepalive: true,
-        body: JSON.stringify({
-          type: 'socialClick',
-          socialName: socialName,
-          socialUrl: href,
-          referrer: document.referrer || 'Direct',
-          page: __currentPage,
-          device, browser, model, platform
-        })
+        body: payload
       }).catch(() => {});
-    } catch (err) {}
+    }
   }, true);
 
   const hasTrackedVisit = sessionStorage.getItem('nexus_visit_tracked');
