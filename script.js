@@ -253,6 +253,7 @@ function initNexusPage() {
   setupUniversalSearch();
   initProfilePage();
   initLabsPage();
+    setTimeout(applyPinnedSections, 100);
 
   async function getDeviceInfo() {
     let model = '', platform = '';
