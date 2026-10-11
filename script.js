@@ -88,7 +88,7 @@ function __nexusUnlockAt() {
 
 let __nexusLockInterval = null;
 
-function applySectionLocks() {
+ function applySectionLocks() {
   if (__nexusLockInterval) { clearInterval(__nexusLockInterval); __nexusLockInterval = null; }
   if (!__nexusLockActive()) return;
   if (!isHomePage()) return;
@@ -111,6 +111,51 @@ function applySectionLocks() {
       document.querySelectorAll('.categories a.card').forEach(clearLockOnCard);
       return;
     }
+
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    const timerText = `${d}d ${h}h ${m}m ${s}s`;
+
+    const cards = document.querySelectorAll('.categories a.card');
+    cards.forEach(card => {
+      const href = (card.getAttribute('href') || '').trim().toLowerCase();
+      if (!NEXUS_LOCKED_HREFS.includes(href)) return;
+
+      card.style.pointerEvents = 'none';
+      card.style.position = 'relative';
+      // ❌ Koi filter / dim nahi — colors intact rahenge
+      card.style.filter = '';
+      card.style.opacity = '1';
+
+      let overlay = card.querySelector('.nexus-lock-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'nexus-lock-overlay';
+        overlay.style.cssText = [
+          'position:absolute','inset:0',
+          'display:flex','flex-direction:column','align-items:center','justify-content:center',
+          'background:rgba(11,10,19,0.55)',
+          'border-radius:inherit','z-index:50','text-align:center','padding:10px',
+          'pointer-events:none'
+        ].join(';');
+        overlay.innerHTML = `
+          <div style="font-size:1.5rem; line-height:1; margin-bottom:6px;">🔒</div>
+          <div style="color:#ffffff; font-weight:700; font-size:0.66rem; letter-spacing:2.5px; margin-bottom:6px; text-transform:uppercase;">Locked</div>
+          <div class="nexus-lock-timer" style="color:#ff9f43; font-weight:700; font-size:0.95rem; font-family:'Space Grotesk',sans-serif; letter-spacing:0.5px;">--</div>
+        `;
+        card.appendChild(overlay);
+      }
+
+      const timerEl = overlay.querySelector('.nexus-lock-timer');
+      if (timerEl) timerEl.textContent = timerText;
+    });
+  }
+
+  paint();
+  __nexusLockInterval = setInterval(paint, 1000);
+}
 
     const d = Math.floor(diff / 86400000);
     const h = Math.floor((diff % 86400000) / 3600000);
