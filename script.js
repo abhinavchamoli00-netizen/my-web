@@ -22,6 +22,56 @@ const THEMES = ['dark', 'day', 'amoled'];
 const THEME_ICONS = { dark: '🌙', day: '☀️', amoled: '⬛' };
 let __currentTheme = localStorage.getItem('nexus_theme') || 'dark';
 if (!THEMES.includes(__currentTheme)) __currentTheme = 'dark';
+// =========================================
+// PINNED SECTIONS (reorder homepage categories)
+// =========================================
+async function applyPinnedSections() {
+  if (!isHomePage()) return;
+  const categoriesGrid = document.querySelector('.categories');
+  if (!categoriesGrid) return;
+
+  try {
+    const res = await fetch('/api/settings');
+    const data = await res.json();
+    if (!data.success || !Array.isArray(data.pinned) || data.pinned.length === 0) return;
+
+    const allCards = Array.from(categoriesGrid.querySelectorAll('a.card'));
+    const pinnedCards = [];
+    const restCards = [];
+
+    allCards.forEach(card => {
+      const href = card.getAttribute('href') || '';
+      const idx = data.pinned.indexOf(href);
+      if (idx > -1) {
+        card.style.order = String(idx);
+        card.style.gridColumn = 'span 2';
+        card.style.borderColor = 'rgba(108, 92, 231, 0.7)';
+        card.style.boxShadow = '0 8px 26px rgba(108, 92, 231, 0.35)';
+        card.style.background = 'linear-gradient(135deg, #141414, #1a1033)';
+
+        if (!card.querySelector('.pinned-badge')) {
+          const b = document.createElement('span');
+          b.className = 'pinned-badge';
+          b.textContent = '📌 PINNED';
+          card.appendChild(b);
+        }
+        pinnedCards.push(card);
+      } else {
+        restCards.push(card);
+      }
+    });
+
+    // Reorder: pinned first, rest after
+    categoriesGrid.innerHTML = '';
+    pinnedCards.forEach(c => categoriesGrid.appendChild(c));
+    restCards.forEach(c => categoriesGrid.appendChild(c));
+
+    // Mobile fallback: reset gridColumn on small screens
+    if (window.innerWidth <= 600) {
+      pinnedCards.forEach(c => { c.style.gridColumn = 'span 1'; });
+    }
+  } catch (e) {}
+}
 
 function applyTheme(t) {
   document.documentElement.classList.remove('theme-dark', 'theme-day', 'theme-amoled');
@@ -1466,4 +1516,10 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initNexusPage);
 } else {
   initNexusPage();
+  // Apply pinned sections on first load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', applyPinnedSections);
+} else {
+  applyPinnedSections();
+}
 }

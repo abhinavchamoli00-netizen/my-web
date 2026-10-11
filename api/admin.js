@@ -88,7 +88,50 @@ module.exports = async function handler(req, res) {
       }
     } catch (e) {}
   }
+  // =========================================
+  // PIN / UNPIN HOMEPAGE SECTIONS
+  // =========================================
+  if (action === 'pinSection' || action === 'unpinSection' || action === 'getPinnedSections') {
+    const pollBinId = process.env.POLL_BIN_ID;
+    if (!apiKey || !pollBinId) return res.status(500).json({ error: 'POLL_BIN_ID not configured' });
+    const settingsUrl = `https://api.jsonbin.io/v3/b/${pollBinId}`;
+    const settingsHeaders = { 'X-Master-Key': apiKey, 'Content-Type': 'application/json' };
 
+    try {
+      const r = await fetch(`${settingsUrl}/latest`, { headers: settingsHeaders });
+      const d = await r.json();
+      let data = (d.record && typeof d.record === 'object') ? d.record : {};
+      if (!Array.isArray(data.pinned)) data.pinned = [];
+
+      if (action === 'getPinnedSections') {
+        return res.status(200).json({ success: true, pinned: data.pinned });
+      }
+
+      const sectionId = (body.sectionId || '').trim();
+      if (!sectionId) return res.status(400).json({ error: 'sectionId required' });
+
+      if (action === 'pinSection') {
+        if (!data.pinned.includes(sectionId)) {
+          if (data.pinned.length >= 2) {
+            return res.status(400).json({ error: 'Max 2 sections can be pinned. Unpin one first.' });
+          }
+          data.pinned.push(sectionId);
+        }
+      } else if (action === 'unpinSection') {
+        data.pinned = data.pinned.filter(s => s !== sectionId);
+      }
+
+      const saveRes = await fetch(settingsUrl, {
+        method: 'PUT', headers: settingsHeaders, body: JSON.stringify(data)
+      });
+      if (!saveRes.ok) return res.status(500).json({ error: 'Save failed' });
+      return res.status(200).json({ success: true, pinned: data.pinned });
+    } catch (e) {
+      return res.status(500).json({ error: 'Server error', details: e.message });
+    }
+  }
+
+  if (password !== ADMIN_PASS) {
   if (password !== ADMIN_PASS) {
     return res.status(401).json({ success: false, error: 'Invalid credentials' });
   }

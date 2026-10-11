@@ -307,6 +307,13 @@
         <button id="lockBtn">Lock</button>
       </div>
     </div>
+        <!-- 📌 PIN HOMEPAGE SECTIONS -->
+    <div style="background:#141414; border-radius:14px; padding:16px; margin-bottom:20px; border:1px solid rgba(108,92,231,0.2);">
+      <h3 style="color:#a29bfe; font-size:1rem; margin-bottom:6px;">📌 Pin Homepage Sections</h3>
+      <p style="color:#888; font-size:0.78rem; margin-bottom:14px;">Pin max 2 categories to appear at top of homepage.</p>
+      <div id="pinSections" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"></div>
+      <p id="pinStatus" style="color:#888; font-size:0.75rem; margin-top:10px; min-height:14px;"></p>
+    </div>
     <div class="list" id="list"></div>
   </div>
 
@@ -323,6 +330,88 @@
   const refreshBtn = document.getElementById('refreshBtn');
   const clearBtn = document.getElementById('clearBtn');
   const lockBtn = document.getElementById('lockBtn');
+    // =========================================
+  // PIN / UNPIN HOMEPAGE SECTIONS
+  // =========================================
+  const SECTIONS = [
+    { id: 'movies.html', name: '🎬 Movies' },
+    { id: 'games.html', name: '🎮 Games' },
+    { id: 'reading.html', name: '📖 Reading' },
+    { id: 'marvel.html', name: '🦸 Marvel' },
+    { id: 'listening.html', name: '🎧 Listening' },
+    { id: 'profile.html', name: '👤 Profile' },
+    { id: 'labs.html', name: '🧪 Labs' },
+    { id: 'political.html', name: '🏛️ Political' }
+  ];
+  const pinSections = document.getElementById('pinSections');
+  const pinStatus = document.getElementById('pinStatus');
+
+  async function loadPinned() {
+    const pass = sessionStorage.getItem('_adm');
+    if (!pass) return;
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass, action: 'getPinnedSections', deviceToken: MY_DEVICE_TOKEN })
+      });
+      const data = await res.json();
+      renderPinned(data.success ? data.pinned : []);
+    } catch (e) { renderPinned([]); }
+  }
+
+  function renderPinned(pinned) {
+    pinSections.innerHTML = '';
+    SECTIONS.forEach(sec => {
+      const isPinned = pinned.includes(sec.id);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = (isPinned ? '📌 ' : '') + sec.name;
+      btn.style.cssText = `
+        padding:10px 8px; border-radius:10px; cursor:pointer; font-family:inherit; font-size:0.82rem;
+        border:1px solid ${isPinned ? '#6c5ce7' : 'rgba(108,92,231,0.3)'};
+        background:${isPinned ? 'rgba(108,92,231,0.35)' : 'rgba(108,92,231,0.1)'};
+        color:${isPinned ? '#fff' : '#a29bfe'}; font-weight:600;
+        transition:all 0.2s;
+      `;
+      btn.addEventListener('click', () => togglePin(sec.id, isPinned));
+      pinSections.appendChild(btn);
+    });
+  }
+
+  async function togglePin(sectionId, isPinned) {
+    const pass = sessionStorage.getItem('_adm');
+    if (!pass) return;
+    pinStatus.textContent = isPinned ? 'Unpinning...' : 'Pinning...';
+    pinStatus.style.color = '#a29bfe';
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          password: pass,
+          action: isPinned ? 'unpinSection' : 'pinSection',
+          sectionId: sectionId,
+          deviceToken: MY_DEVICE_TOKEN
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        pinStatus.textContent = isPinned ? '✅ Unpinned' : '✅ Pinned';
+        pinStatus.style.color = '#2ecc71';
+        renderPinned(data.pinned || []);
+        setTimeout(() => { pinStatus.textContent = ''; }, 2500);
+      } else {
+        pinStatus.textContent = '❌ ' + (data.error || 'Failed');
+        pinStatus.style.color = '#e74c3c';
+      }
+    } catch (e) {
+      pinStatus.textContent = '❌ Network error';
+      pinStatus.style.color = '#e74c3c';
+    }
+  }
+
+  // Load pinned when admin logs in
+  const origRenderComments = renderComments;
+  // (call loadPinned after successful login)
 
   // Admin visit alert
   if (!sessionStorage.getItem('_adm_visit_logged')) {
@@ -364,6 +453,7 @@
         lockScreen.style.display = 'none';
         panel.classList.add('active');
         renderComments(data.comments || []);
+                loadPinned();
       } else {
         sessionStorage.removeItem('_adm');
       }

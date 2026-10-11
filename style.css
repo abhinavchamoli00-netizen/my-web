@@ -1106,3 +1106,23 @@ html.theme-amoled .report-toc { background: #050505; }
 }
 .report-inline-link { display: inline-block; color: #a29bfe; font-weight: 600; text-decoration: none; border-bottom: 1px dashed rgba(162, 155, 254, 0.5); }
 .report-inline-link:hover { color: #ffffff; }
+/* Pinned card badge */
+.pinned-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #6c5ce7, #7b4fbf);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.8px;
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.6);
+  z-index: 5;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+@media (max-width: 600px) {
+  .pinned-badge { font-size: 0.58rem; padding: 3px 8px; top: 10px; right: 10px; }
+}
