@@ -230,7 +230,7 @@ function initNexusPage() {
   }
 
   // =========================================
-  // VISITOR TRACKING (first visit + page views)
+  // VISITOR TRACKING
   // =========================================
   async function sendPageViewAlert() {
     try {
@@ -247,17 +247,13 @@ function initNexusPage() {
           type: 'pageView',
           referrer: document.referrer || 'Direct',
           page: __currentPage,
-          device,
-          browser,
-          model,
-          platform
+          device, browser, model, platform
         })
       }).catch(() => {});
     } catch (e) {}
   }
-  // =========================================
-  // SOCIAL MEDIA CLICK TRACKING (URL based — reliable)
-  // =========================================
+
+  // SOCIAL CLICK TRACKING (keepalive = fixes cancellation on new tab)
   document.addEventListener('click', async (e) => {
     const link = e.target.closest('a');
     if (!link) return;
@@ -274,8 +270,6 @@ function initNexusPage() {
     else if (/facebook\.com/i.test(href)) socialName = 'Facebook';
     else return;
 
-    // ✅ Skip if external link that opens new tab without ours
-    // (but still track it)
     try {
       const { model, platform } = await getDeviceInfo();
       const device = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
@@ -286,19 +280,6 @@ function initNexusPage() {
       fetch('/api/visitor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'socialClick',
-          socialName: socialName,
-          socialUrl: href,
-          referrer: document.referrer || 'Direct',
-          page: __currentPage,
-          device,
-          browser,
-          model,
-          platform
-                fetch('/api/visitor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         keepalive: true,
         body: JSON.stringify({
           type: 'socialClick',
@@ -306,16 +287,12 @@ function initNexusPage() {
           socialUrl: href,
           referrer: document.referrer || 'Direct',
           page: __currentPage,
-          device,
-          browser,
-          model,
-          platform
-        })
-      }).catch(() => {});
+          device, browser, model, platform
         })
       }).catch(() => {});
     } catch (err) {}
   }, true);
+
   const hasTrackedVisit = sessionStorage.getItem('nexus_visit_tracked');
   if (!hasTrackedVisit) {
     sessionStorage.setItem('nexus_visit_tracked', 'true');
@@ -332,12 +309,8 @@ function initNexusPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: 'firstVisit',
-          referrer,
-          page: __currentPage,
-          device,
-          browser,
-          model,
-          platform
+          referrer, page: __currentPage,
+          device, browser, model, platform
         })
       }).catch(() => {});
     })();
@@ -788,9 +761,7 @@ function initNexusPage() {
     speechSynthesis.speak(utt);
   }
 
-  // =========================================
   // RECOMMEND FLOW
-  // =========================================
   const recommendBtn = document.getElementById('recommendBtn');
 
   function buildRecommendChips() {
@@ -1293,10 +1264,6 @@ function initLabsPage() {
   }
 
   function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-  function localRandom(pool) {
-    if (!pool || pool.length === 0) return null;
-    return rand(pool);
-  }
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
