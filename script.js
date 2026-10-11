@@ -256,22 +256,26 @@ function initNexusPage() {
     } catch (e) {}
   }
   // =========================================
-  // SOCIAL MEDIA CLICK TRACKING
+  // SOCIAL MEDIA CLICK TRACKING (URL based — reliable)
   // =========================================
   document.addEventListener('click', async (e) => {
-    const link = e.target.closest('a[aria-label]');
+    const link = e.target.closest('a');
     if (!link) return;
 
-    const label = link.getAttribute('aria-label');
-    const socialLabels = ['GitHub', 'X (Twitter)', 'X', 'Twitter', 'Instagram'];
-    if (!socialLabels.includes(label)) return;
-
     const href = link.getAttribute('href') || '';
-    let socialName = 'Unknown';
-    if (label.includes('GitHub')) socialName = 'GitHub';
-    else if (label.includes('Instagram')) socialName = 'Instagram';
-    else if (label.includes('X') || label.includes('Twitter')) socialName = 'X (Twitter)';
+    if (!href) return;
 
+    let socialName = '';
+    if (/github\.com/i.test(href)) socialName = 'GitHub';
+    else if (/instagram\.com/i.test(href)) socialName = 'Instagram';
+    else if (/x\.com|twitter\.com/i.test(href)) socialName = 'X (Twitter)';
+    else if (/linkedin\.com/i.test(href)) socialName = 'LinkedIn';
+    else if (/youtube\.com|youtu\.be/i.test(href)) socialName = 'YouTube';
+    else if (/facebook\.com/i.test(href)) socialName = 'Facebook';
+    else return;
+
+    // ✅ Skip if external link that opens new tab without ours
+    // (but still track it)
     try {
       const { model, platform } = await getDeviceInfo();
       const device = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
@@ -294,7 +298,7 @@ function initNexusPage() {
           platform
         })
       }).catch(() => {});
-    } catch (e) {}
+    } catch (err) {}
   }, true);
   const hasTrackedVisit = sessionStorage.getItem('nexus_visit_tracked');
   if (!hasTrackedVisit) {
