@@ -358,7 +358,7 @@ function applyTheme(t) {
 }
 
 function ensureFloatingButtons() {
-  const root = document.documentElement;
+ const root = document.body;
 
   let tBtn = document.getElementById('nexusThemeToggle');
   if (!tBtn) {
