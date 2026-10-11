@@ -18,20 +18,19 @@ module.exports = async function handler(req, res) {
   const browser = (body && body.browser) || 'Other';
   const model = (body && body.model) || '';
   const platform = (body && body.platform) || '';
+  const socialName = (body && body.socialName) || '';
+  const socialUrl = (body && body.socialUrl) || '';
 
   const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'Unknown';
   const ua = req.headers['user-agent'] || '';
 
-  // ✅ Detect source from UA + referrer
   const detectSource = () => {
-    // In-app browsers (more reliable than referrer)
     if (/Instagram/i.test(ua)) return 'Instagram (In-App Browser)';
     if (/FBAN|FBAV|FB_IAB/i.test(ua)) return 'Facebook (In-App Browser)';
     if (/Twitter/i.test(ua)) return 'Twitter/X (In-App Browser)';
     if (/Snapchat/i.test(ua)) return 'Snapchat (In-App Browser)';
     if (/LinkedInApp|LinkedIn/i.test(ua)) return 'LinkedIn (In-App Browser)';
 
-    // Referrer based
     if (!referrer || referrer === 'Direct') return 'Direct';
     if (/instagram\.com/i.test(referrer)) return 'Instagram';
     if (/t\.co|twitter\.com|x\.com/i.test(referrer)) return 'Twitter/X';
@@ -43,13 +42,11 @@ module.exports = async function handler(req, res) {
     if (/telegram|t\.me/i.test(referrer)) return 'Telegram';
     if (/reddit\.com/i.test(referrer)) return 'Reddit';
     if (/linkedin\.com/i.test(referrer)) return 'LinkedIn';
-
     return 'Other';
   };
 
   const source = detectSource();
 
-  // Rate limit — max 30 page views per minute per IP
   if (!global._visitorRate) global._visitorRate = new Map();
   const now = Date.now();
   const WINDOW = 60 * 1000;
@@ -62,9 +59,8 @@ module.exports = async function handler(req, res) {
     rec.count++;
   }
 
-  // Location lookup — sirf firstVisit pe
   let location = '';
-  if (type === 'firstVisit' && ip !== 'Unknown') {
+  if ((type === 'firstVisit' || type === 'socialClick') && ip !== 'Unknown') {
     try {
       const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=status,city,regionName,countryCode`);
       const geoData = await geoRes.json();
@@ -99,10 +95,23 @@ module.exports = async function handler(req, res) {
          + `💻 Device: ${deviceStr}\n`
          + `🌐 IP: \`${ip}\`\n`
          + `🕐 Time: ${time}`;
-  } else {
-    // fallback
-    text = `👀 *New Visitor on Nexus*\n\n🔗 Source: ${source}\n🌍 Location: ${location || 'Unknown'}\n💻 Device: ${deviceStr}\n🌐 IP: \`${ip}\`\n📄 Page: ${page}\n🕐 Time: ${time}`;
+  } else if (type === 'socialClick') {
+    let emoji = '🔗';
+    if (socialName === 'GitHub') emoji = '🐙';
+    else if (socialName === 'X (Twitter)') emoji = '𝕏';
+    else if (socialName === 'Instagram') emoji = '📷';
+
+    text = `${emoji} *Social Link Clicked!*\n\n`
+         + `🎯 *Clicked:* ${socialName}\n`
+         + `🔗 URL: ${socialUrl}\n`
+         + `📍 Location: ${location || 'Unknown'}\n`
+         + `💻 Device: ${deviceStr}\n`
+         + `🌐 IP: \`${ip}\`\n`
+         + `📄 From Page: ${page}\n`
+         + `🕐 Time: ${time}`;
   }
+
+  if (!text) return res.status(400).json({ error: 'Invalid type' });
 
   try {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;

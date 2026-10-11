@@ -255,7 +255,47 @@ function initNexusPage() {
       }).catch(() => {});
     } catch (e) {}
   }
+  // =========================================
+  // SOCIAL MEDIA CLICK TRACKING
+  // =========================================
+  document.addEventListener('click', async (e) => {
+    const link = e.target.closest('a[aria-label]');
+    if (!link) return;
 
+    const label = link.getAttribute('aria-label');
+    const socialLabels = ['GitHub', 'X (Twitter)', 'X', 'Twitter', 'Instagram'];
+    if (!socialLabels.includes(label)) return;
+
+    const href = link.getAttribute('href') || '';
+    let socialName = 'Unknown';
+    if (label.includes('GitHub')) socialName = 'GitHub';
+    else if (label.includes('Instagram')) socialName = 'Instagram';
+    else if (label.includes('X') || label.includes('Twitter')) socialName = 'X (Twitter)';
+
+    try {
+      const { model, platform } = await getDeviceInfo();
+      const device = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+      const browser = navigator.userAgent.includes('Chrome') ? 'Chrome' :
+                      navigator.userAgent.includes('Firefox') ? 'Firefox' :
+                      navigator.userAgent.includes('Safari') ? 'Safari' : 'Other';
+
+      fetch('/api/visitor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'socialClick',
+          socialName: socialName,
+          socialUrl: href,
+          referrer: document.referrer || 'Direct',
+          page: __currentPage,
+          device,
+          browser,
+          model,
+          platform
+        })
+      }).catch(() => {});
+    } catch (e) {}
+  }, true);
   const hasTrackedVisit = sessionStorage.getItem('nexus_visit_tracked');
   if (!hasTrackedVisit) {
     sessionStorage.setItem('nexus_visit_tracked', 'true');
