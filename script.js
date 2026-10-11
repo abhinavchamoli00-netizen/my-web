@@ -62,12 +62,10 @@ async function applyPinnedSections() {
       }
     });
 
-    // Reorder: pinned first, rest after
     categoriesGrid.innerHTML = '';
     pinnedCards.forEach(c => categoriesGrid.appendChild(c));
     restCards.forEach(c => categoriesGrid.appendChild(c));
 
-    // Mobile fallback: reset gridColumn on small screens
     if (window.innerWidth <= 600) {
       pinnedCards.forEach(c => { c.style.gridColumn = 'span 1'; });
     }
@@ -77,7 +75,6 @@ async function applyPinnedSections() {
 // =========================================
 // HOMEPAGE SECTION LOCKS — Labs + Political (5 day timer)
 // =========================================
-// 🔧 Lock start date — yahan se 5 din count hoga
 const NEXUS_LOCK_START = new Date('2026-10-11T00:00:00+05:30').getTime();
 const NEXUS_LOCK_DURATION_MS = 5 * 24 * 60 * 60 * 1000; // 5 din
 const NEXUS_LOCKED_HREFS = ['labs.html', 'political.html'];
@@ -109,7 +106,6 @@ function applySectionLocks() {
   function paint() {
     const diff = unlockAt - Date.now();
 
-    // Time over → cleanup
     if (diff <= 0) {
       if (__nexusLockInterval) { clearInterval(__nexusLockInterval); __nexusLockInterval = null; }
       document.querySelectorAll('.categories a.card').forEach(clearLockOnCard);
@@ -154,60 +150,6 @@ function applySectionLocks() {
           <div style="width:36px; height:1px; background:linear-gradient(90deg, transparent, rgba(162,155,254,0.6), transparent); margin-bottom:10px;"></div>
           <div class="nexus-lock-timer" style="color:#ff9f43; font-weight:700; font-size:1.05rem; font-family:'Space Grotesk',monospace; letter-spacing:1px; text-shadow:0 0 14px rgba(255,159,67,0.4);">--</div>
           <div style="color:#7a7a8a; font-size:0.62rem; letter-spacing:1.5px; margin-top:8px; text-transform:uppercase;">Unlocks in 5 days</div>
-        `;
-        card.appendChild(overlay);
-      }
-
-      const timerEl = overlay.querySelector('.nexus-lock-timer');
-      if (timerEl) timerEl.textContent = timerText;
-    });
-  }
-
-  paint();
-  __nexusLockInterval = setInterval(paint, 1000);
-}
-
-  function paint() {
-    const diff = unlockAt - Date.now();
-
-    // Time over → cleanup everything
-    if (diff <= 0) {
-      if (__nexusLockInterval) { clearInterval(__nexusLockInterval); __nexusLockInterval = null; }
-      document.querySelectorAll('.categories a.card').forEach(clearLockOnCard);
-      return;
-    }
-
-    const d = Math.floor(diff / 86400000);
-    const h = Math.floor((diff % 86400000) / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    const timerText = `${d}d ${h}h ${m}m ${s}s`;
-
-    const cards = document.querySelectorAll('.categories a.card');
-    cards.forEach(card => {
-      const href = (card.getAttribute('href') || '').trim().toLowerCase();
-      if (!NEXUS_LOCKED_HREFS.includes(href)) return;
-
-      card.style.pointerEvents = 'none';
-      card.style.position = 'relative';
-      card.style.filter = 'grayscale(0.65) brightness(0.55)';
-      card.style.opacity = '0.85';
-
-      let overlay = card.querySelector('.nexus-lock-overlay');
-      if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.className = 'nexus-lock-overlay';
-        overlay.style.cssText = [
-          'position:absolute','inset:0',
-          'display:flex','flex-direction:column','align-items:center','justify-content:center',
-          'background:rgba(10,10,18,0.78)',
-          'border-radius:inherit','z-index:50','text-align:center','padding:10px',
-          'pointer-events:none'
-        ].join(';');
-        overlay.innerHTML = `
-          <div style="font-size:1.6rem; line-height:1; margin-bottom:4px;">🔒</div>
-          <div style="color:#a29bfe; font-weight:700; font-size:0.7rem; letter-spacing:1.5px; margin-bottom:4px;">LOCKED</div>
-          <div class="nexus-lock-timer" style="color:#ff9f43; font-weight:700; font-size:0.88rem; font-family:'Space Grotesk',sans-serif;">--</div>
         `;
         card.appendChild(overlay);
       }
@@ -408,7 +350,6 @@ function addBookmarkButtons() {
 }
 
 function initNexusPage() {
-  // 🚫 Lock check — direct URL block
   if (enforceLockRedirect()) return;
 
   const home = isHomePage();
@@ -426,7 +367,6 @@ function initNexusPage() {
   initProfilePage();
   initLabsPage();
 
-  // ✅ Pinned sections pehle, phir locks (order matter karta hai)
   setTimeout(async () => {
     try { await applyPinnedSections(); } catch (e) {}
     applySectionLocks();
@@ -457,9 +397,6 @@ function initNexusPage() {
     return { model, platform };
   }
 
-  // =========================================
-  // VISITOR TRACKING
-  // =========================================
   async function sendPageViewAlert() {
     try {
       const { model, platform } = await getDeviceInfo();
@@ -481,9 +418,6 @@ function initNexusPage() {
     } catch (e) {}
   }
 
-  // =========================================
-  // SOCIAL CLICK TRACKING (sendBeacon — most reliable)
-  // =========================================
   document.addEventListener('click', (e) => {
     const link = e.target.closest('a');
     if (!link) return;
@@ -569,9 +503,6 @@ function initNexusPage() {
     }
   }
 
-  // =========================================
-  // FEEDBACK FORM
-  // =========================================
   const feedbackForm = document.getElementById('feedbackForm');
   let isSubmitting = false;
   if (feedbackForm) {
@@ -614,9 +545,6 @@ function initNexusPage() {
     });
   }
 
-  // =========================================
-  // COMMENTS
-  // =========================================
   const commentName = document.getElementById('commentName');
   const commentMessage = document.getElementById('commentMessage');
   const commentSubmit = document.getElementById('commentSubmit');
@@ -749,9 +677,6 @@ function initNexusPage() {
     });
   }
 
-  // =========================================
-  // CHAT
-  // =========================================
   const chatFab = document.getElementById('chatFab');
   const chatWidget = document.getElementById('chatWidget');
   const chatBackdrop = document.getElementById('chatBackdrop');
@@ -878,7 +803,6 @@ function initNexusPage() {
   }
   window.addEventListener('resize', adjustChatForKeyboard);
 
-  // VOICE
   const voiceBtn = document.getElementById('voiceBtn');
   let recognition = null;
   let isRecording = false;
@@ -916,7 +840,6 @@ function initNexusPage() {
     });
   }
 
-  // TTS
   let currentlySpeaking = false;
   let currentSpeakBtn = null;
   let currentMessageEl = null;
@@ -1007,7 +930,6 @@ function initNexusPage() {
     speechSynthesis.speak(utt);
   }
 
-  // RECOMMEND FLOW
   const recommendBtn = document.getElementById('recommendBtn');
 
   function buildRecommendChips() {
@@ -1108,7 +1030,6 @@ function initNexusPage() {
     });
   }
 
-  // CHAT FORM SUBMIT
   if (chatForm) {
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
