@@ -88,7 +88,7 @@ function __nexusUnlockAt() {
 
 let __nexusLockInterval = null;
 
- function applySectionLocks() {
+function applySectionLocks() {
   if (__nexusLockInterval) { clearInterval(__nexusLockInterval); __nexusLockInterval = null; }
   if (!__nexusLockActive()) return;
   if (!isHomePage()) return;
@@ -125,7 +125,6 @@ let __nexusLockInterval = null;
 
       card.style.pointerEvents = 'none';
       card.style.position = 'relative';
-      // ❌ Koi filter / dim nahi — colors intact rahenge
       card.style.filter = '';
       card.style.opacity = '1';
 
@@ -144,57 +143,6 @@ let __nexusLockInterval = null;
           <div style="font-size:1.5rem; line-height:1; margin-bottom:6px;">🔒</div>
           <div style="color:#ffffff; font-weight:700; font-size:0.66rem; letter-spacing:2.5px; margin-bottom:6px; text-transform:uppercase;">Locked</div>
           <div class="nexus-lock-timer" style="color:#ff9f43; font-weight:700; font-size:0.95rem; font-family:'Space Grotesk',sans-serif; letter-spacing:0.5px;">--</div>
-        `;
-        card.appendChild(overlay);
-      }
-
-      const timerEl = overlay.querySelector('.nexus-lock-timer');
-      if (timerEl) timerEl.textContent = timerText;
-    });
-  }
-
-  paint();
-  __nexusLockInterval = setInterval(paint, 1000);
-}
-
-    const d = Math.floor(diff / 86400000);
-    const h = Math.floor((diff % 86400000) / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    const pad = n => String(n).padStart(2, '0');
-    const timerText = `${d}d ${pad(h)}h ${pad(m)}m ${pad(s)}s`;
-
-    const cards = document.querySelectorAll('.categories a.card');
-    cards.forEach(card => {
-      const href = (card.getAttribute('href') || '').trim().toLowerCase();
-      if (!NEXUS_LOCKED_HREFS.includes(href)) return;
-
-      card.style.pointerEvents = 'none';
-      card.style.position = 'relative';
-      card.style.filter = 'grayscale(0.5) brightness(0.4)';
-      card.style.opacity = '1';
-
-      let overlay = card.querySelector('.nexus-lock-overlay');
-      if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.className = 'nexus-lock-overlay';
-        overlay.style.cssText = [
-          'position:absolute','inset:0',
-          'display:flex','flex-direction:column','align-items:center','justify-content:center',
-          'background:radial-gradient(ellipse at center, rgba(20,16,40,0.92) 0%, rgba(10,8,20,0.97) 100%)',
-          'backdrop-filter:blur(3px)',
-          '-webkit-backdrop-filter:blur(3px)',
-          'border-radius:inherit','z-index:50','text-align:center','padding:12px',
-          'pointer-events:none',
-          'border:1px solid rgba(108,92,231,0.35)',
-          'box-shadow:inset 0 0 40px rgba(108,92,231,0.12)'
-        ].join(';');
-        overlay.innerHTML = `
-          <div style="font-size:1.9rem; line-height:1; margin-bottom:8px; filter:drop-shadow(0 0 12px rgba(162,155,254,0.55));">🔒</div>
-          <div style="color:#a29bfe; font-weight:700; font-size:0.68rem; letter-spacing:2.5px; margin-bottom:10px; text-transform:uppercase;">Locked</div>
-          <div style="width:36px; height:1px; background:linear-gradient(90deg, transparent, rgba(162,155,254,0.6), transparent); margin-bottom:10px;"></div>
-          <div class="nexus-lock-timer" style="color:#ff9f43; font-weight:700; font-size:1.05rem; font-family:'Space Grotesk',monospace; letter-spacing:1px; text-shadow:0 0 14px rgba(255,159,67,0.4);">--</div>
-          <div style="color:#7a7a8a; font-size:0.62rem; letter-spacing:1.5px; margin-top:8px; text-transform:uppercase;">Unlocks in 5 days</div>
         `;
         card.appendChild(overlay);
       }
