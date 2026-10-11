@@ -26,18 +26,11 @@ module.exports = async function handler(req, res) {
   const binId = process.env.JSONBIN_BIN_ID || process.env.JSONBIN_ID;
   const pollBinId = process.env.POLL_BIN_ID;
 
-  // Client IP
   const clientIp = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'Unknown';
 
-  // =========================================
-  // RATE LIMIT CONFIG
-  // =========================================
-  const MAX_ATTEMPTS = 4;                       // 4 galat attempts
-  const LOCK_DURATION_MS = 20 * 60 * 1000;      // 20 minute
+  const MAX_ATTEMPTS = 4;
+  const LOCK_DURATION_MS = 20 * 60 * 1000;
 
-  // =========================================
-  // HELPER: read/write POLL_BIN settings
-  // =========================================
   async function readSettings() {
     const url = `https://api.jsonbin.io/v3/b/${pollBinId}/latest`;
     const r = await fetch(url, { headers: { 'X-Master-Key': apiKey } });
@@ -102,110 +95,7 @@ module.exports = async function handler(req, res) {
   }
 
   // =========================================
-  // LOCKOUT CHECK (before any password attempt)
-  // =========================================
-  let lockData = null;
-  if (password && !isTrusted && pollBinId && apiKey) {
-    try {
-      lockData = await readSettings();
-      const lockMap = lockData.adminLock || {};
-      const entry = lockMap[clientIp];
-      const now = Date.now();
-
-      // Cleanup stale entries (> 1 day old)
-      let cleaned = false;
-      const cutoff = now - 24 * 60 * 60 * 1000;
-      for (const key in lockMap) {
-        if (!lockMap[key] || !lockMap[key].lastAttempt || lockMap[key].lastAttempt < cutoff) {
-          delete lockMap[key];
-          cleaned = true;
-        }
-      }
-      if (cleaned) {
-        lockData.adminLock = lockMap;
-        writeSettings(lockData).catch(() => {});
-      }
-
-      if (entry && entry.lockedUntil && now < entry.lockedUntil) {
-        const msLeft = entry.lockedUntil - now;
-        const minsLeft = Math.ceil(msLeft / 60000);
-        return res.status(429).json({
-          success: false,
-          error: 'locked',
-          message: `Too many failed attempts. Try again in ${minsLeft} minute${minsLeft !== 1 ? 's' : ''}.`,
-          lockedUntil: entry.lockedUntil
-        });
-      }
-    } catch (e) {}
-  }
-
-  // =========================================
-  // WRONG PASSWORD ALERT (before password check)
-  // =========================================
-  if (password && password !== ADMIN_PASS && !isTrusted) {
-    try {
-      const botToken = process.env.TELEGRAM_BOT_TOKEN;
-      const chatId = process.env.TELEGRAM_CHAT_ID;
-      if (botToken && chatId) {
-        const ip2 = clientIp;
-        const ua2 = req.headers['user-agent'] || '';
-        const location2 = await lookupLocation(ip2);
-        const time2 = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-        const safeTried = String(password).replace(/[*_`\[\]]/g, '').substring(0, 20);
-        const text2 = `⚠️ *Wrong Admin Password Attempt*\n\n🌍 Location: ${location2}\n💻 Device: ${buildDeviceStr(ua2, deviceModel)}\n🌐 IP: \`${ip2}\`\n🔑 Tried: \`${safeTried}\`\n🕐 Time: ${time2}`;
-        fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: chatId, text: text2, parse_mode: 'Markdown' })
-        }).catch(() => {});
-      }
-    } catch (e) {}
-  }
-
-  // =========================================
-  // PASSWORD CHECK
-  // =========================================
-  if (password !== ADMIN_PASS) {
-    // Record failed attempt
-    if (!isTrusted && pollBinId && apiKey) {
-      try {
-        const settings = lockData || await readSettings();
-        if (!settings.adminLock) settings.adminLock = {};
-        const entry = settings.adminLock[clientIp] || { attempts: 0, lockedUntil: 0 };
-
-        // Reset if lock expired
-        if (entry.lockedUntil && Date.now() >= entry.lockedUntil) {
-          entry.attempts = 0;
-          entry.lockedUntil = 0;
-        }
-
-        entry.attempts = (entry.attempts || 0) + 1;
-        entry.lastAttempt = Date.now();
-
-        let locked = false;
-        if (entry.attempts >= MAX_ATTEMPTS) {
-          entry.lockedUntil = Date.now() + LOCK_DURATION_MS;
-          locked = true;
-        }
-        settings.adminLock[clientIp] = entry;
-        await writeSettings(settings);
-
-        if (locked) {
-          return res.status(429).json({
-            success: false,
-            error: 'locked',
-            message: 'Too many failed attempts. Try again in 20 minutes.',
-            lockedUntil: entry.lockedUntil
-          });
-        }
-      } catch (e) {}
-    }
-
-    return res.status(401).json({ success: false, error: 'Invalid credentials' });
-  }
-
-    // =========================================
-  // LOCKOUT CHECK (applies to EVERYONE including trusted)
+  // LOCKOUT CHECK (applies to EVERYONE)
   // =========================================
   let lockData = null;
   if (password && pollBinId && apiKey) {
@@ -215,7 +105,6 @@ module.exports = async function handler(req, res) {
       const entry = lockMap[clientIp];
       const now = Date.now();
 
-      // Cleanup stale entries (> 1 day old)
       let cleaned = false;
       const cutoff = now - 24 * 60 * 60 * 1000;
       for (const key in lockMap) {
@@ -266,10 +155,9 @@ module.exports = async function handler(req, res) {
   }
 
   // =========================================
-  // PASSWORD CHECK
+  // PASSWORD CHECK (applies to EVERYONE)
   // =========================================
   if (password !== ADMIN_PASS) {
-    // Record failed attempt (applies to EVERYONE)
     if (pollBinId && apiKey) {
       try {
         const settings = lockData || await readSettings();
@@ -307,7 +195,7 @@ module.exports = async function handler(req, res) {
   }
 
   // =========================================
-  // SUCCESS → reset attempts for this IP (everyone)
+  // SUCCESS → reset attempts for this IP
   // =========================================
   if (pollBinId && apiKey) {
     try {
@@ -378,12 +266,10 @@ module.exports = async function handler(req, res) {
     if (readData.record && Array.isArray(readData.record)) comments = readData.record;
     else if (readData.record && readData.record.comments) comments = readData.record.comments;
 
-    // VERIFY
     if (action === 'verify') {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // DELETE
     if (action === 'delete') {
       const before = comments.length;
       comments = comments.filter(c => String(c.id) !== String(commentId));
@@ -393,7 +279,6 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // HIDE
     if (action === 'hide') {
       const idx = comments.findIndex(c => String(c.id) === String(commentId));
       if (idx === -1) return res.status(404).json({ error: 'Comment not found' });
@@ -404,7 +289,6 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // UNHIDE
     if (action === 'unhide') {
       const idx = comments.findIndex(c => String(c.id) === String(commentId));
       if (idx === -1) return res.status(404).json({ error: 'Comment not found' });
@@ -415,7 +299,6 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // REPLY
     if (action === 'reply') {
       if (!replyText) return res.status(400).json({ error: 'Reply text required' });
       if (replyText.length > 400) return res.status(400).json({ error: 'Reply too long' });
@@ -428,7 +311,6 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // UNREPLY
     if (action === 'unreply') {
       const idx = comments.findIndex(c => String(c.id) === String(commentId));
       if (idx === -1) return res.status(404).json({ error: 'Comment not found' });
@@ -439,7 +321,6 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // CLEAR ALL
     if (action === 'clear') {
       const saveRes = await fetch(baseUrl, { method: 'PUT', headers, body: JSON.stringify([]) });
       if (!saveRes.ok) return res.status(500).json({ error: 'Save failed' });
