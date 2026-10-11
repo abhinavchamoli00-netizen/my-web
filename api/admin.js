@@ -204,10 +204,112 @@ module.exports = async function handler(req, res) {
     return res.status(401).json({ success: false, error: 'Invalid credentials' });
   }
 
+    // =========================================
+  // LOCKOUT CHECK (applies to EVERYONE including trusted)
   // =========================================
-  // SUCCESS → reset attempts for this IP
+  let lockData = null;
+  if (password && pollBinId && apiKey) {
+    try {
+      lockData = await readSettings();
+      const lockMap = lockData.adminLock || {};
+      const entry = lockMap[clientIp];
+      const now = Date.now();
+
+      // Cleanup stale entries (> 1 day old)
+      let cleaned = false;
+      const cutoff = now - 24 * 60 * 60 * 1000;
+      for (const key in lockMap) {
+        if (!lockMap[key] || !lockMap[key].lastAttempt || lockMap[key].lastAttempt < cutoff) {
+          delete lockMap[key];
+          cleaned = true;
+        }
+      }
+      if (cleaned) {
+        lockData.adminLock = lockMap;
+        writeSettings(lockData).catch(() => {});
+      }
+
+      if (entry && entry.lockedUntil && now < entry.lockedUntil) {
+        const msLeft = entry.lockedUntil - now;
+        const minsLeft = Math.ceil(msLeft / 60000);
+        return res.status(429).json({
+          success: false,
+          error: 'locked',
+          message: `Too many failed attempts. Try again in ${minsLeft} minute${minsLeft !== 1 ? 's' : ''}.`,
+          lockedUntil: entry.lockedUntil
+        });
+      }
+    } catch (e) {}
+  }
+
   // =========================================
-  if (!isTrusted && pollBinId && apiKey) {
+  // WRONG PASSWORD TELEGRAM ALERT (skip if trusted)
+  // =========================================
+  if (password && password !== ADMIN_PASS && !isTrusted) {
+    try {
+      const botToken = process.env.TELEGRAM_BOT_TOKEN;
+      const chatId = process.env.TELEGRAM_CHAT_ID;
+      if (botToken && chatId) {
+        const ip2 = clientIp;
+        const ua2 = req.headers['user-agent'] || '';
+        const location2 = await lookupLocation(ip2);
+        const time2 = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+        const safeTried = String(password).replace(/[*_`\[\]]/g, '').substring(0, 20);
+        const text2 = `⚠️ *Wrong Admin Password Attempt*\n\n🌍 Location: ${location2}\n💻 Device: ${buildDeviceStr(ua2, deviceModel)}\n🌐 IP: \`${ip2}\`\n🔑 Tried: \`${safeTried}\`\n🕐 Time: ${time2}`;
+        fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, text: text2, parse_mode: 'Markdown' })
+        }).catch(() => {});
+      }
+    } catch (e) {}
+  }
+
+  // =========================================
+  // PASSWORD CHECK
+  // =========================================
+  if (password !== ADMIN_PASS) {
+    // Record failed attempt (applies to EVERYONE)
+    if (pollBinId && apiKey) {
+      try {
+        const settings = lockData || await readSettings();
+        if (!settings.adminLock) settings.adminLock = {};
+        const entry = settings.adminLock[clientIp] || { attempts: 0, lockedUntil: 0 };
+
+        if (entry.lockedUntil && Date.now() >= entry.lockedUntil) {
+          entry.attempts = 0;
+          entry.lockedUntil = 0;
+        }
+
+        entry.attempts = (entry.attempts || 0) + 1;
+        entry.lastAttempt = Date.now();
+
+        let locked = false;
+        if (entry.attempts >= MAX_ATTEMPTS) {
+          entry.lockedUntil = Date.now() + LOCK_DURATION_MS;
+          locked = true;
+        }
+        settings.adminLock[clientIp] = entry;
+        await writeSettings(settings);
+
+        if (locked) {
+          return res.status(429).json({
+            success: false,
+            error: 'locked',
+            message: 'Too many failed attempts. Try again in 20 minutes.',
+            lockedUntil: entry.lockedUntil
+          });
+        }
+      } catch (e) {}
+    }
+
+    return res.status(401).json({ success: false, error: 'Invalid credentials' });
+  }
+
+  // =========================================
+  // SUCCESS → reset attempts for this IP (everyone)
+  // =========================================
+  if (pollBinId && apiKey) {
     try {
       const settings = lockData || await readSettings();
       if (settings.adminLock && settings.adminLock[clientIp]) {
