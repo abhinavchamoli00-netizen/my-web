@@ -24,7 +24,7 @@ let __currentTheme = localStorage.getItem('nexus_theme') || 'dark';
 if (!THEMES.includes(__currentTheme)) __currentTheme = 'dark';
 
 // =========================================
-// PINNED SECTIONS (reorder homepage categories)
+// PINNED SECTIONS
 // =========================================
 async function applyPinnedSections() {
   if (!isHomePage()) return;
@@ -73,10 +73,10 @@ async function applyPinnedSections() {
 }
 
 // =========================================
-// HOMEPAGE SECTION LOCKS — Labs + Political (5 day timer)
+// SECTION LOCKS — Labs + Political (5 day)
 // =========================================
 const NEXUS_LOCK_START = new Date('2026-10-11T00:00:00+05:30').getTime();
-const NEXUS_LOCK_DURATION_MS = 5 * 24 * 60 * 60 * 1000; // 5 din
+const NEXUS_LOCK_DURATION_MS = 5 * 24 * 60 * 60 * 1000;
 const NEXUS_LOCKED_HREFS = ['labs.html', 'political.html'];
 
 function __nexusLockActive() {
@@ -156,7 +156,6 @@ function applySectionLocks() {
   __nexusLockInterval = setInterval(paint, 1000);
 }
 
-// 🚫 Direct URL block — labs.html / political.html
 function enforceLockRedirect() {
   if (!__nexusLockActive()) return false;
   const p = (__currentPage || '').toLowerCase();
@@ -178,39 +177,46 @@ function enforceLockRedirect() {
 }
 
 // =========================================
-// ADMIN ENTRY (top-right visible button → password modal → server verify)
+// ADMIN ENTRY (above sections grid → password modal)
 // =========================================
 function setupAdminEntry() {
-  if (document.getElementById('nexusAdminEntry')) return;
+  if (document.getElementById('nexusAdminEntryWrapper')) return;
   if (__currentPage === 'admin.html') return;
+  if (!isHomePage()) return;
 
-  // Visible purple pill button
+  const categoriesGrid = document.querySelector('.categories');
+  if (!categoriesGrid) return;
+
+  // Wrapper bar (sections grid ke upar)
+  const wrapper = document.createElement('div');
+  wrapper.id = 'nexusAdminEntryWrapper';
+  wrapper.style.cssText = 'display:flex; justify-content:flex-end; align-items:center; margin:6px 6px 12px 6px;';
+
   const trigger = document.createElement('button');
   trigger.id = 'nexusAdminEntry';
   trigger.type = 'button';
-  trigger.innerHTML = '🔐 Admin';
+  trigger.textContent = 'Only Admin Entry';
   trigger.style.cssText = [
-    'position:fixed','top:14px','right:14px','z-index:2147483646',
-    'color:#ffffff','font-size:0.78rem','font-weight:600',
-    'font-family:"Space Grotesk",sans-serif','letter-spacing:0.3px',
-    'cursor:pointer','user-select:none',
-    'padding:8px 14px','border-radius:20px',
-    'background:rgba(108,92,231,0.85)',
-    'border:1px solid rgba(150,140,255,0.75)',
-    'transition:all 0.2s','line-height:1',
-    'box-shadow:0 4px 14px rgba(108,92,231,0.45)',
-    'outline:none'
+    'color:rgba(180,180,200,0.6)','font-size:0.68rem','font-weight:600',
+    'font-family:"Space Grotesk",sans-serif','letter-spacing:1.6px',
+    'text-transform:uppercase','cursor:pointer','user-select:none',
+    'padding:6px 13px','border-radius:16px',
+    'background:transparent','border:1px solid rgba(150,140,255,0.3)',
+    'transition:all 0.2s','line-height:1','outline:none'
   ].join(';');
   trigger.addEventListener('mouseenter', () => {
-    trigger.style.background = 'rgba(108,92,231,1)';
-    trigger.style.transform = 'scale(1.06)';
-    trigger.style.boxShadow = '0 6px 20px rgba(108,92,231,0.7)';
+    trigger.style.color = '#ffffff';
+    trigger.style.background = 'rgba(108,92,231,0.55)';
+    trigger.style.borderColor = 'rgba(150,140,255,0.85)';
   });
   trigger.addEventListener('mouseleave', () => {
-    trigger.style.background = 'rgba(108,92,231,0.85)';
-    trigger.style.transform = 'scale(1)';
-    trigger.style.boxShadow = '0 4px 14px rgba(108,92,231,0.45)';
+    trigger.style.color = 'rgba(180,180,200,0.6)';
+    trigger.style.background = 'transparent';
+    trigger.style.borderColor = 'rgba(150,140,255,0.3)';
   });
+
+  wrapper.appendChild(trigger);
+  categoriesGrid.parentNode.insertBefore(wrapper, categoriesGrid);
 
   // Modal
   const modal = document.createElement('div');
@@ -234,7 +240,6 @@ function setupAdminEntry() {
     </div>
   `;
 
-  document.body.appendChild(trigger);
   document.body.appendChild(modal);
 
   const input = modal.querySelector('#nexusAdminInput');
@@ -478,7 +483,6 @@ function initNexusPage() {
   }
 
   ensureFloatingButtons();
-  setupAdminEntry();
   addBookmarkButtons();
   setupUniversalSearch();
   initProfilePage();
@@ -487,6 +491,7 @@ function initNexusPage() {
   setTimeout(async () => {
     try { await applyPinnedSections(); } catch (e) {}
     applySectionLocks();
+    setupAdminEntry();
   }, 100);
 
   async function getDeviceInfo() {
