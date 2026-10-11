@@ -22,6 +22,7 @@ const THEMES = ['dark', 'day', 'amoled'];
 const THEME_ICONS = { dark: '🌙', day: '☀️', amoled: '⬛' };
 let __currentTheme = localStorage.getItem('nexus_theme') || 'dark';
 if (!THEMES.includes(__currentTheme)) __currentTheme = 'dark';
+
 // =========================================
 // PINNED SECTIONS (reorder homepage categories)
 // =========================================
@@ -71,6 +72,113 @@ async function applyPinnedSections() {
       pinnedCards.forEach(c => { c.style.gridColumn = 'span 1'; });
     }
   } catch (e) {}
+}
+
+// =========================================
+// HOMEPAGE SECTION LOCKS — Labs + Political (5 day timer)
+// =========================================
+// 🔧 Lock start date — yahan se 5 din count hoga
+const NEXUS_LOCK_START = new Date('2026-10-11T00:00:00+05:30').getTime();
+const NEXUS_LOCK_DURATION_MS = 5 * 24 * 60 * 60 * 1000; // 5 din
+const NEXUS_LOCKED_HREFS = ['labs.html', 'political.html'];
+
+function __nexusLockActive() {
+  return Date.now() < (NEXUS_LOCK_START + NEXUS_LOCK_DURATION_MS);
+}
+function __nexusUnlockAt() {
+  return NEXUS_LOCK_START + NEXUS_LOCK_DURATION_MS;
+}
+
+let __nexusLockInterval = null;
+
+function applySectionLocks() {
+  if (__nexusLockInterval) { clearInterval(__nexusLockInterval); __nexusLockInterval = null; }
+  if (!__nexusLockActive()) return;
+  if (!isHomePage()) return;
+
+  const unlockAt = __nexusUnlockAt();
+
+  function clearLockOnCard(card) {
+    card.style.pointerEvents = '';
+    card.style.filter = '';
+    card.style.opacity = '';
+    const ov = card.querySelector('.nexus-lock-overlay');
+    if (ov) ov.remove();
+  }
+
+  function paint() {
+    const diff = unlockAt - Date.now();
+
+    // Time over → cleanup everything
+    if (diff <= 0) {
+      if (__nexusLockInterval) { clearInterval(__nexusLockInterval); __nexusLockInterval = null; }
+      document.querySelectorAll('.categories a.card').forEach(clearLockOnCard);
+      return;
+    }
+
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    const timerText = `${d}d ${h}h ${m}m ${s}s`;
+
+    const cards = document.querySelectorAll('.categories a.card');
+    cards.forEach(card => {
+      const href = (card.getAttribute('href') || '').trim().toLowerCase();
+      if (!NEXUS_LOCKED_HREFS.includes(href)) return;
+
+      card.style.pointerEvents = 'none';
+      card.style.position = 'relative';
+      card.style.filter = 'grayscale(0.65) brightness(0.55)';
+      card.style.opacity = '0.85';
+
+      let overlay = card.querySelector('.nexus-lock-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'nexus-lock-overlay';
+        overlay.style.cssText = [
+          'position:absolute','inset:0',
+          'display:flex','flex-direction:column','align-items:center','justify-content:center',
+          'background:rgba(10,10,18,0.78)',
+          'border-radius:inherit','z-index:50','text-align:center','padding:10px',
+          'pointer-events:none'
+        ].join(';');
+        overlay.innerHTML = `
+          <div style="font-size:1.6rem; line-height:1; margin-bottom:4px;">🔒</div>
+          <div style="color:#a29bfe; font-weight:700; font-size:0.7rem; letter-spacing:1.5px; margin-bottom:4px;">LOCKED</div>
+          <div class="nexus-lock-timer" style="color:#ff9f43; font-weight:700; font-size:0.88rem; font-family:'Space Grotesk',sans-serif;">--</div>
+        `;
+        card.appendChild(overlay);
+      }
+
+      const timerEl = overlay.querySelector('.nexus-lock-timer');
+      if (timerEl) timerEl.textContent = timerText;
+    });
+  }
+
+  paint();
+  __nexusLockInterval = setInterval(paint, 1000);
+}
+
+// 🚫 Direct URL block — labs.html / political.html
+function enforceLockRedirect() {
+  if (!__nexusLockActive()) return false;
+  const p = (__currentPage || '').toLowerCase();
+  if (!NEXUS_LOCKED_HREFS.includes(p)) return false;
+
+  const unlockDate = new Date(__nexusUnlockAt());
+  const dateStr = unlockDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  document.body.innerHTML = `
+    <div style="min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#0b0a13; color:#fff; font-family:'Space Grotesk',sans-serif; padding:20px; text-align:center;">
+      <div style="font-size:3rem; line-height:1;">🔒</div>
+      <h2 style="color:#a29bfe; margin:14px 0 8px; font-size:1.4rem; letter-spacing:1px;">Section Locked</h2>
+      <p style="color:#888; font-size:0.9rem; max-width:320px; line-height:1.5; margin-bottom:8px;">This section unlocks in 5 days.</p>
+      <p style="color:#ff9f43; font-weight:700; font-size:0.95rem; margin-bottom:22px;">Unlocks on ${dateStr}</p>
+      <a href="index.html" style="background:#6c5ce7; color:#fff; padding:10px 22px; border-radius:10px; text-decoration:none; font-weight:600; font-size:0.9rem;">← Back to Home</a>
+    </div>
+  `;
+  return true;
 }
 
 function applyTheme(t) {
@@ -239,6 +347,9 @@ function addBookmarkButtons() {
 }
 
 function initNexusPage() {
+  // 🚫 Lock check — direct URL block
+  if (enforceLockRedirect()) return;
+
   const home = isHomePage();
 
   if (!home) {
@@ -253,7 +364,12 @@ function initNexusPage() {
   setupUniversalSearch();
   initProfilePage();
   initLabsPage();
-    setTimeout(applyPinnedSections, 100);
+
+  // ✅ Pinned sections pehle, phir locks (order matter karta hai)
+  setTimeout(async () => {
+    try { await applyPinnedSections(); } catch (e) {}
+    applySectionLocks();
+  }, 100);
 
   async function getDeviceInfo() {
     let model = '', platform = '';
@@ -304,7 +420,7 @@ function initNexusPage() {
     } catch (e) {}
   }
 
-    // =========================================
+  // =========================================
   // SOCIAL CLICK TRACKING (sendBeacon — most reliable)
   // =========================================
   document.addEventListener('click', (e) => {
@@ -340,7 +456,6 @@ function initNexusPage() {
       platform: ''
     });
 
-    // ✅ sendBeacon — works even when navigating to new tab
     if (navigator.sendBeacon) {
       try {
         const blob = new Blob([payload], { type: 'application/json' });
@@ -1513,14 +1628,14 @@ function initLabsPage() {
 // BOOTSTRAP
 // =========================================
 applyTheme(__currentTheme);
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initNexusPage);
-} else {
+
+function __nexusBootstrap() {
+  if (enforceLockRedirect()) return;
   initNexusPage();
-  // Apply pinned sections on first load
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', applyPinnedSections);
-} else {
-  applyPinnedSections();
 }
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', __nexusBootstrap);
+} else {
+  __nexusBootstrap();
 }
