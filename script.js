@@ -178,33 +178,38 @@ function enforceLockRedirect() {
 }
 
 // =========================================
-// ADMIN ENTRY (top-right trigger → password modal → server verify)
+// ADMIN ENTRY (top-right visible button → password modal → server verify)
 // =========================================
 function setupAdminEntry() {
   if (document.getElementById('nexusAdminEntry')) return;
   if (__currentPage === 'admin.html') return;
 
-  // Trigger text
-  const trigger = document.createElement('div');
+  // Visible purple pill button
+  const trigger = document.createElement('button');
   trigger.id = 'nexusAdminEntry';
-  trigger.textContent = 'Admin Entry';
+  trigger.type = 'button';
+  trigger.innerHTML = '🔐 Admin';
   trigger.style.cssText = [
     'position:fixed','top:14px','right:14px','z-index:2147483646',
-    'color:rgba(150,150,170,0.45)','font-size:0.62rem',
-    'font-family:"Space Grotesk",sans-serif','letter-spacing:1.8px',
-    'text-transform:uppercase','cursor:pointer','user-select:none',
-    'padding:5px 9px','border-radius:8px','transition:all 0.2s',
-    'background:transparent','border:1px solid transparent'
+    'color:#ffffff','font-size:0.78rem','font-weight:600',
+    'font-family:"Space Grotesk",sans-serif','letter-spacing:0.3px',
+    'cursor:pointer','user-select:none',
+    'padding:8px 14px','border-radius:20px',
+    'background:rgba(108,92,231,0.85)',
+    'border:1px solid rgba(150,140,255,0.75)',
+    'transition:all 0.2s','line-height:1',
+    'box-shadow:0 4px 14px rgba(108,92,231,0.45)',
+    'outline:none'
   ].join(';');
   trigger.addEventListener('mouseenter', () => {
-    trigger.style.color = '#a29bfe';
-    trigger.style.background = 'rgba(108,92,231,0.12)';
-    trigger.style.borderColor = 'rgba(108,92,231,0.4)';
+    trigger.style.background = 'rgba(108,92,231,1)';
+    trigger.style.transform = 'scale(1.06)';
+    trigger.style.boxShadow = '0 6px 20px rgba(108,92,231,0.7)';
   });
   trigger.addEventListener('mouseleave', () => {
-    trigger.style.color = 'rgba(150,150,170,0.45)';
-    trigger.style.background = 'transparent';
-    trigger.style.borderColor = 'transparent';
+    trigger.style.background = 'rgba(108,92,231,0.85)';
+    trigger.style.transform = 'scale(1)';
+    trigger.style.boxShadow = '0 4px 14px rgba(108,92,231,0.45)';
   });
 
   // Modal
