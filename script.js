@@ -139,7 +139,6 @@ function addBookmarkButtons() {
   cards.forEach(card => {
     if (card.querySelector('.bookmark-btn')) return;
 
-    // Card ka unique ID banao
     const link = card.closest('a');
     const href = link ? link.getAttribute('href') : '';
     const img = card.querySelector('img');
@@ -153,10 +152,8 @@ function addBookmarkButtons() {
     btn.setAttribute('aria-label', 'Like');
     btn.dataset.id = id;
 
-    // Star icon
     btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
 
-    // Agar pehle se liked hai toh bhara hua dikhao
     let likes = [];
     try {
       likes = JSON.parse(localStorage.getItem('nexus_likes') || '[]');
@@ -175,11 +172,9 @@ function addBookmarkButtons() {
 
       const idx = likes.indexOf(id);
       if (idx > -1) {
-        // Unlike
         likes.splice(idx, 1);
         btn.classList.remove('active');
       } else {
-        // Like
         likes.push(id);
         btn.classList.add('active');
         btn.style.transform = 'scale(1.4)';
@@ -203,11 +198,12 @@ function initNexusPage() {
     if (cs) cs.remove();
   }
 
-    ensureFloatingButtons();
+  ensureFloatingButtons();
   addBookmarkButtons();
   setupUniversalSearch();
   initProfilePage();
-    initLabsPage();
+  initLabsPage();
+
   async function getDeviceInfo() {
     let model = '', platform = '';
     try {
@@ -233,6 +229,33 @@ function initNexusPage() {
     return { model, platform };
   }
 
+  // =========================================
+  // VISITOR TRACKING (first visit + page views)
+  // =========================================
+  async function sendPageViewAlert() {
+    try {
+      const { model, platform } = await getDeviceInfo();
+      const device = /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+      const browser = navigator.userAgent.includes('Chrome') ? 'Chrome' :
+                      navigator.userAgent.includes('Firefox') ? 'Firefox' :
+                      navigator.userAgent.includes('Safari') ? 'Safari' : 'Other';
+
+      fetch('/api/visitor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'pageView',
+          referrer: document.referrer || 'Direct',
+          page: __currentPage,
+          device,
+          browser,
+          model,
+          platform
+        })
+      }).catch(() => {});
+    } catch (e) {}
+  }
+
   const hasTrackedVisit = sessionStorage.getItem('nexus_visit_tracked');
   if (!hasTrackedVisit) {
     sessionStorage.setItem('nexus_visit_tracked', 'true');
@@ -243,14 +266,33 @@ function initNexusPage() {
       const browser = navigator.userAgent.includes('Chrome') ? 'Chrome' :
                       navigator.userAgent.includes('Firefox') ? 'Firefox' :
                       navigator.userAgent.includes('Safari') ? 'Safari' : 'Other';
+
       fetch('/api/visitor', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ referrer, page: __currentPage, device, browser, model, platform })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'firstVisit',
+          referrer,
+          page: __currentPage,
+          device,
+          browser,
+          model,
+          platform
+        })
       }).catch(() => {});
     })();
+  } else {
+    const lastAlert = parseInt(sessionStorage.getItem('nexus_last_page_alert') || '0', 10);
+    const now = Date.now();
+    if (now - lastAlert > 2000) {
+      sessionStorage.setItem('nexus_last_page_alert', String(now));
+      sendPageViewAlert();
+    }
   }
 
+  // =========================================
   // FEEDBACK FORM
+  // =========================================
   const feedbackForm = document.getElementById('feedbackForm');
   let isSubmitting = false;
   if (feedbackForm) {
@@ -293,7 +335,9 @@ function initNexusPage() {
     });
   }
 
+  // =========================================
   // COMMENTS
+  // =========================================
   const commentName = document.getElementById('commentName');
   const commentMessage = document.getElementById('commentMessage');
   const commentSubmit = document.getElementById('commentSubmit');
@@ -426,7 +470,9 @@ function initNexusPage() {
     });
   }
 
+  // =========================================
   // CHAT
+  // =========================================
   const chatFab = document.getElementById('chatFab');
   const chatWidget = document.getElementById('chatWidget');
   const chatBackdrop = document.getElementById('chatBackdrop');
@@ -681,13 +727,13 @@ function initNexusPage() {
     utt.onerror = () => stopSpeaking();
     speechSynthesis.speak(utt);
   }
+
   // =========================================
   // RECOMMEND FLOW
   // =========================================
   const recommendBtn = document.getElementById('recommendBtn');
 
   function buildRecommendChips() {
-    // Chips container banao
     let chips = document.getElementById('recommendChips');
     if (!chips) {
       chips = document.createElement('div');
@@ -785,6 +831,7 @@ function initNexusPage() {
     });
   }
 
+  // CHAT FORM SUBMIT
   if (chatForm) {
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -825,10 +872,8 @@ function initNexusPage() {
     });
   }
 
-  
-      function formatAIResponse(text) {
+  function formatAIResponse(text) {
     let html = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    // Site links: [[link:url|title]]
     html = html.replace(/\[\[link:([^|\]]+)\|([^\]]+)\]\]/g, '<a href="$1" class="site-link">$2</a>');
     html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
@@ -936,18 +981,10 @@ window.__nexusLoadPage = loadNexusPage;
   history.replaceState({ nexusPage: __currentPage }, '', window.location.pathname);
 })();
 
-applyTheme(__currentTheme);
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initNexusPage);
-} else {
-  initNexusPage();
-}
 // =========================================
 // UNIVERSAL SEARCH
 // =========================================
-
 const NEXUS_DATA = [
-  // MOVIES
   { title: "Shawshank Redemption", category: "Movies", url: "shawshank.html", img: "images/movies/Shawshank.jpg" },
   { title: "Inception", category: "Movies", url: "inception.html", img: "images/movies/Inception.jpg.jpg" },
   { title: "Interstellar", category: "Movies", url: "interstellar.html", img: "images/movies/Interstellar.jpg.jpg" },
@@ -976,21 +1013,14 @@ const NEXUS_DATA = [
   { title: "Bring Her Back", category: "Movies", url: "bringherback.html", img: "images/movies/bringherback.jpg" },
   { title: "When Evil Lurks", category: "Movies", url: "whenevillurks.html", img: "images/movies/whenevillurks.jpg" },
   { title: "Insidious: Out of the Further", category: "Movies", url: "insidious.html", img: "images/movies/insidious.jpg" },
-
-  // MARVEL
+  { title: "Obsession", category: "Movies", url: "obsession.html", img: "images/movies/obsession.jpg" },
   { title: "Iron Man", category: "Marvel", url: "ironman.html", img: "images/marvel/iron%20man.jpg.jpg" },
   { title: "Iron Man 2", category: "Marvel", url: "ironman2.html", img: "images/marvel/iron%20man2.jpg.jpg" },
   { title: "Spider-Man 2", category: "Marvel", url: "spiderman2.html", img: "images/marvel/spiderman2.jpg" },
   { title: "Thor", category: "Marvel", url: "thor.html", img: "images/marvel/thor.jpg.jpg" },
-
-  // GAMES
   { title: "Red Dead Redemption", category: "Games", url: "rdr1.html", img: "images/games/rdr.jpg" },
-
-  // READING
   { title: "Diwar Mein Ek Khidki Rehti Thi", category: "Reading", url: "reading.html", img: "images/reading/book2.jpg" },
   { title: "Gunahon Ka Devta", category: "Reading", url: "reading.html", img: "images/reading/gunahonkadevta.jpg.jpg" },
-
-  // MUSIC
   { title: "Talha Anjum", category: "Music", url: "listening.html", img: "images/music/talhaanjum.jpg" }
 ];
 
@@ -1062,6 +1092,7 @@ function setupUniversalSearch() {
     }
   });
 }
+
 // =========================================
 // PROFILE PAGE
 // =========================================
@@ -1082,19 +1113,16 @@ function initProfilePage() {
 
   if (!grid) return;
 
-  // Get all liked IDs
   let likedIds = [];
   try {
     likedIds = JSON.parse(localStorage.getItem('nexus_likes') || '[]');
   } catch (e) { likedIds = []; }
 
-  // Find full item data from NEXUS_DATA (defined in search section)
   let likedItems = [];
   if (typeof NEXUS_DATA !== 'undefined') {
     likedItems = NEXUS_DATA.filter(item => likedIds.includes(item.url) || likedIds.includes(item.img));
   }
 
-  // Map for stats
   const categoryCount = {
     'Movies': 0, 'Marvel': 0, 'Games': 0, 'Reading': 0, 'Music': 0
   };
@@ -1102,7 +1130,6 @@ function initProfilePage() {
     if (categoryCount[item.category] !== undefined) categoryCount[item.category]++;
   });
 
-  // Update stats
   if (stats.total) stats.total.textContent = likedItems.length;
   if (stats.movies) stats.movies.textContent = categoryCount.Movies;
   if (stats.games) stats.games.textContent = categoryCount.Games;
@@ -1110,7 +1137,6 @@ function initProfilePage() {
   if (stats.marvel) stats.marvel.textContent = categoryCount.Marvel;
   if (stats.music) stats.music.textContent = categoryCount.Music;
 
-  // Render grid
   function renderGrid(filter) {
     grid.innerHTML = '';
     const items = filter === 'all' ? likedItems : likedItems.filter(i => i.category === filter);
@@ -1158,7 +1184,6 @@ function initProfilePage() {
 
   renderGrid('all');
 
-  // Filter buttons
   if (filterWrap) {
     filterWrap.addEventListener('click', (e) => {
       const btn = e.target.closest('.filter-btn');
@@ -1169,11 +1194,11 @@ function initProfilePage() {
     });
   }
 }
+
 // =========================================
 // NEXUS LABS
 // =========================================
-
-  function initLabsPage() {
+function initLabsPage() {
   if (__currentPage !== 'labs.html') return;
 
   const movies = (typeof NEXUS_DATA !== 'undefined')
@@ -1200,7 +1225,6 @@ function initProfilePage() {
     { text: "Every passing minute is another chance to turn it all around.", by: "Vanilla Sky" }
   ];
 
-  // ✅ PERSISTENT history via localStorage
   function getHistory(key) {
     try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) { return []; }
   }
@@ -1219,7 +1243,6 @@ function initProfilePage() {
     }[c]));
   }
 
-  // ✅ Fisher-Yates shuffle for true randomness
   function shuffle(arr) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -1237,7 +1260,6 @@ function initProfilePage() {
 
     try {
       const pool = submode === 'movie' ? movies : allItems;
-      // ✅ Shuffle pool for true randomness
       const shuffledPool = shuffle(pool);
       const localItem = shuffledPool[0];
 
@@ -1272,7 +1294,6 @@ function initProfilePage() {
         }
       }
 
-      // Save picks to persistent history
       const newHistory = previousPicks.concat(externalItems.map(i => i.title));
       setHistory('nexus_prev_picks', newHistory);
 
@@ -1361,7 +1382,6 @@ function initProfilePage() {
         const data = await res.json();
         if (data.success && data.reply) {
           factRes.innerHTML = `<div class="result-text">${data.reply}</div>`;
-          // Save to persistent history
           const newFacts = previousFacts.concat([data.reply.substring(0, 150)]);
           setHistory('nexus_prev_facts', newFacts);
         } else if (data.error === 'limit_reached') {
@@ -1390,4 +1410,14 @@ function initProfilePage() {
       `;
     });
   }
+}
+
+// =========================================
+// BOOTSTRAP
+// =========================================
+applyTheme(__currentTheme);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initNexusPage);
+} else {
+  initNexusPage();
 }
