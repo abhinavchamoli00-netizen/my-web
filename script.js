@@ -73,11 +73,12 @@ async function applyPinnedSections() {
 }
 
 // =========================================
-// SECTION LOCKS — Labs + Political (5 day)
+// SECTION LOCKS — Labs + Political (5 day) + Admin unlock
 // =========================================
 const NEXUS_LOCK_START = new Date('2026-10-11T00:00:00+05:30').getTime();
 const NEXUS_LOCK_DURATION_MS = 5 * 24 * 60 * 60 * 1000;
 const NEXUS_LOCKED_HREFS = ['labs.html', 'political.html'];
+const NEXUS_ADMIN_TOKEN = 'k9x4m2p7q8z3n6w1';
 
 function __nexusLockActive() {
   return Date.now() < (NEXUS_LOCK_START + NEXUS_LOCK_DURATION_MS);
@@ -85,8 +86,6 @@ function __nexusLockActive() {
 function __nexusUnlockAt() {
   return NEXUS_LOCK_START + NEXUS_LOCK_DURATION_MS;
 }
-
-// Admin override — session tak unlock
 function __nexusAdminUnlocked() {
   return sessionStorage.getItem('_nexus_unlock_override') === '1';
 }
@@ -95,7 +94,6 @@ function __nexusAdminUnlockSet() {
 }
 
 let __nexusLockInterval = null;
-let __nexusAdminModalOpen = false;
 
 function __nexusBuildAdminModal() {
   if (document.getElementById('nexusAdminModal')) return;
@@ -128,10 +126,12 @@ function __nexusBuildAdminModal() {
 
   function closeModal() {
     modal.style.display = 'none';
-    __nexusAdminModalOpen = false;
     input.value = '';
+    input.disabled = false;
+    submitBtn.disabled = false;
     errEl.textContent = '';
   }
+
   async function trySubmit() {
     const pass = input.value.trim();
     if (!pass) return;
@@ -146,7 +146,7 @@ function __nexusBuildAdminModal() {
         body: JSON.stringify({
           password: pass,
           action: 'verify',
-          deviceToken: 'k9x4m2p7q8z3n6w1'
+          deviceToken: NEXUS_ADMIN_TOKEN
         })
       });
       const data = await res.json();
@@ -199,8 +199,9 @@ function __nexusOpenAdminModal() {
   const modal = document.getElementById('nexusAdminModal');
   const input = modal.querySelector('#nexusAdminInput');
   const errEl = modal.querySelector('#nexusAdminErr');
+  input.disabled = false;
+  modal.querySelector('#nexusAdminSubmit').disabled = false;
   modal.style.display = 'flex';
-  __nexusAdminModalOpen = true;
   input.value = '';
   errEl.textContent = '';
   setTimeout(() => input.focus(), 100);
@@ -218,7 +219,6 @@ function applySectionLocks() {
     if (ov) ov.remove();
   }
 
-  // Admin already unlocked OR lock expired → clear all
   if (__nexusAdminUnlocked() || !__nexusLockActive()) {
     document.querySelectorAll('.categories a.card').forEach(clearLockOnCard);
     return;
@@ -266,7 +266,7 @@ function applySectionLocks() {
           <div style="font-size:1.5rem; line-height:1; margin-bottom:6px;">🔒</div>
           <div style="color:#ffffff; font-weight:700; font-size:0.66rem; letter-spacing:2.5px; margin-bottom:6px; text-transform:uppercase;">Locked</div>
           <div class="nexus-lock-timer" style="color:#ff9f43; font-weight:700; font-size:0.95rem; font-family:'Space Grotesk',sans-serif; letter-spacing:0.5px;">--</div>
-          <button type="button" class="nexus-lock-admin-btn" style="pointer-events:auto; margin-top:10px; padding:5px 12px; font-size:0.62rem; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#e0dcff; background:rgba(108,92,231,0.55); border:1px solid rgba(150,140,255,0.7); border-radius:14px; cursor:pointer; font-family:'Space Grotesk',sans-serif; outline:none; transition:all 0.2s;">🔑 Admin Entry</button>
+          <button type="button" class="nexus-lock-admin-btn" style="pointer-events:auto; margin-top:10px; padding:6px 14px; font-size:0.68rem; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; color:#ffffff; background:rgba(108,92,231,0.75); border:1px solid rgba(150,140,255,0.85); border-radius:14px; cursor:pointer; font-family:'Space Grotesk',sans-serif; outline:none; transition:all 0.2s;">🔑 Admin Entry</button>
         `;
         card.appendChild(overlay);
 
@@ -277,10 +277,12 @@ function applySectionLocks() {
           __nexusOpenAdminModal();
         });
         btn.addEventListener('mouseenter', () => {
-          btn.style.background = 'rgba(108,92,231,0.95)';
+          btn.style.background = 'rgba(108,92,231,1)';
+          btn.style.transform = 'scale(1.05)';
         });
         btn.addEventListener('mouseleave', () => {
-          btn.style.background = 'rgba(108,92,231,0.55)';
+          btn.style.background = 'rgba(108,92,231,0.75)';
+          btn.style.transform = 'scale(1)';
         });
       }
 
@@ -446,21 +448,14 @@ function addBookmarkButtons() {
     btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
 
     let likes = [];
-    try {
-      likes = JSON.parse(localStorage.getItem('nexus_likes') || '[]');
-    } catch (e) { likes = []; }
-
+    try { likes = JSON.parse(localStorage.getItem('nexus_likes') || '[]'); } catch (e) { likes = []; }
     if (likes.includes(id)) btn.classList.add('active');
 
     btn.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
-
       let likes = [];
-      try {
-        likes = JSON.parse(localStorage.getItem('nexus_likes') || '[]');
-      } catch (e) { likes = []; }
-
+      try { likes = JSON.parse(localStorage.getItem('nexus_likes') || '[]'); } catch (e) { likes = []; }
       const idx = likes.indexOf(id);
       if (idx > -1) {
         likes.splice(idx, 1);
@@ -471,7 +466,6 @@ function addBookmarkButtons() {
         btn.style.transform = 'scale(1.4)';
         setTimeout(() => { btn.style.transform = ''; }, 200);
       }
-
       localStorage.setItem('nexus_likes', JSON.stringify(likes));
     });
 
