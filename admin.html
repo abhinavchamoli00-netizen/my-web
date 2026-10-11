@@ -315,7 +315,6 @@
       </div>
     </div>
 
-    <!-- 📌 PIN HOMEPAGE SECTIONS -->
     <div style="background:#141414; border-radius:14px; padding:16px; margin-bottom:20px; border:1px solid rgba(108,92,231,0.2);">
       <h3 style="color:#a29bfe; font-size:1rem; margin-bottom:6px;">📌 Pin Homepage Sections</h3>
       <p style="color:#888; font-size:0.78rem; margin-bottom:14px;">Pin max 2 categories to appear at top of homepage.</p>
@@ -328,6 +327,27 @@
 <script>
 (function() {
   const MY_DEVICE_TOKEN = 'k9x4m2p7q8z3n6w1';
+
+  let LOCKED_UNTIL = 0;
+
+  async function checkLockStatus() {
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'checkLock', deviceToken: MY_DEVICE_TOKEN })
+      });
+      const data = await res.json();
+      if (data.success && data.locked && data.lockedUntil) {
+        LOCKED_UNTIL = data.lockedUntil;
+        const minsLeft = Math.ceil((data.lockedUntil - Date.now()) / 60000);
+        errMsg.textContent = `🔒 Too many failed attempts. Try again in ${minsLeft} minute${minsLeft !== 1 ? 's' : ''}.`;
+        errMsg.style.color = '#ff9f43';
+        passInput.disabled = true;
+        unlockBtn.disabled = true;
+      }
+    } catch (e) {}
+  }
 
   const lockScreen = document.getElementById('lockScreen');
   const panel = document.getElementById('panel');
@@ -371,7 +391,6 @@
   function renderPinned(pinned) {
     pinSections.innerHTML = '';
 
-    // Pinned first (numbered)
     pinned.forEach((pinId, i) => {
       const sec = SECTIONS.find(s => s.id === pinId);
       if (!sec) return;
@@ -389,7 +408,6 @@
       pinSections.appendChild(btn);
     });
 
-    // Rest (unpinned)
     SECTIONS.filter(s => !pinned.includes(s.id)).forEach(sec => {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -437,7 +455,6 @@
     }
   }
 
-  // Admin visit alert
   if (!sessionStorage.getItem('_adm_visit_logged')) {
     sessionStorage.setItem('_adm_visit_logged', '1');
     (async () => {
@@ -463,6 +480,7 @@
   let storedPass = sessionStorage.getItem('_adm') || '';
 
   if (storedPass) verifyAndShow(storedPass);
+  else checkLockStatus();
 
   async function verifyAndShow(pass) {
     try {
@@ -481,6 +499,7 @@
       } else {
         sessionStorage.removeItem('_adm');
         if (data.error === 'locked') {
+          if (data.lockedUntil) LOCKED_UNTIL = data.lockedUntil;
           errMsg.textContent = '🔒 ' + (data.message || 'Too many attempts. Try again later.');
           errMsg.style.color = '#ff9f43';
           passInput.disabled = true;
@@ -514,6 +533,7 @@
       } else if (data.error === 'locked') {
         errMsg.textContent = '🔒 ' + (data.message || 'Too many attempts. Try again later.');
         errMsg.style.color = '#ff9f43';
+        if (data.lockedUntil) LOCKED_UNTIL = data.lockedUntil;
         passInput.value = '';
         passInput.disabled = true;
         lockedNow = true;

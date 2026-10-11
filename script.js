@@ -80,6 +80,24 @@ const NEXUS_LOCK_DURATION_MS = 5 * 24 * 60 * 60 * 1000;
 const NEXUS_LOCKED_HREFS = ['labs.html', 'political.html'];
 const NEXUS_ADMIN_TOKEN = 'k9x4m2p7q8z3n6w1';
 
+let __nexusLockedUntil = 0;
+
+async function __nexusCheckLock() {
+  try {
+    const res = await fetch('/api/admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'checkLock', deviceToken: NEXUS_ADMIN_TOKEN })
+    });
+    const data = await res.json();
+    if (data.success && data.locked && data.lockedUntil) {
+      __nexusLockedUntil = data.lockedUntil;
+    } else {
+      __nexusLockedUntil = 0;
+    }
+  } catch (e) {}
+}
+
 function __nexusLockActive() {
   return Date.now() < (NEXUS_LOCK_START + NEXUS_LOCK_DURATION_MS);
 }
@@ -154,6 +172,7 @@ function __nexusBuildAdminModal() {
         errEl.textContent = '✅ Unlocked!';
         errEl.style.color = '#2ecc71';
         __nexusAdminUnlockSet();
+        __nexusLockedUntil = 0;
         setTimeout(() => {
           closeModal();
           if (__nexusLockInterval) { clearInterval(__nexusLockInterval); __nexusLockInterval = null; }
@@ -168,6 +187,7 @@ function __nexusBuildAdminModal() {
       } else if (data.error === 'locked') {
         errEl.textContent = '🔒 ' + (data.message || 'Too many attempts. Try again later.');
         errEl.style.color = '#ff9f43';
+        if (data.lockedUntil) __nexusLockedUntil = data.lockedUntil;
         input.value = '';
         input.disabled = true;
         lockedNow = true;
@@ -194,17 +214,31 @@ function __nexusBuildAdminModal() {
   modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 }
 
-function __nexusOpenAdminModal() {
+async function __nexusOpenAdminModal() {
   __nexusBuildAdminModal();
   const modal = document.getElementById('nexusAdminModal');
   const input = modal.querySelector('#nexusAdminInput');
   const errEl = modal.querySelector('#nexusAdminErr');
-  input.disabled = false;
-  modal.querySelector('#nexusAdminSubmit').disabled = false;
+  const submitBtn = modal.querySelector('#nexusAdminSubmit');
+
+  // Refresh lock status from server before showing
+  await __nexusCheckLock();
+
   modal.style.display = 'flex';
   input.value = '';
-  errEl.textContent = '';
-  setTimeout(() => input.focus(), 100);
+
+  if (__nexusLockedUntil > Date.now()) {
+    const minsLeft = Math.ceil((__nexusLockedUntil - Date.now()) / 60000);
+    errEl.textContent = `🔒 Too many failed attempts. Try again in ${minsLeft} minute${minsLeft !== 1 ? 's' : ''}.`;
+    errEl.style.color = '#ff9f43';
+    input.disabled = true;
+    submitBtn.disabled = true;
+  } else {
+    errEl.textContent = '';
+    input.disabled = false;
+    submitBtn.disabled = false;
+    setTimeout(() => input.focus(), 100);
+  }
 }
 
 function applySectionLocks() {
@@ -494,6 +528,7 @@ function initNexusPage() {
   setTimeout(async () => {
     try { await applyPinnedSections(); } catch (e) {}
     applySectionLocks();
+    __nexusCheckLock();
   }, 100);
 
   async function getDeviceInfo() {

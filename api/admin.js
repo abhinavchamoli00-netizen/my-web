@@ -93,7 +93,31 @@ module.exports = async function handler(req, res) {
     } catch (e) {}
     return res.status(200).json({ success: true });
   }
-
+  // =========================================
+  // CHECK LOCK STATUS (no password needed)
+  // =========================================
+  if (action === 'checkLock') {
+    if (!pollBinId || !apiKey) {
+      return res.status(200).json({ success: true, locked: false });
+    }
+    try {
+      const settings = await readSettings();
+      const lockMap = settings.adminLock || {};
+      const entry = lockMap[clientIp];
+      const now = Date.now();
+      if (entry && entry.lockedUntil && now < entry.lockedUntil) {
+        const msLeft = entry.lockedUntil - now;
+        const minsLeft = Math.ceil(msLeft / 60000);
+        return res.status(200).json({
+          success: true,
+          locked: true,
+          lockedUntil: entry.lockedUntil,
+          minutesLeft: minsLeft
+        });
+      }
+    } catch (e) {}
+    return res.status(200).json({ success: true, locked: false });
+  }
   // =========================================
   // LOCKOUT CHECK (applies to EVERYONE)
   // =========================================
