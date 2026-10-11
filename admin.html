@@ -60,8 +60,14 @@
       font-family: inherit;
       text-align: center;
       letter-spacing: 4px;
+      transition: all 0.2s;
     }
     .lock-screen input:focus { border-color: #6c5ce7; }
+    .lock-screen input:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: #0f0f18;
+    }
     .lock-screen button {
       width: 100%;
       padding: 12px;
@@ -76,12 +82,14 @@
       transition: 0.2s;
       letter-spacing: 1px;
     }
-    .lock-screen button:hover { background: #4e3ec9; }
+    .lock-screen button:hover:not(:disabled) { background: #4e3ec9; }
+    .lock-screen button:disabled { opacity: 0.5; cursor: not-allowed; }
     .lock-screen .err {
       color: #e74c3c;
       font-size: 0.8rem;
       margin-top: 10px;
       min-height: 16px;
+      line-height: 1.4;
     }
     .panel {
       display: none;
@@ -202,7 +210,6 @@
     }
     .c-card .btn.del:hover { background: #e74c3c; color: #fff; }
 
-    /* ✅ Hide button styling */
     .c-card .btn.hide {
       background: rgba(255, 159, 67, 0.1);
       color: #ff9f43;
@@ -307,7 +314,8 @@
         <button id="lockBtn">Lock</button>
       </div>
     </div>
-        <!-- 📌 PIN HOMEPAGE SECTIONS -->
+
+    <!-- 📌 PIN HOMEPAGE SECTIONS -->
     <div style="background:#141414; border-radius:14px; padding:16px; margin-bottom:20px; border:1px solid rgba(108,92,231,0.2);">
       <h3 style="color:#a29bfe; font-size:1rem; margin-bottom:6px;">📌 Pin Homepage Sections</h3>
       <p style="color:#888; font-size:0.78rem; margin-bottom:14px;">Pin max 2 categories to appear at top of homepage.</p>
@@ -330,7 +338,8 @@
   const refreshBtn = document.getElementById('refreshBtn');
   const clearBtn = document.getElementById('clearBtn');
   const lockBtn = document.getElementById('lockBtn');
-    // =========================================
+
+  // =========================================
   // PIN / UNPIN HOMEPAGE SECTIONS
   // =========================================
   const SECTIONS = [
@@ -359,10 +368,10 @@
     } catch (e) { renderPinned([]); }
   }
 
-    function renderPinned(pinned) {
+  function renderPinned(pinned) {
     pinSections.innerHTML = '';
 
-    // ✅ Pehle pinned wale (numbered order mein)
+    // Pinned first (numbered)
     pinned.forEach((pinId, i) => {
       const sec = SECTIONS.find(s => s.id === pinId);
       if (!sec) return;
@@ -380,7 +389,7 @@
       pinSections.appendChild(btn);
     });
 
-    // ✅ Phir baaki (unpinned) wale
+    // Rest (unpinned)
     SECTIONS.filter(s => !pinned.includes(s.id)).forEach(sec => {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -428,10 +437,6 @@
     }
   }
 
-  // Load pinned when admin logs in
-  const origRenderComments = renderComments;
-  // (call loadPinned after successful login)
-
   // Admin visit alert
   if (!sessionStorage.getItem('_adm_visit_logged')) {
     sessionStorage.setItem('_adm_visit_logged', '1');
@@ -472,9 +477,15 @@
         lockScreen.style.display = 'none';
         panel.classList.add('active');
         renderComments(data.comments || []);
-                loadPinned();
+        loadPinned();
       } else {
         sessionStorage.removeItem('_adm');
+        if (data.error === 'locked') {
+          errMsg.textContent = '🔒 ' + (data.message || 'Too many attempts. Try again later.');
+          errMsg.style.color = '#ff9f43';
+          passInput.disabled = true;
+          unlockBtn.disabled = true;
+        }
       }
     } catch (e) {}
   }
@@ -484,6 +495,8 @@
     if (!pass) return;
     errMsg.textContent = 'Verifying...';
     errMsg.style.color = '#888';
+    unlockBtn.disabled = true;
+    let lockedNow = false;
     try {
       const res = await fetch('/api/admin', {
         method: 'POST',
@@ -497,6 +510,13 @@
         lockScreen.style.display = 'none';
         panel.classList.add('active');
         renderComments(data.comments || []);
+        loadPinned();
+      } else if (data.error === 'locked') {
+        errMsg.textContent = '🔒 ' + (data.message || 'Too many attempts. Try again later.');
+        errMsg.style.color = '#ff9f43';
+        passInput.value = '';
+        passInput.disabled = true;
+        lockedNow = true;
       } else {
         errMsg.textContent = 'Wrong passcode';
         errMsg.style.color = '#e74c3c';
@@ -505,6 +525,8 @@
     } catch (e) {
       errMsg.textContent = 'Connection error';
       errMsg.style.color = '#e74c3c';
+    } finally {
+      if (!lockedNow) unlockBtn.disabled = false;
     }
   });
 
@@ -583,7 +605,6 @@
         if (replyBox.classList.contains('active')) replyInput.focus();
       });
 
-      // ✅ Hide / Unhide button
       const hideBtn = document.createElement('button');
       if (c.hidden) {
         hideBtn.className = 'btn unhide';
@@ -676,7 +697,6 @@
     } catch (e) {}
   }
 
-  // ✅ Hide comment
   async function hideComment(id) {
     const pass = sessionStorage.getItem('_adm');
     if (!pass) return;
@@ -691,7 +711,6 @@
     } catch (e) {}
   }
 
-  // ✅ Unhide comment
   async function unhideComment(id) {
     const pass = sessionStorage.getItem('_adm');
     if (!pass) return;

@@ -132,13 +132,13 @@ function __nexusBuildAdminModal() {
     input.value = '';
     errEl.textContent = '';
   }
-
   async function trySubmit() {
     const pass = input.value.trim();
     if (!pass) return;
     errEl.textContent = 'Verifying...';
     errEl.style.color = '#888';
     submitBtn.disabled = true;
+    let lockedNow = false;
     try {
       const res = await fetch('/api/admin', {
         method: 'POST',
@@ -165,6 +165,12 @@ function __nexusBuildAdminModal() {
             if (ov) ov.remove();
           });
         }, 500);
+      } else if (data.error === 'locked') {
+        errEl.textContent = '🔒 ' + (data.message || 'Too many attempts. Try again later.');
+        errEl.style.color = '#ff9f43';
+        input.value = '';
+        input.disabled = true;
+        lockedNow = true;
       } else {
         errEl.textContent = '❌ Wrong password';
         errEl.style.color = '#e74c3c';
@@ -175,7 +181,7 @@ function __nexusBuildAdminModal() {
       errEl.textContent = '❌ Connection error';
       errEl.style.color = '#e74c3c';
     } finally {
-      submitBtn.disabled = false;
+      if (!lockedNow) submitBtn.disabled = false;
     }
   }
 
