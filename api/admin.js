@@ -46,7 +46,7 @@ module.exports = async function handler(req, res) {
     return 'Unknown';
   };
 
-  // Visit alert
+  // Visit alert (no password)
   if (action === 'visitAlert') {
     if (isTrusted) return res.status(200).json({ success: true, skipped: true });
     try {
@@ -68,7 +68,7 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ success: true });
   }
 
-  // Wrong password alert
+  // Wrong password alert (no password check yet)
   if (password && password !== ADMIN_PASS && !isTrusted) {
     try {
       const botToken = process.env.TELEGRAM_BOT_TOKEN;
@@ -88,12 +88,25 @@ module.exports = async function handler(req, res) {
       }
     } catch (e) {}
   }
+
+  if (password !== ADMIN_PASS) {
+    return res.status(401).json({ success: false, error: 'Invalid credentials' });
+  }
+
+  // =========================================
+  // VARIABLES (after password check)
+  // =========================================
+  const apiKey = process.env.JSONBIN_API_KEY || process.env.JSONBIN_KEY;
+  const binId = process.env.JSONBIN_BIN_ID || process.env.JSONBIN_ID;
+
   // =========================================
   // PIN / UNPIN HOMEPAGE SECTIONS
   // =========================================
   if (action === 'pinSection' || action === 'unpinSection' || action === 'getPinnedSections') {
     const pollBinId = process.env.POLL_BIN_ID;
-    if (!apiKey || !pollBinId) return res.status(500).json({ error: 'POLL_BIN_ID not configured' });
+    if (!apiKey || !pollBinId) {
+      return res.status(500).json({ error: 'POLL_BIN_ID or JSONBIN key not configured' });
+    }
     const settingsUrl = `https://api.jsonbin.io/v3/b/${pollBinId}`;
     const settingsHeaders = { 'X-Master-Key': apiKey, 'Content-Type': 'application/json' };
 
@@ -131,13 +144,9 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  if (password !== ADMIN_PASS) {
-  if (password !== ADMIN_PASS) {
-    return res.status(401).json({ success: false, error: 'Invalid credentials' });
-  }
-
-  const apiKey = process.env.JSONBIN_API_KEY || process.env.JSONBIN_KEY;
-  const binId = process.env.JSONBIN_BIN_ID || process.env.JSONBIN_ID;
+  // =========================================
+  // COMMENTS MANAGEMENT (existing)
+  // =========================================
   if (!apiKey || !binId) return res.status(500).json({ error: 'Config missing' });
 
   const baseUrl = `https://api.jsonbin.io/v3/b/${binId}`;
@@ -154,26 +163,15 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // ✅ DELETE — with better error handling
     if (action === 'delete') {
       const before = comments.length;
       comments = comments.filter(c => String(c.id) !== String(commentId));
-      if (comments.length === before) {
-        return res.status(404).json({ 
-          error: 'Comment not found',
-          lookingFor: commentId,
-          availableIds: comments.slice(-5).map(c => c.id)
-        });
-      }
+      if (comments.length === before) return res.status(404).json({ error: 'Not found' });
       const saveRes = await fetch(baseUrl, { method: 'PUT', headers, body: JSON.stringify(comments) });
-      if (!saveRes.ok) {
-        const errText = await saveRes.text().catch(() => 'unknown');
-        return res.status(500).json({ error: 'Save failed', details: errText });
-      }
+      if (!saveRes.ok) return res.status(500).json({ error: 'Save failed' });
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // ✅ HIDE
     if (action === 'hide') {
       const idx = comments.findIndex(c => String(c.id) === String(commentId));
       if (idx === -1) return res.status(404).json({ error: 'Comment not found' });
@@ -184,7 +182,6 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // ✅ UNHIDE
     if (action === 'unhide') {
       const idx = comments.findIndex(c => String(c.id) === String(commentId));
       if (idx === -1) return res.status(404).json({ error: 'Comment not found' });
@@ -195,7 +192,6 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // REPLY
     if (action === 'reply') {
       if (!replyText) return res.status(400).json({ error: 'Reply text required' });
       if (replyText.length > 400) return res.status(400).json({ error: 'Reply too long' });
@@ -208,7 +204,6 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // UNREPLY
     if (action === 'unreply') {
       const idx = comments.findIndex(c => String(c.id) === String(commentId));
       if (idx === -1) return res.status(404).json({ error: 'Comment not found' });
@@ -219,7 +214,6 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, comments: comments.slice(-50).reverse() });
     }
 
-    // CLEAR
     if (action === 'clear') {
       const saveRes = await fetch(baseUrl, { method: 'PUT', headers, body: JSON.stringify([]) });
       if (!saveRes.ok) return res.status(500).json({ error: 'Save failed' });
