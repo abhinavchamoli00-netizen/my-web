@@ -359,21 +359,40 @@
     } catch (e) { renderPinned([]); }
   }
 
-  function renderPinned(pinned) {
+    function renderPinned(pinned) {
     pinSections.innerHTML = '';
-    SECTIONS.forEach(sec => {
-      const isPinned = pinned.includes(sec.id);
+
+    // ✅ Pehle pinned wale (numbered order mein)
+    pinned.forEach((pinId, i) => {
+      const sec = SECTIONS.find(s => s.id === pinId);
+      if (!sec) return;
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.textContent = (isPinned ? '📌 ' : '') + sec.name;
+      btn.textContent = `📌 ${i + 1}. ${sec.name.replace(/^[^\s]+\s/, '')}`;
       btn.style.cssText = `
         padding:10px 8px; border-radius:10px; cursor:pointer; font-family:inherit; font-size:0.82rem;
-        border:1px solid ${isPinned ? '#6c5ce7' : 'rgba(108,92,231,0.3)'};
-        background:${isPinned ? 'rgba(108,92,231,0.35)' : 'rgba(108,92,231,0.1)'};
-        color:${isPinned ? '#fff' : '#a29bfe'}; font-weight:600;
+        border:1px solid #6c5ce7;
+        background:rgba(108,92,231,0.35);
+        color:#fff; font-weight:600;
         transition:all 0.2s;
       `;
-      btn.addEventListener('click', () => togglePin(sec.id, isPinned));
+      btn.addEventListener('click', () => togglePin(sec.id, true));
+      pinSections.appendChild(btn);
+    });
+
+    // ✅ Phir baaki (unpinned) wale
+    SECTIONS.filter(s => !pinned.includes(s.id)).forEach(sec => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = sec.name;
+      btn.style.cssText = `
+        padding:10px 8px; border-radius:10px; cursor:pointer; font-family:inherit; font-size:0.82rem;
+        border:1px solid rgba(108,92,231,0.3);
+        background:rgba(108,92,231,0.1);
+        color:#a29bfe; font-weight:600;
+        transition:all 0.2s;
+      `;
+      btn.addEventListener('click', () => togglePin(sec.id, false));
       pinSections.appendChild(btn);
     });
   }
