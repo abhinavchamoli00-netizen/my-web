@@ -296,6 +296,22 @@ function initNexusPage() {
           browser,
           model,
           platform
+                fetch('/api/visitor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
+        body: JSON.stringify({
+          type: 'socialClick',
+          socialName: socialName,
+          socialUrl: href,
+          referrer: document.referrer || 'Direct',
+          page: __currentPage,
+          device,
+          browser,
+          model,
+          platform
+        })
+      }).catch(() => {});
         })
       }).catch(() => {});
     } catch (err) {}
