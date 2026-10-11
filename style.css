@@ -1127,71 +1127,17 @@ html.theme-amoled .report-toc { background: #050505; }
   .pinned-badge { font-size: 0.58rem; padding: 3px 8px; top: 10px; right: 10px; }
 }
 
-// =========================================
-// PINNED SECTIONS (reorder homepage categories)
-// =========================================
-async function applyPinnedSections() {
-  if (!isHomePage()) return;
-  const categoriesGrid = document.querySelector('.categories');
-  if (!categoriesGrid) return;
 
-  try {
-    const res = await fetch('/api/settings');
-    const data = await res.json();
-
-    if (!data.success || !Array.isArray(data.pinned) || data.pinned.length === 0) {
-      console.log('📍 No pinned sections');
-      return;
-    }
-
-    console.log('📍 Pinned sections:', data.pinned);
-
-    const allCards = Array.from(categoriesGrid.children);
-    const pinnedCards = [];
-    const restCards = [];
-
-    allCards.forEach(card => {
-      const href = (card.getAttribute && card.getAttribute('href')) || '';
-      const idx = data.pinned.indexOf(href);
-
-      if (idx > -1) {
-        card.style.borderColor = 'rgba(108, 92, 231, 0.7)';
-        card.style.boxShadow = '0 8px 26px rgba(108, 92, 231, 0.35)';
-        card.style.background = 'linear-gradient(135deg, #141414, #1a1033)';
-        card.setAttribute('data-pinned', 'true');
-
-        if (!card.querySelector('.pinned-badge')) {
-          const badge = document.createElement('span');
-          badge.className = 'pinned-badge';
-          badge.textContent = '📌 PINNED';
-          card.appendChild(badge);
-        }
-        pinnedCards.push(card);
-      } else {
-        restCards.push(card);
-      }
-    });
-
-    if (pinnedCards.length === 0) return;
-
-    categoriesGrid.innerHTML = '';
-
-    data.pinned.forEach(pinId => {
-      const card = pinnedCards.find(c => c.getAttribute('href') === pinId);
-      if (card) categoriesGrid.appendChild(card);
-    });
-
-    restCards.forEach(card => categoriesGrid.appendChild(card));
-
-    console.log('✅ Pinned sections moved to top');
-  } catch (e) {
-    console.error('❌ applyPinnedSections error:', e);
-  }
+/* =========================================
+   SECTION SUBTITLE (used in Movies page)
+   ========================================= */
+.section-subtitle {
+  color: #888;
+  font-size: 0.85rem;
+  margin-top: -12px;
+  margin-bottom: 22px;
+  padding-left: 16px;
+  font-style: italic;
+  letter-spacing: 0.3px;
 }
-
-// Run on load
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', applyPinnedSections);
-} else {
-  applyPinnedSections();
-}
+html.theme-day .section-subtitle { color: #666; }
