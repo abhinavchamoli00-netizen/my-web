@@ -177,6 +177,124 @@ function enforceLockRedirect() {
   return true;
 }
 
+// =========================================
+// ADMIN ENTRY (top-right trigger → password modal → server verify)
+// =========================================
+function setupAdminEntry() {
+  if (document.getElementById('nexusAdminEntry')) return;
+  if (__currentPage === 'admin.html') return;
+
+  // Trigger text
+  const trigger = document.createElement('div');
+  trigger.id = 'nexusAdminEntry';
+  trigger.textContent = 'Admin Entry';
+  trigger.style.cssText = [
+    'position:fixed','top:14px','right:14px','z-index:2147483646',
+    'color:rgba(150,150,170,0.45)','font-size:0.62rem',
+    'font-family:"Space Grotesk",sans-serif','letter-spacing:1.8px',
+    'text-transform:uppercase','cursor:pointer','user-select:none',
+    'padding:5px 9px','border-radius:8px','transition:all 0.2s',
+    'background:transparent','border:1px solid transparent'
+  ].join(';');
+  trigger.addEventListener('mouseenter', () => {
+    trigger.style.color = '#a29bfe';
+    trigger.style.background = 'rgba(108,92,231,0.12)';
+    trigger.style.borderColor = 'rgba(108,92,231,0.4)';
+  });
+  trigger.addEventListener('mouseleave', () => {
+    trigger.style.color = 'rgba(150,150,170,0.45)';
+    trigger.style.background = 'transparent';
+    trigger.style.borderColor = 'transparent';
+  });
+
+  // Modal
+  const modal = document.createElement('div');
+  modal.id = 'nexusAdminModal';
+  modal.style.cssText = [
+    'display:none','position:fixed','inset:0',
+    'background:rgba(0,0,0,0.85)','z-index:2147483647',
+    'align-items:center','justify-content:center','padding:20px',
+    'font-family:"Space Grotesk",sans-serif'
+  ].join(';');
+  modal.innerHTML = `
+    <div style="background:#141414; border:1px solid rgba(108,92,231,0.4); border-radius:14px; padding:26px 22px; max-width:340px; width:100%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.7);">
+      <div style="color:#a29bfe; font-size:1.3rem; font-weight:700; letter-spacing:3px; margin-bottom:4px;">NEXUS</div>
+      <p style="color:#888; font-size:0.75rem; margin-bottom:18px; letter-spacing:0.5px;">Enter admin password</p>
+      <input id="nexusAdminInput" type="password" inputmode="numeric" placeholder="••••" maxlength="12" autocomplete="off" style="width:100%; padding:12px 14px; background:#1c1b22; border:1px solid rgba(108,92,231,0.3); border-radius:10px; color:#fff; text-align:center; letter-spacing:6px; font-size:1.1rem; outline:none; margin-bottom:14px; font-family:inherit; box-sizing:border-box;" />
+      <div style="display:flex; gap:8px;">
+        <button id="nexusAdminCancel" type="button" style="flex:1; padding:11px; background:transparent; color:#888; border:1px solid #333; border-radius:9px; cursor:pointer; font-family:inherit; font-size:0.85rem;">Cancel</button>
+        <button id="nexusAdminSubmit" type="button" style="flex:1; padding:11px; background:#6c5ce7; color:#fff; border:none; border-radius:9px; cursor:pointer; font-family:inherit; font-size:0.85rem; font-weight:600;">Enter</button>
+      </div>
+      <p id="nexusAdminErr" style="color:#e74c3c; font-size:0.75rem; margin-top:12px; min-height:14px;"></p>
+    </div>
+  `;
+
+  document.body.appendChild(trigger);
+  document.body.appendChild(modal);
+
+  const input = modal.querySelector('#nexusAdminInput');
+  const submitBtn = modal.querySelector('#nexusAdminSubmit');
+  const cancelBtn = modal.querySelector('#nexusAdminCancel');
+  const errEl = modal.querySelector('#nexusAdminErr');
+
+  function openModal() {
+    modal.style.display = 'flex';
+    input.value = '';
+    errEl.textContent = '';
+    setTimeout(() => input.focus(), 100);
+  }
+  function closeModal() {
+    modal.style.display = 'none';
+    input.value = '';
+    errEl.textContent = '';
+  }
+
+  async function trySubmit() {
+    const pass = input.value.trim();
+    if (!pass) return;
+    errEl.textContent = 'Verifying...';
+    errEl.style.color = '#888';
+    submitBtn.disabled = true;
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          password: pass,
+          action: 'verify',
+          deviceToken: 'nexus-my-device-2026-abhinav'
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        sessionStorage.setItem('_adm', pass);
+        errEl.textContent = '✅ Access granted';
+        errEl.style.color = '#2ecc71';
+        setTimeout(() => { window.location.href = 'admin.html'; }, 400);
+      } else {
+        errEl.textContent = '❌ Wrong password';
+        errEl.style.color = '#e74c3c';
+        input.value = '';
+        input.focus();
+      }
+    } catch (e) {
+      errEl.textContent = '❌ Connection error';
+      errEl.style.color = '#e74c3c';
+    } finally {
+      submitBtn.disabled = false;
+    }
+  }
+
+  trigger.addEventListener('click', openModal);
+  cancelBtn.addEventListener('click', closeModal);
+  submitBtn.addEventListener('click', trySubmit);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') trySubmit();
+    if (e.key === 'Escape') closeModal();
+  });
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+}
+
 function applyTheme(t) {
   document.documentElement.classList.remove('theme-dark', 'theme-day', 'theme-amoled');
   document.documentElement.classList.add('theme-' + t);
@@ -355,6 +473,7 @@ function initNexusPage() {
   }
 
   ensureFloatingButtons();
+  setupAdminEntry();
   addBookmarkButtons();
   setupUniversalSearch();
   initProfilePage();
