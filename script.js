@@ -221,7 +221,6 @@ async function __nexusOpenAdminModal() {
   const errEl = modal.querySelector('#nexusAdminErr');
   const submitBtn = modal.querySelector('#nexusAdminSubmit');
 
-  // Refresh lock status from server before showing
   await __nexusCheckLock();
 
   modal.style.display = 'flex';
@@ -358,7 +357,7 @@ function applyTheme(t) {
 }
 
 function ensureFloatingButtons() {
- const root = document.body;
+  const root = document.body;
 
   let tBtn = document.getElementById('nexusThemeToggle');
   if (!tBtn) {
@@ -426,16 +425,18 @@ function ensureFloatingButtons() {
     'align-items': 'center',
     'justify-content': 'center',
     'user-select': 'none',
-    'transform': 'none',
-    '-webkit-transform': 'none',
-    'will-change': 'auto',
+    'transform': 'translateZ(0)',
+    '-webkit-transform': 'translateZ(0)',
+    'will-change': 'transform',
     'contain': 'none',
     'filter': 'none',
     '-webkit-filter': 'none',
     'backdrop-filter': 'none',
     '-webkit-backdrop-filter': 'none',
     'perspective': 'none',
-    'isolation': 'auto'
+    'isolation': 'auto',
+    'backface-visibility': 'hidden',
+    '-webkit-backface-visibility': 'hidden'
   };
 
   Object.entries(styles).forEach(([prop, val]) => {
