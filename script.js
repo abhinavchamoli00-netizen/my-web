@@ -146,7 +146,7 @@ function __nexusBuildAdminModal() {
         body: JSON.stringify({
           password: pass,
           action: 'verify',
-          deviceToken: 'nexus-my-device-2026-abhinav'
+          deviceToken: 'k9x4m2p7q8z3n6w1'
         })
       });
       const data = await res.json();
