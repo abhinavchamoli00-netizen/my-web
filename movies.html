@@ -19,39 +19,7 @@
 
   <section id="movies">
     <h2>Movies</h2>
-
-    <div class="notice-box">
-      <h4>⚠️ Important Notice</h4>
-      <p>All links below lead to <strong>legal streaming platforms</strong>. Some content may require a subscription. Free platforms show ads to support creators.</p>
-    </div>
-
-    <div class="streaming-sites-section">
-      <h3>🎬 Subscription Platforms (Paid)</h3>
-      <div class="streaming-links-grid">
-        <a href="https://www.netflix.com" target="_blank" class="stream-link">Netflix</a>
-        <a href="https://www.primevideo.com" target="_blank" class="stream-link">Amazon Prime</a>
-        <a href="https://www.hotstar.com" target="_blank" class="stream-link">Disney+ Hotstar</a>
-        <a href="https://www.jiocinema.com" target="_blank" class="stream-link">JioCinema</a>
-        <a href="https://www.sonyliv.com" target="_blank" class="stream-link">SonyLIV</a>
-        <a href="https://www.zee5.com" target="_blank" class="stream-link">Zee5</a>
-        <a href="https://tv.apple.com" target="_blank" class="stream-link">Apple TV+</a>
-        <a href="https://www.youtube.com/movies" target="_blank" class="stream-link">YouTube Movies</a>
-      </div>
-    </div>
-
-    <div class="streaming-sites-section">
-      <h3>🆓 Free (Legal) Platforms</h3>
-      <div class="streaming-links-grid">
-        <a href="https://tubitv.com" target="_blank" class="stream-link">Tubi TV</a>
-        <a href="https://pluto.tv" target="_blank" class="stream-link">Pluto TV</a>
-        <a href="https://www.peacocktv.com" target="_blank" class="stream-link">Peacock (Free)</a>
-        <a href="https://www.youtube.com/movies" target="_blank" class="stream-link">YouTube (Free with Ads)</a>
-        <a href="https://www.crackle.com" target="_blank" class="stream-link">Crackle</a>
-        <a href="https://www.popcornflix.com" target="_blank" class="stream-link">Popcornflix</a>
-        <a href="https://archive.org/details/movies" target="_blank" class="stream-link">Internet Archive</a>
-        <a href="https://www.kanopy.com" target="_blank" class="stream-link">Kanopy</a>
-      </div>
-    </div>
+    <p class="section-subtitle">Curated picks — this list grows as I explore more.</p>
 
     <div class="card-container">
 
@@ -215,6 +183,7 @@
           <img src="images/movies/who%20am%20i.jpg" alt="Who Am I"><p>Who Am I</p>
         </div>
       </a>
+
       <!-- Obsession -->
       <a href="obsession.html" class="poster-link">
         <div class="poster-card">
@@ -223,7 +192,7 @@
           <p>Obsession</p>
         </div>
       </a>
-<!-- Insidious -->
+
       <!-- Insidious -->
       <a href="insidious.html" class="poster-link">
         <div class="poster-card">
@@ -232,7 +201,7 @@
         </div>
       </a>
 
-      <!-- 🔴 RESTRICTED MOVIES (with popup warning) -->
+      <!-- RESTRICTED MOVIES (with popup warning) -->
 
       <a href="eventhorizon.html" class="poster-link restricted-movie" data-movie="Event Horizon">
         <div class="poster-card">
@@ -274,7 +243,7 @@
     <p class="contact">abhinavchamoli00@gmail.com</p>
   </footer>
 
-  <!-- ⚠️ WARNING MODAL -->
+  <!-- WARNING MODAL -->
   <div class="warning-modal-overlay" id="warningOverlay">
     <div class="warning-modal" id="warningModal">
       <span class="wm-icon" id="wmIcon">⚠️</span>
@@ -311,8 +280,7 @@
       pendingUrl = null;
     }
 
-        document.addEventListener('click', function (e) {
-      // ✅ Skip if user clicked the star/like button
+    document.addEventListener('click', function (e) {
       if (e.target.closest('.bookmark-btn')) return;
 
       const link = e.target.closest('a.restricted-movie');
@@ -322,6 +290,7 @@
       pendingUrl = link.getAttribute('href');
       showModal();
     }, true);
+
     wmBackBtn.addEventListener('click', closeModal);
 
     wmContinueBtn.addEventListener('click', function () {
