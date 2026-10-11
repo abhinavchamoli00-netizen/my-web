@@ -1139,5 +1139,16 @@ html.theme-amoled .report-toc { background: #050505; }
   padding-left: 16px;
   font-style: italic;
   letter-spacing: 0.3px;
+  .section-subtitle {
+  color: #b8b8c8;
+  font-size: 1rem;
+  font-weight: 400;
+  margin-top: -6px;
+  margin-bottom: 24px;
+  padding-left: 16px;
+  letter-spacing: 0.2px;
+  line-height: 1.5;
+}
+html.theme-day .section-subtitle { color: #666; }
 }
 html.theme-day .section-subtitle { color: #666; }
