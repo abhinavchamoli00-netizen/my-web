@@ -1157,38 +1157,65 @@ html.theme-day .section-subtitle { color: #666; }
    ========================================= */
 .update-notice {
   max-width: 900px;
-  margin: 8px auto 0 auto;
-  padding: 10px 16px;
+  margin: 6px auto 4px auto;
+  padding: 11px 18px;
   width: 95%;
-  background: rgba(108, 92, 231, 0.12);
-  border: 1px solid rgba(108, 92, 231, 0.3);
-  border-radius: 12px;
+  background: #101018;
+  border: 1px solid rgba(108, 92, 231, 0.25);
+  border-radius: 14px;
   color: #c8c8d8;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   text-align: center;
   font-family: 'Space Grotesk', sans-serif;
   letter-spacing: 0.2px;
+  line-height: 1.5;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
 }
+
 .update-notice .update-date {
   color: #a29bfe;
-  font-weight: 600;
-}
-.update-notice .update-link {
-  color: #a29bfe;
-  text-decoration: underline;
-  text-decoration-color: rgba(162, 155, 254, 0.4);
-  text-underline-offset: 3px;
   font-weight: 700;
-  transition: all 0.2s;
+}
+
+.update-notice .update-link {
+  display: inline-block;
+  padding: 2px 12px;
+  background: rgba(108, 92, 231, 0.2);
+  border: 1px solid rgba(108, 92, 231, 0.5);
+  border-radius: 14px;
+  color: #a29bfe;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.82rem;
+  margin-left: 2px;
+  transition: all 0.2s ease;
 }
 .update-notice .update-link:hover {
+  background: #6c5ce7;
   color: #ffffff;
-  text-decoration-color: #ffffff;
+  border-color: #6c5ce7;
+  transform: translateY(-1px);
 }
+
 html.theme-day .update-notice {
-  background: rgba(108, 92, 231, 0.08);
+  background: #ffffff;
   color: #444;
 }
 html.theme-day .update-notice .update-link {
   color: #6c5ce7;
+}
+html.theme-amoled .update-notice {
+  background: #050505;
+}
+
+@media (max-width: 600px) {
+  .update-notice {
+    font-size: 0.78rem;
+    padding: 10px 14px;
+    margin: 6px auto 4px auto;
+  }
+  .update-notice .update-link {
+    font-size: 0.75rem;
+    padding: 2px 10px;
+  }
 }
