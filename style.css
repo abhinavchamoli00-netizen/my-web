@@ -1152,3 +1152,43 @@ html.theme-amoled .report-toc { background: #050505; }
 html.theme-day .section-subtitle { color: #666; }
 }
 html.theme-day .section-subtitle { color: #666; }
+/* =========================================
+   UPDATE NOTICE (homepage)
+   ========================================= */
+.update-notice {
+  max-width: 900px;
+  margin: 8px auto 0 auto;
+  padding: 10px 16px;
+  width: 95%;
+  background: rgba(108, 92, 231, 0.12);
+  border: 1px solid rgba(108, 92, 231, 0.3);
+  border-radius: 12px;
+  color: #c8c8d8;
+  font-size: 0.82rem;
+  text-align: center;
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: 0.2px;
+}
+.update-notice .update-date {
+  color: #a29bfe;
+  font-weight: 600;
+}
+.update-notice .update-link {
+  color: #a29bfe;
+  text-decoration: underline;
+  text-decoration-color: rgba(162, 155, 254, 0.4);
+  text-underline-offset: 3px;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+.update-notice .update-link:hover {
+  color: #ffffff;
+  text-decoration-color: #ffffff;
+}
+html.theme-day .update-notice {
+  background: rgba(108, 92, 231, 0.08);
+  color: #444;
+}
+html.theme-day .update-notice .update-link {
+  color: #6c5ce7;
+}
