@@ -7,17 +7,19 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
   const apiKey = process.env.JSONBIN_API_KEY || process.env.JSONBIN_KEY;
-  const binId = process.env.POLL_BIN_ID;
-  if (!apiKey || !binId) return res.status(500).json({ error: 'Config missing' });
+  const pollBinId = process.env.POLL_BIN_ID;
+  if (!apiKey || !pollBinId) {
+    return res.status(200).json({ success: true, pinned: [] });
+  }
 
   try {
-    const r = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
-      headers: { 'X-Master-Key': apiKey }
-    });
+    const url = `https://api.jsonbin.io/v3/b/${pollBinId}/latest`;
+    const r = await fetch(url, { headers: { 'X-Master-Key': apiKey } });
     const d = await r.json();
-    const pinned = (d.record && Array.isArray(d.record.pinned)) ? d.record.pinned : [];
+    const data = (d.record && typeof d.record === 'object') ? d.record : {};
+    const pinned = Array.isArray(data.pinned) ? data.pinned : [];
     return res.status(200).json({ success: true, pinned });
   } catch (e) {
-    return res.status(500).json({ error: 'Failed' });
+    return res.status(200).json({ success: true, pinned: [] });
   }
 };

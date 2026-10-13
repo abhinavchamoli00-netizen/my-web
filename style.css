@@ -1106,7 +1106,10 @@ html.theme-amoled .report-toc { background: #050505; }
 }
 .report-inline-link { display: inline-block; color: #a29bfe; font-weight: 600; text-decoration: none; border-bottom: 1px dashed rgba(162, 155, 254, 0.5); }
 .report-inline-link:hover { color: #ffffff; }
-/* Pinned card badge */
+
+/* =========================================
+   PINNED CARD BADGE
+   ========================================= */
 .pinned-badge {
   position: absolute;
   top: 12px;
@@ -1122,24 +1125,14 @@ html.theme-amoled .report-toc { background: #050505; }
   z-index: 5;
   font-family: 'Space Grotesk', sans-serif;
 }
-
 @media (max-width: 600px) {
   .pinned-badge { font-size: 0.58rem; padding: 3px 8px; top: 10px; right: 10px; }
 }
-
 
 /* =========================================
    SECTION SUBTITLE (used in Movies page)
    ========================================= */
 .section-subtitle {
-  color: #888;
-  font-size: 0.85rem;
-  margin-top: -12px;
-  margin-bottom: 22px;
-  padding-left: 16px;
-  font-style: italic;
-  letter-spacing: 0.3px;
-  .section-subtitle {
   color: #b8b8c8;
   font-size: 1rem;
   font-weight: 400;
@@ -1150,8 +1143,7 @@ html.theme-amoled .report-toc { background: #050505; }
   line-height: 1.5;
 }
 html.theme-day .section-subtitle { color: #666; }
-}
-html.theme-day .section-subtitle { color: #666; }
+
 /* =========================================
    UPDATE NOTICE (homepage)
    ========================================= */

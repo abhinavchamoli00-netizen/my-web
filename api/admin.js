@@ -32,12 +32,14 @@ module.exports = async function handler(req, res) {
   const LOCK_DURATION_MS = 20 * 60 * 1000;
 
   async function readSettings() {
+    if (!pollBinId || !apiKey) return {};
     const url = `https://api.jsonbin.io/v3/b/${pollBinId}/latest`;
     const r = await fetch(url, { headers: { 'X-Master-Key': apiKey } });
     const d = await r.json();
     return (d.record && typeof d.record === 'object') ? d.record : {};
   }
   async function writeSettings(data) {
+    if (!pollBinId || !apiKey) return;
     const url = `https://api.jsonbin.io/v3/b/${pollBinId}`;
     await fetch(url, {
       method: 'PUT',
@@ -70,20 +72,17 @@ module.exports = async function handler(req, res) {
     return 'Unknown';
   };
 
-  // =========================================
-  // VISIT ALERT (no password needed)
-  // =========================================
+  // VISIT ALERT
   if (action === 'visitAlert') {
     if (isTrusted) return res.status(200).json({ success: true, skipped: true });
     try {
       const botToken = process.env.TELEGRAM_BOT_TOKEN;
       const chatId = process.env.TELEGRAM_CHAT_ID;
       if (botToken && chatId) {
-        const ip = clientIp;
         const ua = req.headers['user-agent'] || '';
-        const location = await lookupLocation(ip);
+        const location = await lookupLocation(clientIp);
         const time = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-        const text = `🚨 *Admin Panel Opened*\n\nSomeone (not you) opened the admin page!\n\n🌍 Location: ${location}\n💻 Device: ${buildDeviceStr(ua, deviceModel)}\n🌐 IP: \`${ip}\`\n🕐 Time: ${time}`;
+        const text = `🚨 *Admin Panel Opened*\n\nSomeone (not you) opened the admin page!\n\n🌍 Location: ${location}\n💻 Device: ${buildDeviceStr(ua, deviceModel)}\n🌐 IP: \`${clientIp}\`\n🕐 Time: ${time}`;
         fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -93,13 +92,9 @@ module.exports = async function handler(req, res) {
     } catch (e) {}
     return res.status(200).json({ success: true });
   }
-  // =========================================
-  // CHECK LOCK STATUS (no password needed)
-  // =========================================
+
+  // CHECK LOCK (no password needed)
   if (action === 'checkLock') {
-    if (!pollBinId || !apiKey) {
-      return res.status(200).json({ success: true, locked: false });
-    }
     try {
       const settings = await readSettings();
       const lockMap = settings.adminLock || {};
@@ -109,18 +104,15 @@ module.exports = async function handler(req, res) {
         const msLeft = entry.lockedUntil - now;
         const minsLeft = Math.ceil(msLeft / 60000);
         return res.status(200).json({
-          success: true,
-          locked: true,
-          lockedUntil: entry.lockedUntil,
-          minutesLeft: minsLeft
+          success: true, locked: true,
+          lockedUntil: entry.lockedUntil, minutesLeft: minsLeft
         });
       }
     } catch (e) {}
     return res.status(200).json({ success: true, locked: false });
   }
-  // =========================================
-  // LOCKOUT CHECK (applies to EVERYONE)
-  // =========================================
+
+  // LOCKOUT CHECK
   let lockData = null;
   if (password && pollBinId && apiKey) {
     try {
@@ -146,8 +138,7 @@ module.exports = async function handler(req, res) {
         const msLeft = entry.lockedUntil - now;
         const minsLeft = Math.ceil(msLeft / 60000);
         return res.status(429).json({
-          success: false,
-          error: 'locked',
+          success: false, error: 'locked',
           message: `Too many failed attempts. Try again in ${minsLeft} minute${minsLeft !== 1 ? 's' : ''}.`,
           lockedUntil: entry.lockedUntil
         });
@@ -155,20 +146,17 @@ module.exports = async function handler(req, res) {
     } catch (e) {}
   }
 
-  // =========================================
-  // WRONG PASSWORD TELEGRAM ALERT (skip if trusted)
-  // =========================================
+  // WRONG PASSWORD TELEGRAM ALERT
   if (password && password !== ADMIN_PASS && !isTrusted) {
     try {
       const botToken = process.env.TELEGRAM_BOT_TOKEN;
       const chatId = process.env.TELEGRAM_CHAT_ID;
       if (botToken && chatId) {
-        const ip2 = clientIp;
         const ua2 = req.headers['user-agent'] || '';
-        const location2 = await lookupLocation(ip2);
+        const location2 = await lookupLocation(clientIp);
         const time2 = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
         const safeTried = String(password).replace(/[*_`\[\]]/g, '').substring(0, 20);
-        const text2 = `⚠️ *Wrong Admin Password Attempt*\n\n🌍 Location: ${location2}\n💻 Device: ${buildDeviceStr(ua2, deviceModel)}\n🌐 IP: \`${ip2}\`\n🔑 Tried: \`${safeTried}\`\n🕐 Time: ${time2}`;
+        const text2 = `⚠️ *Wrong Admin Password Attempt*\n\n🌍 Location: ${location2}\n💻 Device: ${buildDeviceStr(ua2, deviceModel)}\n🌐 IP: \`${clientIp}\`\n🔑 Tried: \`${safeTried}\`\n🕐 Time: ${time2}`;
         fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -178,9 +166,7 @@ module.exports = async function handler(req, res) {
     } catch (e) {}
   }
 
-  // =========================================
-  // PASSWORD CHECK (applies to EVERYONE)
-  // =========================================
+  // PASSWORD CHECK
   if (password !== ADMIN_PASS) {
     if (pollBinId && apiKey) {
       try {
@@ -206,21 +192,17 @@ module.exports = async function handler(req, res) {
 
         if (locked) {
           return res.status(429).json({
-            success: false,
-            error: 'locked',
+            success: false, error: 'locked',
             message: 'Too many failed attempts. Try again in 20 minutes.',
             lockedUntil: entry.lockedUntil
           });
         }
       } catch (e) {}
     }
-
     return res.status(401).json({ success: false, error: 'Invalid credentials' });
   }
 
-  // =========================================
-  // SUCCESS → reset attempts for this IP
-  // =========================================
+  // SUCCESS - reset attempts
   if (pollBinId && apiKey) {
     try {
       const settings = lockData || await readSettings();
@@ -231,9 +213,7 @@ module.exports = async function handler(req, res) {
     } catch (e) {}
   }
 
-  // =========================================
-  // PIN / UNPIN HOMEPAGE SECTIONS
-  // =========================================
+  // PIN / UNPIN
   if (action === 'pinSection' || action === 'unpinSection' || action === 'getPinnedSections') {
     if (!apiKey || !pollBinId) {
       return res.status(500).json({ error: 'POLL_BIN_ID or JSONBIN key not configured' });
@@ -275,9 +255,7 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // =========================================
   // COMMENTS MANAGEMENT
-  // =========================================
   if (!apiKey || !binId) return res.status(500).json({ error: 'Config missing' });
 
   const baseUrl = `https://api.jsonbin.io/v3/b/${binId}`;

@@ -73,30 +73,11 @@ async function applyPinnedSections() {
 }
 
 // =========================================
-// SECTION LOCKS — Labs + Political (5 day) + Admin unlock
+// SECTION LOCKS — Labs + Political (5 day)
 // =========================================
 const NEXUS_LOCK_START = new Date('2026-10-11T00:00:00+05:30').getTime();
 const NEXUS_LOCK_DURATION_MS = 5 * 24 * 60 * 60 * 1000;
 const NEXUS_LOCKED_HREFS = ['labs.html', 'political.html'];
-const NEXUS_ADMIN_TOKEN = 'k9x4m2p7q8z3n6w1';
-
-let __nexusLockedUntil = 0;
-
-async function __nexusCheckLock() {
-  try {
-    const res = await fetch('/api/admin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'checkLock', deviceToken: NEXUS_ADMIN_TOKEN })
-    });
-    const data = await res.json();
-    if (data.success && data.locked && data.lockedUntil) {
-      __nexusLockedUntil = data.lockedUntil;
-    } else {
-      __nexusLockedUntil = 0;
-    }
-  } catch (e) {}
-}
 
 function __nexusLockActive() {
   return Date.now() < (NEXUS_LOCK_START + NEXUS_LOCK_DURATION_MS);
@@ -104,141 +85,8 @@ function __nexusLockActive() {
 function __nexusUnlockAt() {
   return NEXUS_LOCK_START + NEXUS_LOCK_DURATION_MS;
 }
-function __nexusAdminUnlocked() {
-  return sessionStorage.getItem('_nexus_unlock_override') === '1';
-}
-function __nexusAdminUnlockSet() {
-  sessionStorage.setItem('_nexus_unlock_override', '1');
-}
 
 let __nexusLockInterval = null;
-
-function __nexusBuildAdminModal() {
-  if (document.getElementById('nexusAdminModal')) return;
-  const modal = document.createElement('div');
-  modal.id = 'nexusAdminModal';
-  modal.style.cssText = [
-    'display:none','position:fixed','inset:0',
-    'background:rgba(0,0,0,0.85)','z-index:2147483647',
-    'align-items:center','justify-content:center','padding:20px',
-    'font-family:"Space Grotesk",sans-serif'
-  ].join(';');
-  modal.innerHTML = `
-    <div style="background:#141414; border:1px solid rgba(108,92,231,0.4); border-radius:14px; padding:26px 22px; max-width:340px; width:100%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.7);">
-      <div style="color:#a29bfe; font-size:1.3rem; font-weight:700; letter-spacing:3px; margin-bottom:4px;">NEXUS</div>
-      <p style="color:#888; font-size:0.75rem; margin-bottom:18px; letter-spacing:0.5px;">Enter admin password to unlock</p>
-      <input id="nexusAdminInput" type="password" inputmode="numeric" placeholder="••••" maxlength="12" autocomplete="off" style="width:100%; padding:12px 14px; background:#1c1b22; border:1px solid rgba(108,92,231,0.3); border-radius:10px; color:#fff; text-align:center; letter-spacing:6px; font-size:1.1rem; outline:none; margin-bottom:14px; font-family:inherit; box-sizing:border-box;" />
-      <div style="display:flex; gap:8px;">
-        <button id="nexusAdminCancel" type="button" style="flex:1; padding:11px; background:transparent; color:#888; border:1px solid #333; border-radius:9px; cursor:pointer; font-family:inherit; font-size:0.85rem;">Cancel</button>
-        <button id="nexusAdminSubmit" type="button" style="flex:1; padding:11px; background:#6c5ce7; color:#fff; border:none; border-radius:9px; cursor:pointer; font-family:inherit; font-size:0.85rem; font-weight:600;">Unlock</button>
-      </div>
-      <p id="nexusAdminErr" style="color:#e74c3c; font-size:0.75rem; margin-top:12px; min-height:14px;"></p>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  const input = modal.querySelector('#nexusAdminInput');
-  const submitBtn = modal.querySelector('#nexusAdminSubmit');
-  const cancelBtn = modal.querySelector('#nexusAdminCancel');
-  const errEl = modal.querySelector('#nexusAdminErr');
-
-  function closeModal() {
-    modal.style.display = 'none';
-    input.value = '';
-    input.disabled = false;
-    submitBtn.disabled = false;
-    errEl.textContent = '';
-  }
-
-  async function trySubmit() {
-    const pass = input.value.trim();
-    if (!pass) return;
-    errEl.textContent = 'Verifying...';
-    errEl.style.color = '#888';
-    submitBtn.disabled = true;
-    let lockedNow = false;
-    try {
-      const res = await fetch('/api/admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          password: pass,
-          action: 'verify',
-          deviceToken: NEXUS_ADMIN_TOKEN
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        errEl.textContent = '✅ Unlocked!';
-        errEl.style.color = '#2ecc71';
-        __nexusAdminUnlockSet();
-        __nexusLockedUntil = 0;
-        setTimeout(() => {
-          closeModal();
-          if (__nexusLockInterval) { clearInterval(__nexusLockInterval); __nexusLockInterval = null; }
-          document.querySelectorAll('.categories a.card').forEach(card => {
-            card.style.pointerEvents = '';
-            card.style.filter = '';
-            card.style.opacity = '';
-            const ov = card.querySelector('.nexus-lock-overlay');
-            if (ov) ov.remove();
-          });
-        }, 500);
-      } else if (data.error === 'locked') {
-        errEl.textContent = '🔒 ' + (data.message || 'Too many attempts. Try again later.');
-        errEl.style.color = '#ff9f43';
-        if (data.lockedUntil) __nexusLockedUntil = data.lockedUntil;
-        input.value = '';
-        input.disabled = true;
-        lockedNow = true;
-      } else {
-        errEl.textContent = '❌ Wrong password';
-        errEl.style.color = '#e74c3c';
-        input.value = '';
-        input.focus();
-      }
-    } catch (e) {
-      errEl.textContent = '❌ Connection error';
-      errEl.style.color = '#e74c3c';
-    } finally {
-      if (!lockedNow) submitBtn.disabled = false;
-    }
-  }
-
-  cancelBtn.addEventListener('click', closeModal);
-  submitBtn.addEventListener('click', trySubmit);
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') trySubmit();
-    if (e.key === 'Escape') closeModal();
-  });
-  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-}
-
-async function __nexusOpenAdminModal() {
-  __nexusBuildAdminModal();
-  const modal = document.getElementById('nexusAdminModal');
-  const input = modal.querySelector('#nexusAdminInput');
-  const errEl = modal.querySelector('#nexusAdminErr');
-  const submitBtn = modal.querySelector('#nexusAdminSubmit');
-
-  await __nexusCheckLock();
-
-  modal.style.display = 'flex';
-  input.value = '';
-
-  if (__nexusLockedUntil > Date.now()) {
-    const minsLeft = Math.ceil((__nexusLockedUntil - Date.now()) / 60000);
-    errEl.textContent = `🔒 Too many failed attempts. Try again in ${minsLeft} minute${minsLeft !== 1 ? 's' : ''}.`;
-    errEl.style.color = '#ff9f43';
-    input.disabled = true;
-    submitBtn.disabled = true;
-  } else {
-    errEl.textContent = '';
-    input.disabled = false;
-    submitBtn.disabled = false;
-    setTimeout(() => input.focus(), 100);
-  }
-}
 
 function applySectionLocks() {
   if (__nexusLockInterval) { clearInterval(__nexusLockInterval); __nexusLockInterval = null; }
@@ -252,7 +100,7 @@ function applySectionLocks() {
     if (ov) ov.remove();
   }
 
-  if (__nexusAdminUnlocked() || !__nexusLockActive()) {
+  if (!__nexusLockActive()) {
     document.querySelectorAll('.categories a.card').forEach(clearLockOnCard);
     return;
   }
@@ -267,12 +115,6 @@ function applySectionLocks() {
       document.querySelectorAll('.categories a.card').forEach(clearLockOnCard);
       return;
     }
-
-    const d = Math.floor(diff / 86400000);
-    const h = Math.floor((diff % 86400000) / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    const timerText = `${d}d ${h}h ${m}m ${s}s`;
 
     const cards = document.querySelectorAll('.categories a.card');
     cards.forEach(card => {
@@ -291,45 +133,25 @@ function applySectionLocks() {
         overlay.style.cssText = [
           'position:absolute','inset:0',
           'display:flex','flex-direction:column','align-items:center','justify-content:center',
-          'background:rgba(11,10,19,0.55)',
-          'border-radius:inherit','z-index:50','text-align:center','padding:10px',
+          'background:rgba(11,10,19,0.78)',
+          'border-radius:inherit','z-index:50','text-align:center','padding:16px',
           'pointer-events:none'
         ].join(';');
         overlay.innerHTML = `
-          <div style="font-size:1.5rem; line-height:1; margin-bottom:6px;">🔒</div>
-          <div style="color:#ffffff; font-weight:700; font-size:0.66rem; letter-spacing:2.5px; margin-bottom:6px; text-transform:uppercase;">Locked</div>
-          <div class="nexus-lock-timer" style="color:#ff9f43; font-weight:700; font-size:0.95rem; font-family:'Space Grotesk',sans-serif; letter-spacing:0.5px;">--</div>
-          <button type="button" class="nexus-lock-admin-btn" style="pointer-events:auto; margin-top:10px; padding:6px 14px; font-size:0.68rem; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; color:#ffffff; background:rgba(108,92,231,0.75); border:1px solid rgba(150,140,255,0.85); border-radius:14px; cursor:pointer; font-family:'Space Grotesk',sans-serif; outline:none; transition:all 0.2s;">🔑 Admin Entry</button>
+          <div style="font-size:1.6rem; line-height:1; margin-bottom:8px;">⚠️</div>
+          <div style="color:#ff9f43; font-weight:700; font-size:0.7rem; letter-spacing:2px; margin-bottom:6px; text-transform:uppercase;">Temporarily Unavailable</div>
+          <div style="color:#c8c8d8; font-size:0.8rem; line-height:1.5; max-width:220px;">Something's up here — we're fixing it soon.</div>
         `;
         card.appendChild(overlay);
-
-        const btn = overlay.querySelector('.nexus-lock-admin-btn');
-        btn.addEventListener('click', (ev) => {
-          ev.stopPropagation();
-          ev.preventDefault();
-          __nexusOpenAdminModal();
-        });
-        btn.addEventListener('mouseenter', () => {
-          btn.style.background = 'rgba(108,92,231,1)';
-          btn.style.transform = 'scale(1.05)';
-        });
-        btn.addEventListener('mouseleave', () => {
-          btn.style.background = 'rgba(108,92,231,0.75)';
-          btn.style.transform = 'scale(1)';
-        });
       }
-
-      const timerEl = overlay.querySelector('.nexus-lock-timer');
-      if (timerEl) timerEl.textContent = timerText;
     });
   }
 
   paint();
-  __nexusLockInterval = setInterval(paint, 1000);
+  __nexusLockInterval = setInterval(paint, 60000);
 }
 
 function enforceLockRedirect() {
-  if (__nexusAdminUnlocked()) return false;
   if (!__nexusLockActive()) return false;
   const p = (__currentPage || '').toLowerCase();
   if (!NEXUS_LOCKED_HREFS.includes(p)) return false;
@@ -339,10 +161,10 @@ function enforceLockRedirect() {
 
   document.body.innerHTML = `
     <div style="min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#0b0a13; color:#fff; font-family:'Space Grotesk',sans-serif; padding:20px; text-align:center;">
-      <div style="font-size:3rem; line-height:1;">🔒</div>
-      <h2 style="color:#a29bfe; margin:14px 0 8px; font-size:1.4rem; letter-spacing:1px;">Section Locked</h2>
-      <p style="color:#888; font-size:0.9rem; max-width:320px; line-height:1.5; margin-bottom:8px;">This section unlocks in 5 days.</p>
-      <p style="color:#ff9f43; font-weight:700; font-size:0.95rem; margin-bottom:22px;">Unlocks on ${dateStr}</p>
+      <div style="font-size:3rem; line-height:1;">⚠️</div>
+      <h2 style="color:#ff9f43; margin:14px 0 8px; font-size:1.4rem; letter-spacing:1px;">Temporarily Unavailable</h2>
+      <p style="color:#888; font-size:0.9rem; max-width:320px; line-height:1.5; margin-bottom:8px;">Something's up here — we're fixing it soon.</p>
+      <p style="color:#a29bfe; font-weight:600; font-size:0.85rem; margin-bottom:22px;">Back by ${dateStr}</p>
       <a href="index.html" style="background:#6c5ce7; color:#fff; padding:10px 22px; border-radius:10px; text-decoration:none; font-weight:600; font-size:0.9rem;">← Back to Home</a>
     </div>
   `;
@@ -529,7 +351,6 @@ function initNexusPage() {
   setTimeout(async () => {
     try { await applyPinnedSections(); } catch (e) {}
     applySectionLocks();
-    __nexusCheckLock();
   }, 100);
 
   async function getDeviceInfo() {
