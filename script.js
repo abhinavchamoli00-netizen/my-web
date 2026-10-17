@@ -80,8 +80,9 @@ const NEXUS_LOCK_DURATION_MS = 5 * 24 * 60 * 60 * 1000;
 const NEXUS_LOCKED_HREFS = ['labs.html', 'political.html'];
 
 function __nexusLockActive() {
-  return Date.now() < (NEXUS_LOCK_START + NEXUS_LOCK_DURATION_MS);
+  return true; // Permanently locked
 }
+
 function __nexusUnlockAt() {
   return NEXUS_LOCK_START + NEXUS_LOCK_DURATION_MS;
 }
