@@ -73,27 +73,17 @@ async function applyPinnedSections() {
 }
 
 // =========================================
-// SECTION LOCKS — Labs + Political (5 day)
+// SECTION LOCKS — Labs + Political (PERMANENT)
 // =========================================
-const NEXUS_LOCK_START = new Date('2026-10-11T00:00:00+05:30').getTime();
-const NEXUS_LOCK_DURATION_MS = 5 * 24 * 60 * 60 * 1000;
 const NEXUS_LOCKED_HREFS = ['labs.html', 'political.html'];
 
 function __nexusLockActive() {
   return true; // Permanently locked
 }
 
-function __nexusUnlockAt() {
-  return NEXUS_LOCK_START + NEXUS_LOCK_DURATION_MS;
-}
-
-let __nexusLockInterval = null;
-
 function applySectionLocks() {
-  if (__nexusLockInterval) { clearInterval(__nexusLockInterval); __nexusLockInterval = null; }
   if (!isHomePage()) return;
 
-  // Check karo lock active hai ya nahi (abhi hum isko true kar rahe hain)
   if (!__nexusLockActive()) {
     document.querySelectorAll('.categories a.card').forEach(card => {
       card.style.pointerEvents = '';
@@ -109,7 +99,7 @@ function applySectionLocks() {
     const href = (card.getAttribute('href') || '').trim().toLowerCase();
     if (!NEXUS_LOCKED_HREFS.includes(href)) return;
 
-    // Card ko completely block karo (click na ho)
+    // Block clicks
     card.style.pointerEvents = 'none';
     card.style.position = 'relative';
 
@@ -135,24 +125,17 @@ function applySectionLocks() {
   });
 }
 
-  paint();
-  __nexusLockInterval = setInterval(paint, 60000);
-}
-
+// 🚫 Direct URL block — labs.html / political.html
 function enforceLockRedirect() {
   if (!__nexusLockActive()) return false;
   const p = (__currentPage || '').toLowerCase();
   if (!NEXUS_LOCKED_HREFS.includes(p)) return false;
 
-  const unlockDate = new Date(__nexusUnlockAt());
-  const dateStr = unlockDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-
   document.body.innerHTML = `
     <div style="min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#0b0a13; color:#fff; font-family:'Space Grotesk',sans-serif; padding:20px; text-align:center;">
       <div style="font-size:3rem; line-height:1;">⚠️</div>
       <h2 style="color:#ff9f43; margin:14px 0 8px; font-size:1.4rem; letter-spacing:1px;">Temporarily Unavailable</h2>
-      <p style="color:#888; font-size:0.9rem; max-width:320px; line-height:1.5; margin-bottom:8px;">Something's up here — we're fixing it soon.</p>
-      <p style="color:#a29bfe; font-weight:600; font-size:0.85rem; margin-bottom:22px;">Back by ${dateStr}</p>
+      <p style="color:#888; font-size:0.9rem; max-width:320px; line-height:1.5; margin-bottom:22px;">We're fixing something here. Please check back later.</p>
       <a href="index.html" style="background:#6c5ce7; color:#fff; padding:10px 22px; border-radius:10px; text-decoration:none; font-weight:600; font-size:0.9rem;">← Back to Home</a>
     </div>
   `;
@@ -167,7 +150,7 @@ function applyTheme(t) {
 }
 
 function ensureFloatingButtons() {
-  const root = document.body;
+  const root = document.documentElement;
 
   let tBtn = document.getElementById('nexusThemeToggle');
   if (!tBtn) {
@@ -235,18 +218,16 @@ function ensureFloatingButtons() {
     'align-items': 'center',
     'justify-content': 'center',
     'user-select': 'none',
-    'transform': 'translateZ(0)',
-    '-webkit-transform': 'translateZ(0)',
-    'will-change': 'transform',
+    'transform': 'none',
+    '-webkit-transform': 'none',
+    'will-change': 'auto',
     'contain': 'none',
     'filter': 'none',
     '-webkit-filter': 'none',
     'backdrop-filter': 'none',
     '-webkit-backdrop-filter': 'none',
     'perspective': 'none',
-    'isolation': 'auto',
-    'backface-visibility': 'hidden',
-    '-webkit-backface-visibility': 'hidden'
+    'isolation': 'auto'
   };
 
   Object.entries(styles).forEach(([prop, val]) => {
