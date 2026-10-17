@@ -93,60 +93,47 @@ function applySectionLocks() {
   if (__nexusLockInterval) { clearInterval(__nexusLockInterval); __nexusLockInterval = null; }
   if (!isHomePage()) return;
 
-  function clearLockOnCard(card) {
-    card.style.pointerEvents = '';
-    card.style.filter = '';
-    card.style.opacity = '';
-    const ov = card.querySelector('.nexus-lock-overlay');
-    if (ov) ov.remove();
-  }
-
+  // Check karo lock active hai ya nahi (abhi hum isko true kar rahe hain)
   if (!__nexusLockActive()) {
-    document.querySelectorAll('.categories a.card').forEach(clearLockOnCard);
+    document.querySelectorAll('.categories a.card').forEach(card => {
+      card.style.pointerEvents = '';
+      card.style.position = '';
+      const ov = card.querySelector('.nexus-lock-overlay');
+      if (ov) ov.remove();
+    });
     return;
   }
 
-  const unlockAt = __nexusUnlockAt();
+  const cards = document.querySelectorAll('.categories a.card');
+  cards.forEach(card => {
+    const href = (card.getAttribute('href') || '').trim().toLowerCase();
+    if (!NEXUS_LOCKED_HREFS.includes(href)) return;
 
-  function paint() {
-    const diff = unlockAt - Date.now();
+    // Card ko completely block karo (click na ho)
+    card.style.pointerEvents = 'none';
+    card.style.position = 'relative';
 
-    if (diff <= 0) {
-      if (__nexusLockInterval) { clearInterval(__nexusLockInterval); __nexusLockInterval = null; }
-      document.querySelectorAll('.categories a.card').forEach(clearLockOnCard);
-      return;
+    let overlay = card.querySelector('.nexus-lock-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.className = 'nexus-lock-overlay';
+      overlay.style.cssText = [
+        'position:absolute','inset:0',
+        'display:flex','flex-direction:column','align-items:center','justify-content:center',
+        'background:rgba(11,10,19,0.88)',
+        'border-radius:inherit','z-index:50','text-align:center','padding:15px',
+        'pointer-events:none'
+      ].join(';');
+      
+      overlay.innerHTML = `
+        <div style="font-size:1.8rem; line-height:1; margin-bottom:8px;">⚠️</div>
+        <div style="color:#ff9f43; font-weight:700; font-size:0.9rem; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">Temporarily Unavailable</div>
+        <div style="color:#c8c8d8; font-size:0.8rem;">We're fixing this soon.</div>
+      `;
+      card.appendChild(overlay);
     }
-
-    const cards = document.querySelectorAll('.categories a.card');
-    cards.forEach(card => {
-      const href = (card.getAttribute('href') || '').trim().toLowerCase();
-      if (!NEXUS_LOCKED_HREFS.includes(href)) return;
-
-      card.style.pointerEvents = 'none';
-      card.style.position = 'relative';
-      card.style.filter = '';
-      card.style.opacity = '1';
-
-      let overlay = card.querySelector('.nexus-lock-overlay');
-      if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.className = 'nexus-lock-overlay';
-        overlay.style.cssText = [
-          'position:absolute','inset:0',
-          'display:flex','flex-direction:column','align-items:center','justify-content:center',
-          'background:rgba(11,10,19,0.78)',
-          'border-radius:inherit','z-index:50','text-align:center','padding:16px',
-          'pointer-events:none'
-        ].join(';');
-        overlay.innerHTML = `
-          <div style="font-size:1.6rem; line-height:1; margin-bottom:8px;">⚠️</div>
-          <div style="color:#ff9f43; font-weight:700; font-size:0.7rem; letter-spacing:2px; margin-bottom:6px; text-transform:uppercase;">Temporarily Unavailable</div>
-          <div style="color:#c8c8d8; font-size:0.8rem; line-height:1.5; max-width:220px;">Something's up here — we're fixing it soon.</div>
-        `;
-        card.appendChild(overlay);
-      }
-    });
-  }
+  });
+}
 
   paint();
   __nexusLockInterval = setInterval(paint, 60000);
