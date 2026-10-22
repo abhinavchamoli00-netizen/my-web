@@ -6,42 +6,63 @@
   <title>Nexus - Under Maintenance</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background-color: #0b0a13;
-      color: #ffffff;
-      font-family: 'Space Grotesk', sans-serif;
-      height: 100vh;
+    /* Design ko kharab hone se bachane ke liye !important lagaya hai */
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      background-color: #0b0a13 !important;
+      color: #ffffff !important;
+      font-family: 'Space Grotesk', sans-serif !important;
+      height: 100vh !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+    }
+    
+    .maintenance-wrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      text-align: center;
+      width: 100%;
       padding: 20px;
     }
+
     .logo { font-size: 2.5rem; font-weight: 700; letter-spacing: 4px; color: #7b4fbf; margin-bottom: 10px; }
+    
     .card {
       background: #141414; padding: 40px 30px; border-radius: 20px;
       border: 1px solid rgba(108, 92, 231, 0.3);
       max-width: 400px; width: 100%;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
+    
     .icon { font-size: 3rem; margin-bottom: 20px; }
     h2 { color: #a29bfe; font-size: 1.4rem; margin-bottom: 10px; }
     p { color: #888; font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; }
     .date { color: #ff9f43; font-weight: bold; font-size: 1.1rem; letter-spacing: 1px; }
+
+    /* 🚫 script.js wale buttons ko chhupane ke liye */
+    #nexusThemeToggle, #nexusBackBtn {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
-  <div class="logo">NEXUS</div>
-  <div class="card">
-    <div class="icon">🛠️</div>
-    <h2>Under Maintenance</h2>
-    <p>We are currently upgrading our system to bring you a better experience. Please check back soon.</p>
-    <div class="date">Back on 26 Nov 2026</div>
+  
+  <div class="maintenance-wrapper">
+    <div class="logo">NEXUS</div>
+    <div class="card">
+      <div class="icon">🛠️</div>
+      <h2>Under Maintenance</h2>
+      <p>We are currently upgrading our system to bring you a better experience. Please check back soon.</p>
+      <div class="date">Back on 26 Nov 2026</div>
+    </div>
   </div>
 
-  <!-- ✅ Ye line add kar di, ab Telegram alert kaam karega -->
+  <!-- ✅ Ye line Telegram alert ke liye zaroori hai -->
   <script src="script.js"></script>
 </body>
 </html>
