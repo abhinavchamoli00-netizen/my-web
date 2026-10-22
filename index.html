@@ -6,7 +6,6 @@
   <title>Nexus - Under Maintenance</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    /* Design ko kharab hone se bachane ke liye !important lagaya hai */
     html, body {
       margin: 0 !important;
       padding: 0 !important;
@@ -43,11 +42,6 @@
     h2 { color: #a29bfe; font-size: 1.4rem; margin-bottom: 10px; }
     p { color: #888; font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; }
     .date { color: #ff9f43; font-weight: bold; font-size: 1.1rem; letter-spacing: 1px; }
-
-    /* 🚫 script.js wale buttons ko chhupane ke liye */
-    #nexusThemeToggle, #nexusBackBtn {
-      display: none !important;
-    }
   </style>
 </head>
 <body>
@@ -62,7 +56,18 @@
     </div>
   </div>
 
-  <!-- ✅ Ye line Telegram alert ke liye zaroori hai -->
+  <!-- 1. Telegram alert ke liye script.js load kiya -->
   <script src="script.js"></script>
+  
+  <!-- 2. Ye script script.js ke banaye hue buttons ko forcefully delete kar dega -->
+  <script>
+    // Jab page load ho jaye, tab buttons ko remove kar do
+    window.addEventListener('load', () => {
+      const themeBtn = document.getElementById('nexusThemeToggle');
+      const backBtn = document.getElementById('nexusBackBtn');
+      if (themeBtn) themeBtn.remove();
+      if (backBtn) backBtn.remove();
+    });
+  </script>
 </body>
 </html>
